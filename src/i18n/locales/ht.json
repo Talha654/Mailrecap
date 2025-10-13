@@ -1,0 +1,194 @@
+{
+  "welcome": {
+    "title": "Byenveni nan Mailrecap.co",
+    "subtitle": "Ede w pou okipe lèt ou yo",
+    "description": "Tout moun merite yon lavi ki pi bon",
+    "getStarted": "Kòmanse"
+  },
+  "home": {
+    "title": "Mailrecap.co",
+    "welcome": "Byenveni ankò!",
+    "takePhoto": "Pran Foto Lèt la",
+    "reviewSaved": "Gade Lèt Ki Anrejistre",
+    "settings": "Paramèt",
+    "scanDescription": "Eskane epi li lèt ou a touswit",
+    "startScanning": "Kòmanse Eskane",
+    "archiveDescription": "Gade istorik lèt ou yo",
+    "viewArchive": "Gade Achiv",
+    "thisMonth": "Mwa Sa a",
+    "lettersScanned": "Lèt Eskane",
+    "remaining": "Ki Rete"
+  },
+  "profile": {
+    "title": "Pwofil",
+    "settings": "Anviwònman"
+  },
+  "settings": {
+    "title": "Anviwònman",
+    "language": "Lang",
+    "selectLanguage": "Chwazi Lang",
+    "english": "English",
+    "spanish": "Español",
+    "haitianCreole": "Kreyòl",
+    "currentLanguage": "Kounye a: Kreyòl",
+    "subscription": "Abònman",
+    "subscriptionInfo": "Premium - $10/mwa",
+    "usage": "3 nan 10 lèt yo itilize mwa sa a",
+    "family": "Pataje nan Fanmi",
+    "addFamily": "Ajoute Manm Fanmi",
+    "privacy": "Vi Prive ak Èd",
+    "help": "Èd ak Sipò",
+    "privacy_policy": "Politik Vi Prive",
+    "terms_of_service": "Kondisyon Sèvis",
+    "cancel": "Anile Abònman",
+    "changeLanguage": "Chanje Lang"
+  },
+  "common": {
+    "save": "Sove",
+    "cancel": "Anile",
+    "back": "Retounen",
+    "next": "Kontinye"
+  },
+  "privacyTerms": {
+    "title": "Règleman ak Kondisyon",
+    "body": "Lè w kontinye, w aksepte Règleman Konfidansyalite ak Kondisyon Sèvis Mailrecap.co yo.\n\nRezime yo fèt ak AI e yo ka pa toujou egzak.\n\nMailrecap.co pa bay konsèy legal, finansye, oswa medikal.",
+    "viewPrivacy": "Gade Règleman Konfidansyalite",
+    "viewTerms": "Gade Kondisyon Sèvis",
+    "continue": "Kontinye"
+  },
+  "privacyPolicy": {
+    "title": "Règleman Konfidansyalite Mailrecap.co",
+    "subtitle": "(Vèsyon Previsualizasyon)",
+    "dataCollection": {
+      "title": "Koleksyon Done",
+      "content": "Nou kolekte foto lèt ou yo, rezime ki fèt yo, ak enfòmasyon kont debaz (non, imel, eta abònman)."
+    },
+    "dataUsage": {
+      "title": "Itilizasyon Done",
+      "content": "Foto yo trete ak AI pou fè rezime.\n\nRezime yo konsève nan achiv kont ou pou w gade."
+    },
+    "dataStorage": {
+      "title": "Depo Done",
+      "content": "Done yo ka konsève sou aparèy ou oswa nan nwaj la ak sekirite.\n\nTout done yo chifre pandan transpò."
+    },
+    "dataSharing": {
+      "title": "Pataje Done",
+      "content": "Nou pa vann done pèsonèl ou yo.\n\nDone yo ka pataje ak founisè sèvis (ex., tretman AI, depo nwaj) selon yo bezwen yo pou bay sèvis la."
+    },
+    "yourRights": {
+      "title": "Dwa Ou Yo",
+      "content": "Ou ka mande pou yo efase kont ou ak done ki asosye yo nenpòt lè."
+    },
+    "contact": {
+      "title": "Kontak",
+      "content": "Pou kesyon, kontak: support@Mailrecap.co.app"
+    }
+  },
+  "termsOfService": {
+    "title": "Kondisyon Sèvis Mailrecap.co",
+    "subtitle": "(Vèsyon Previsualizasyon)",
+    "useOfService": {
+      "title": "Itilizasyon Sèvis la",
+      "content": "Mailrecap.co bay rezime ki fèt ak AI pou kourye postal yo pou fasilite.\n\nRezime yo se pou ba enfòmasyon sèlman."
+    },
+    "noAdvice": {
+      "title": "Pa Gen Konsèy Legal, Finansye, oswa Medikal",
+      "content": "Mailrecap.co pa yon ranplasman pou konsèy pwofesyonèl legal, finansye, oswa medikal.\n\nItilizatè yo rete responsab pou yo verifye kontni lèt yo."
+    },
+    "subscriptions": {
+      "title": "Abònman ak Faktirasyon",
+      "content": "Peman abònman yo trete nan Apple App Store oswa Google Play.\n\nOu ka anile nenpòt lè nan paramèt kont ou.\n\nRemèt lajan yo soumèt nan règleman Apple/Google."
+    },
+    "userResponsibilities": {
+      "title": "Responsabilite Itilizatè",
+      "content": "Pa voye kontni ilegal, ki mal oswa ofansan.\n\nAsire w aparèy ou ak kont ou rete an sekirite."
+    },
+    "liability": {
+      "title": "Egzonerasyon Responsabilite",
+      "content": "Mailrecap.co pa responsab pou peman ki rate, delè, oswa konsekans ki soti nan rezime AI yo.\n\nApp la bay \"jan li ye a\" san garanti presizyon."
+    },
+    "changes": {
+      "title": "Chanjman nan Kondisyon yo",
+      "content": "Kondisyon yo ka mete ajou pèryodikman. Kontinye itilize app la vle di aksepte kondisyon yo ki mete ajou."
+    }
+  },
+  "subscriptionPlan": {
+    "title": "Chwazi Plan Ou",
+    "subtitle": "Chwazi plan ki pi bon pou ou",
+    "basic": {
+      "name": "Plan Debaz",
+      "price": "$7",
+      "period": "/mwa",
+      "feature1": "Jiskaske 10 lèt nan yon mwa",
+      "feature2": "Rezime vwa ak tèks",
+      "feature3": "Konsève ak gade lèt yo",
+      "feature4": "Opsyon lang: English/Español/Kreyòl"
+    },
+    "unlimited": {
+      "name": "Plan San Limit",
+      "price": "$14.99",
+      "period": "/mwa",
+      "popular": "Pi Popilè",
+      "feature1": "Lèt san limit nan yon mwa",
+      "feature2": "Tout bagay nan Debaz la",
+      "feature3": "Sipò priyorite",
+      "feature4": "Kolaborasyon fanmi"
+    },
+    "continue": "Kontinye",
+    "selectPlan": "Tanpri chwazi yon plan pou kontinye",
+    "legalFootnote": "Abònman yo faktire nan kont App Store oswa Google Play ou. Ou ka anile nenpòt lè nan paramèt kont ou. Apple/Google okipe remèt lajan yo."
+  },
+  "cameraPermission": {
+    "title": "Nou Bezwen Aksè nan Kamera a",
+    "subtitle": "Pou nou li lèt ou yo, nou bezwen aksè nan kamera a",
+    "explanation": "Sa a kite ou pran foto lèt yo pou nou ka li yo ba ou.",
+    "cameraTitle": "Aksè Kamera",
+    "cameraDesc": "Pran foto lèt ou yo",
+    "photosTitle": "Aksè Foto",
+    "photosDesc": "Konsève ak gade foto lèt ou yo",
+    "allow": "Otorize Aksè Kamera",
+    "privacy": "Vi prive ou pwoteje. Foto yo rete sou aparèy ou a.",
+    "disclaimer": "Mailrecap.co sèvi ak kamera ou pou eskane lèt yo. Foto yo trete ak sekirite pou fè rezime. Presiyon an pa garanti. Tanpri verifye detay enpòtan yo ou menm."
+  },
+  "camera": {
+    "title": "Pran Foto Lèt la",
+    "instructions": "Mete lèt ou a nan ti kare ki gen pwen yo anba a, epi peze bouton an pou pran yon foto",
+    "takePicture": "Pran Foto",
+    "choosePhoto": "Chwazi nan Foto",
+    "processing": "N ap li lèt ou a...",
+    "back": "Retounen"
+  },
+  "mailSummary": {
+    "title": "Rezime Lèt la",
+    "summary": "Rezime",
+    "fullText": "Tèks Konplè",
+    "suggestions": "Sijesyon",
+    "listen": "Koute",
+    "stop": "Kanpe",
+    "askSuggestions": "Èske ou ta renmen sijesyon sou sa pou fè apre?",
+    "yes": "Wi, Montre Sijesyon yo",
+    "no": "Non, Mèsi",
+    "home": "Akèy",
+    "back": "Retounen",
+    "disclaimer": "Rezime sa a te fèt ak AI. Presiyon an pa garanti. Mailrecap.co pa responsab pou peman ki rate, delè, oswa aksyon yo ki baze sou rezime yo.",
+    "noMailFound": "Pa gen lèt yo jwenn"
+  },
+  "archive": {
+    "title": "Lèt Ki Anrejistre",
+    "empty": "Pa gen lèt anrejistre ankò",
+    "emptyDesc": "Pran foto lèt ou yo pou wè yo isit la.",
+    "back": "Retounen"
+  },
+  "auth": {
+    "login": "Antre",
+    "signup": "Kreye Kont",
+    "email": "Imel",
+    "password": "Modpas",
+    "name": "Non konplè",
+    "confirmPassword": "Konfime modpas",
+    "forgot": "Blije modpas?",
+    "noAccount": "Pa gen kont?",
+    "haveAccount": "Ou deja gen yon kont?",
+    "continue": "Kontinye"
+  }
+}

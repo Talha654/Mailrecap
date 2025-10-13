@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "409218471461",
+    "project_id": "mailrecap-e10e2",
+    "storage_bucket": "mailrecap-e10e2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:409218471461:android:081bc72c6b35840ad091cc",
+        "android_client_info": {
+          "package_name": "com.mailrecap"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7DLMRDlYHUDNwl-bfoKECRAAANkYQafw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,194 @@
+{
+  "welcome": {
+    "title": "Welcome to Mailrecap.co",
+    "subtitle": "Helping you to take care of your mail",
+    "description": "Everyone deserves a better life",
+    "getStarted": "Get Started"
+  },
+  "home": {
+    "title": "Mailrecap.co",
+    "welcome": "Welcome back!",
+    "takePhoto": "Take Photo of Mail",
+    "reviewSaved": "Review Saved Mail",
+    "settings": "Settings",
+    "scanDescription": "Scan and read your mail instantly",
+    "startScanning": "Start Scanning",
+    "archiveDescription": "View your mail history",
+    "viewArchive": "View Archive",
+    "thisMonth": "This Month",
+    "lettersScanned": "Letters Scanned",
+    "remaining": "Remaining"
+  },
+  "profile": {
+    "title": "Profile",
+    "settings": "Settings"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "selectLanguage": "Select Language",
+    "english": "English",
+    "spanish": "Español",
+    "haitianCreole": "Kreyòl",
+    "currentLanguage": "Current: English",
+    "subscription": "Subscription",
+    "subscriptionInfo": "Premium - $10/month",
+    "usage": "3 of 10 letters used this month",
+    "family": "Family Sharing",
+    "addFamily": "Add Family Member",
+    "privacy": "Privacy & Help",
+    "help": "Help & Support",
+    "privacy_policy": "Privacy Policy",
+    "terms_of_service": "Terms of Service",
+    "cancel": "Cancel Subscription",
+    "changeLanguage": "Change Language"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back",
+    "next": "Next"
+  },
+  "privacyTerms": {
+    "title": "Privacy & Terms",
+    "body": "By continuing, you agree to Mailrecap.co's Privacy Policy and Terms of Service.\n\nSummaries are generated using AI and may not always be accurate.\n\nMailrecap.co does not provide legal, financial, or medical advice.",
+    "viewPrivacy": "View Privacy Policy",
+    "viewTerms": "View Terms of Service",
+    "continue": "Continue"
+  },
+  "privacyPolicy": {
+    "title": "Mailrecap.co Privacy Policy",
+    "subtitle": "(Preview Version)",
+    "dataCollection": {
+      "title": "Data Collection",
+      "content": "We collect photos of your mail, generated summaries, and basic account info (name, email, subscription status)."
+    },
+    "dataUsage": {
+      "title": "Data Usage",
+      "content": "Photos are processed using AI to generate summaries.\n\nSummaries are stored in your account archive for your review."
+    },
+    "dataStorage": {
+      "title": "Data Storage",
+      "content": "Data may be stored locally on your device or securely in the cloud.\n\nAll data is encrypted in transit."
+    },
+    "dataSharing": {
+      "title": "Data Sharing",
+      "content": "We do not sell your personal data.\n\nData may be shared with service providers (e.g., AI processing, cloud hosting) as needed to deliver the service."
+    },
+    "yourRights": {
+      "title": "Your Rights",
+      "content": "You can request deletion of your account and associated data at any time."
+    },
+    "contact": {
+      "title": "Contact",
+      "content": "For questions, contact: support@Mailrecap.co"
+    }
+  },
+  "termsOfService": {
+    "title": "Mailrecap.co Terms of Service",
+    "subtitle": "(Preview Version)",
+    "useOfService": {
+      "title": "Use of Service",
+      "content": "Mailrecap.co provides AI-generated summaries of postal mail for convenience.\n\nSummaries are for informational purposes only."
+    },
+    "noAdvice": {
+      "title": "No Legal, Financial, or Medical Advice",
+      "content": "Mailrecap.co is not a substitute for professional legal, financial, or medical advice.\n\nUsers remain responsible for verifying the contents of their mail."
+    },
+    "subscriptions": {
+      "title": "Subscriptions & Billing",
+      "content": "Subscription payments are processed through Apple App Store or Google Play.\n\nYou can cancel anytime in your account settings.\n\nRefunds are subject to Apple/Google policies."
+    },
+    "userResponsibilities": {
+      "title": "User Responsibilities",
+      "content": "Do not upload illegal, harmful, or offensive content.\n\nEnsure your device and account remain secure."
+    },
+    "liability": {
+      "title": "Liability Disclaimer",
+      "content": "Mailrecap.co is not responsible for missed payments, deadlines, or consequences arising from AI-generated summaries.\n\nThe app is provided \"as is\" without guarantees of accuracy."
+    },
+    "changes": {
+      "title": "Changes to Terms",
+      "content": "Terms may be updated periodically. Continued use of the app means acceptance of updated terms."
+    }
+  },
+  "subscriptionPlan": {
+    "title": "Choose Your Plan",
+    "subtitle": "Select the plan that works best for you",
+    "basic": {
+      "name": "Basic Plan",
+      "price": "$7",
+      "period": "/month",
+      "feature1": "Up to 10 letters per month",
+      "feature2": "Voice & text summaries",
+      "feature3": "Archive & review past mail",
+      "feature4": "Language options: English/Español/Kreyòl"
+    },
+    "unlimited": {
+      "name": "Unlimited Plan",
+      "price": "$14.99",
+      "period": "/month",
+      "popular": "Most Popular",
+      "feature1": "Unlimited letters per month",
+      "feature2": "Everything in Basic",
+      "feature3": "Priority support",
+      "feature4": "Family member collaboration"
+    },
+    "continue": "Continue",
+    "selectPlan": "Please select a plan to continue",
+    "legalFootnote": "Subscriptions are billed through your App Store or Google Play account. You can cancel anytime in your account settings. Refunds are handled by Apple/Google."
+  },
+  "cameraPermission": {
+    "title": "Camera Access Needed",
+    "subtitle": "To read your mail, we need access to your camera",
+    "explanation": "This lets you take photos of your letters so we can read them to you.",
+    "cameraTitle": "Camera Access",
+    "cameraDesc": "Take photos of your mail",
+    "photosTitle": "Photo Access",
+    "photosDesc": "Save and review your mail photos",
+    "allow": "Allow Camera Access",
+    "privacy": "Your privacy is protected. Photos stay on your device.",
+    "disclaimer": "Mailrecap.co uses your camera to scan letters. Photos are processed securely to generate summaries. Accuracy is not guaranteed. Please verify important details yourself."
+  },
+  "camera": {
+    "title": "Take Photo of Mail",
+    "instructions": "Position your mail inside the dotted box below, then tap the button to take a photo",
+    "takePicture": "Take Picture",
+    "choosePhoto": "Choose from Photos",
+    "processing": "Reading your mail...",
+    "back": "Back"
+  },
+  "mailSummary": {
+    "title": "Mail Summary",
+    "summary": "Summary",
+    "fullText": "Full Text",
+    "suggestions": "Suggestions",
+    "listen": "Listen",
+    "stop": "Stop",
+    "askSuggestions": "Would you like suggestions for what to do next?",
+    "yes": "Yes, Show Suggestions",
+    "no": "No, Thanks",
+    "home": "Home",
+    "back": "Back",
+    "disclaimer": "This summary was generated using AI. Accuracy is not guaranteed. Mailrecap.co is not responsible for missed payments, deadlines, or actions taken based on summaries.",
+    "noMailFound": "No mail item found"
+  },
+  "archive": {
+    "title": "Saved Mail",
+    "empty": "No saved mail yet",
+    "emptyDesc": "Take photos of your mail to see them here.",
+    "back": "Back"
+  },
+  "auth": {
+    "login": "Log In",
+    "signup": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "name": "Full Name",
+    "confirmPassword": "Confirm Password",
+    "forgot": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "continue": "Continue"
+  }
+}

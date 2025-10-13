@@ -1,0 +1,194 @@
+{
+  "welcome": {
+    "title": "Bienvenido a Mailrecap.co",
+    "subtitle": "Ayudándote a cuidar tu correo",
+    "description": "Todos merecen una vida mejor",
+    "getStarted": "Comenzar"
+  },
+  "home": {
+    "title": "Mailrecap.co",
+    "welcome": "¡Bienvenido de nuevo!",
+    "takePhoto": "Tomar Foto del Correo",
+    "reviewSaved": "Revisar Correo Guardado",
+    "settings": "Configuración",
+    "scanDescription": "Escanea y lee tu correo al instante",
+    "startScanning": "Comenzar Escaneo",
+    "archiveDescription": "Ver tu historial de correo",
+    "viewArchive": "Ver Archivo",
+    "thisMonth": "Este Mes",
+    "lettersScanned": "Cartas Escaneadas",
+    "remaining": "Restantes"
+  },
+  "profile": {
+    "title": "Perfil",
+    "settings": "Configuración"
+  },
+  "settings": {
+    "title": "Configuración",
+    "language": "Idioma",
+    "selectLanguage": "Seleccionar Idioma",
+    "english": "English",
+    "spanish": "Español",
+    "haitianCreole": "Kreyòl",
+    "currentLanguage": "Actual: Español",
+    "subscription": "Suscripción",
+    "subscriptionInfo": "Premium - $10/mes",
+    "usage": "3 de 10 cartas usadas este mes",
+    "family": "Compartir en Familia",
+    "addFamily": "Agregar Miembro de Familia",
+    "privacy": "Privacidad y Ayuda",
+    "help": "Ayuda y Soporte",
+    "privacy_policy": "Política de Privacidad",
+    "terms_of_service": "Términos de Servicio",
+    "cancel": "Cancelar Suscripción",
+    "changeLanguage": "Cambiar Idioma"
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "back": "Atrás",
+    "next": "Siguiente"
+  },
+  "privacyTerms": {
+    "title": "Privacidad y Términos",
+    "body": "Al continuar, aceptas la Política de Privacidad y los Términos de Servicio de Mailrecap.co.\n\nLos resúmenes se generan usando IA y pueden no ser siempre precisos.\n\nMailrecap.co no proporciona asesoramiento legal, financiero o médico.",
+    "viewPrivacy": "Ver Política de Privacidad",
+    "viewTerms": "Ver Términos de Servicio",
+    "continue": "Continuar"
+  },
+  "privacyPolicy": {
+    "title": "Política de Privacidad de Mailrecap.co",
+    "subtitle": "(Versión de Vista Previa)",
+    "dataCollection": {
+      "title": "Recolección de Datos",
+      "content": "Recopilamos fotos de tu correo, resúmenes generados e información básica de cuenta (nombre, email, estado de suscripción)."
+    },
+    "dataUsage": {
+      "title": "Uso de Datos",
+      "content": "Las fotos se procesan usando IA para generar resúmenes.\n\nLos resúmenes se almacenan en tu archivo de cuenta para tu revisión."
+    },
+    "dataStorage": {
+      "title": "Almacenamiento de Datos",
+      "content": "Los datos pueden almacenarse localmente en tu dispositivo o de forma segura en la nube.\n\nTodos los datos se cifran en tránsito."
+    },
+    "dataSharing": {
+      "title": "Compartir Datos",
+      "content": "No vendemos tus datos personales.\n\nLos datos pueden compartirse con proveedores de servicios (ej., procesamiento IA, alojamiento en nube) según sea necesario para entregar el servicio."
+    },
+    "yourRights": {
+      "title": "Tus Derechos",
+      "content": "Puedes solicitar la eliminación de tu cuenta y datos asociados en cualquier momento."
+    },
+    "contact": {
+      "title": "Contacto",
+      "content": "Para preguntas, contacta: support@Mailrecap.co.app"
+    }
+  },
+  "termsOfService": {
+    "title": "Términos de Servicio de Mailrecap.co",
+    "subtitle": "(Versión de Vista Previa)",
+    "useOfService": {
+      "title": "Uso del Servicio",
+      "content": "Mailrecap.co proporciona resúmenes generados por IA del correo postal para conveniencia.\n\nLos resúmenes son solo para fines informativos."
+    },
+    "noAdvice": {
+      "title": "Sin Asesoramiento Legal, Financiero o Médico",
+      "content": "Mailrecap.co no es un sustituto del asesoramiento profesional legal, financiero o médico.\n\nLos usuarios siguen siendo responsables de verificar el contenido de su correo."
+    },
+    "subscriptions": {
+      "title": "Suscripciones y Facturación",
+      "content": "Los pagos de suscripción se procesan a través de Apple App Store o Google Play.\n\nPuedes cancelar en cualquier momento en la configuración de tu cuenta.\n\nLos reembolsos están sujetos a las políticas de Apple/Google."
+    },
+    "userResponsibilities": {
+      "title": "Responsabilidades del Usuario",
+      "content": "No subas contenido ilegal, dañino u ofensivo.\n\nAsegúrate de que tu dispositivo y cuenta permanezcan seguros."
+    },
+    "liability": {
+      "title": "Descargo de Responsabilidad",
+      "content": "Mailrecap.co no es responsable de pagos perdidos, fechas límite o consecuencias derivadas de resúmenes generados por IA.\n\nLa aplicación se proporciona \"tal como está\" sin garantías de precisión."
+    },
+    "changes": {
+      "title": "Cambios en los Términos",
+      "content": "Los términos pueden actualizarse periódicamente. El uso continuado de la aplicación significa aceptación de los términos actualizados."
+    }
+  },
+  "subscriptionPlan": {
+    "title": "Elige Tu Plan",
+    "subtitle": "Selecciona el plan que mejor te funcione",
+    "basic": {
+      "name": "Plan Básico",
+      "price": "$7",
+      "period": "/mes",
+      "feature1": "Hasta 10 cartas por mes",
+      "feature2": "Resúmenes de voz y texto",
+      "feature3": "Archivar y revisar correo pasado",
+      "feature4": "Opciones de idioma: English/Español/Kreyòl"
+    },
+    "unlimited": {
+      "name": "Plan Ilimitado",
+      "price": "$14.99",
+      "period": "/mes",
+      "popular": "Más Popular",
+      "feature1": "Cartas ilimitadas por mes",
+      "feature2": "Todo lo del Básico",
+      "feature3": "Soporte prioritario",
+      "feature4": "Colaboración familiar"
+    },
+    "continue": "Continuar",
+    "selectPlan": "Por favor selecciona un plan para continuar",
+    "legalFootnote": "Las suscripciones se facturan a través de tu cuenta de App Store o Google Play. Puedes cancelar en cualquier momento en la configuración de tu cuenta. Los reembolsos los maneja Apple/Google."
+  },
+  "cameraPermission": {
+    "title": "Acceso a Cámara Necesario",
+    "subtitle": "Para leer tu correo, necesitamos acceso a tu cámara",
+    "explanation": "Esto te permite tomar fotos de tus cartas para que podamos leértelas.",
+    "cameraTitle": "Acceso a Cámara",
+    "cameraDesc": "Tomar fotos de tu correo",
+    "photosTitle": "Acceso a Fotos",
+    "photosDesc": "Guardar y revisar fotos de tu correo",
+    "allow": "Permitir Acceso a Cámara",
+    "privacy": "Tu privacidad está protegida. Las fotos permanecen en tu dispositivo.",
+    "disclaimer": "Mailrecap.co usa tu cámara para escanear cartas. Las fotos se procesan de forma segura para generar resúmenes. La precisión no está garantizada. Por favor verifica los detalles importantes tú mismo."
+  },
+  "camera": {
+    "title": "Tomar Foto del Correo",
+    "instructions": "Coloca tu correo dentro del cuadro punteado de abajo, luego toca el botón para tomar una foto",
+    "takePicture": "Tomar Foto",
+    "choosePhoto": "Elegir de Fotos",
+    "processing": "Leyendo tu correo...",
+    "back": "Atrás"
+  },
+  "mailSummary": {
+    "title": "Resumen del Correo",
+    "summary": "Resumen",
+    "fullText": "Texto Completo",
+    "suggestions": "Sugerencias",
+    "listen": "Escuchar",
+    "stop": "Detener",
+    "askSuggestions": "¿Te gustaría sugerencias sobre qué hacer a continuación?",
+    "yes": "Sí, Mostrar Sugerencias",
+    "no": "No, Gracias",
+    "home": "Inicio",
+    "back": "Atrás",
+    "disclaimer": "Este resumen fue generado usando IA. La precisión no está garantizada. Mailrecap.co no se hace responsable de pagos perdidos, fechas límite o acciones tomadas basadas en los resúmenes.",
+    "noMailFound": "No se encontró correo"
+  },
+  "archive": {
+    "title": "Correo Guardado",
+    "empty": "No hay correo guardado aún",
+    "emptyDesc": "Toma fotos de tu correo para verlas aquí.",
+    "back": "Atrás"
+  },
+  "auth": {
+    "login": "Iniciar Sesión",
+    "signup": "Registrarse",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "name": "Nombre completo",
+    "confirmPassword": "Confirmar contraseña",
+    "forgot": "¿Olvidaste tu contraseña?",
+    "noAccount": "¿No tienes una cuenta?",
+    "haveAccount": "¿Ya tienes una cuenta?",
+    "continue": "Continuar"
+  }
+}
