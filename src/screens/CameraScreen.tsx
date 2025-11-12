@@ -4,20 +4,25 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import ImagePicker from 'react-native-image-crop-picker';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { hp, wp } from '../constants/StyleGuide';
 import { CustomButton } from '../components/ui/CustomButton';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NavigationProp } from '../types/navigation';
 import { SCREENS } from '../navigation/screens';
+import { saveMailSummary } from '../services/mailSummary.service';
 
 export interface MailItem {
     id: string;
+    userId?: string;
     title: string;
     summary: string;
     fullText: string;
     suggestions: string[];
     date: string;
     photoUrl?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 export const CameraScreen: React.FC = () => {
@@ -26,7 +31,26 @@ export const CameraScreen: React.FC = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [progress, setProgress] = useState(0);
     const [showCamera, setShowCamera] = useState(true);
+    const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
+    const [currentStep, setCurrentStep] = useState(1);
     const progressInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    // Reset screen to step 1 when user navigates back
+    useFocusEffect(
+        React.useCallback(() => {
+            return () => {
+                // This cleanup function runs when screen loses focus
+                setCapturedPhoto(null);
+                setCurrentStep(1);
+                setIsProcessing(false);
+                setProgress(0);
+                setShowCamera(true);
+                if (progressInterval.current) {
+                    clearInterval(progressInterval.current);
+                }
+            };
+        }, [])
+    );
     const [_mailItems, setMailItems] = useState<MailItem[]>([
         {
             id: '1',
@@ -60,7 +84,8 @@ export const CameraScreen: React.FC = () => {
 
             if (image) {
                 console.log('Image captured:', image.path);
-                processPhoto();
+                setCapturedPhoto(image.path);
+                setCurrentStep(2);
             }
         } catch (error: unknown) {
             if (error instanceof Error && 'code' in error) {
@@ -92,7 +117,7 @@ export const CameraScreen: React.FC = () => {
 
             if (image) {
                 console.log('Image selected:', image.path);
-                processPhoto();
+                processPhoto(image.path);
             }
         } catch (error: unknown) {
             if (error instanceof Error && 'code' in error) {
@@ -110,7 +135,7 @@ export const CameraScreen: React.FC = () => {
         }
     };
 
-    const processPhoto = () => {
+    const processPhoto = async (photoPath: string) => {
         setIsProcessing(true);
         setShowCamera(false);
 
@@ -124,35 +149,104 @@ export const CameraScreen: React.FC = () => {
                 if (progressInterval.current) {
                     clearInterval(progressInterval.current);
                 }
-                setTimeout(() => {
-                    setIsProcessing(false);
-                    setProgress(0);
-                    setShowCamera(true);
+                setTimeout(async () => {
+                    try {
+                        // Simulate processing a new mail item
+                        const mailSummaryData = {
+                            title: 'New Mail Item',
+                            summary: 'This letter is about a subscription renewal for your magazine. It costs $29.99 per year.',
+                            fullText: 'Dear Subscriber, We hope you have enjoyed your magazine subscription. Your subscription will expire next month. To continue receiving your magazine, please renew for $29.99 per year.',
+                            suggestions: ['Renew subscription online', 'Call customer service', 'Consider digital subscription instead'],
+                            photoUrl: photoPath,
+                        };
 
-                    // Simulate processing a new mail item
-                    const newMailItem: MailItem = {
-                        id: Date.now().toString(),
-                        title: 'New Mail Item',
-                        summary: 'This letter is about a subscription renewal for your magazine. It costs $29.99 per year.',
-                        fullText: 'Dear Subscriber, We hope you have enjoyed your magazine subscription. Your subscription will expire next month. To continue receiving your magazine, please renew for $29.99 per year.',
-                        suggestions: ['Renew subscription online', 'Call customer service', 'Consider digital subscription instead'],
-                        date: new Date().toISOString().split('T')[0]
-                    };
+                        // Save to Firestore
+                        const savedSummary = await saveMailSummary(mailSummaryData);
+                        console.log('[CameraScreen] Summary saved to Firestore:', savedSummary.id);
 
-                    setMailItems(prev => [newMailItem, ...prev]);
+                        // Convert to MailItem for navigation
+                        const newMailItem: MailItem = {
+                            id: savedSummary.id,
+                            userId: savedSummary.userId,
+                            title: savedSummary.title,
+                            summary: savedSummary.summary,
+                            fullText: savedSummary.fullText,
+                            suggestions: savedSummary.suggestions,
+                            photoUrl: savedSummary.photoUrl,
+                            date: savedSummary.createdAt.toISOString().split('T')[0],
+                            createdAt: savedSummary.createdAt,
+                            updatedAt: savedSummary.updatedAt,
+                        };
 
-                    // Navigate to MailSummaryScreen with the new mail item
-                    navigation.navigate(SCREENS.MAIL_SUMMARY, { mailItem: newMailItem });
+                        setMailItems(prev => [newMailItem, ...prev]);
+
+                        setIsProcessing(false);
+                        setProgress(0);
+                        setShowCamera(true);
+
+                        // Navigate to MailSummaryScreen with the new mail item
+                        navigation.navigate(SCREENS.MAIL_SUMMARY, { mailItem: newMailItem });
+                        setCurrentStep(1);
+                    } catch (error) {
+                        console.error('[CameraScreen] Error saving summary:', error);
+                        setIsProcessing(false);
+                        setProgress(0);
+                        setShowCamera(true);
+                        Alert.alert('Error', 'Failed to save scanned summary. Please try again.');
+                    }
                 }, 500);
             }
         }, 200);
     };
 
     const handleBack = () => {
-        if (progressInterval.current) {
-            clearInterval(progressInterval.current);
+        if (capturedPhoto) {
+            setCapturedPhoto(null);
+            setCurrentStep(1);
+        } else {
+            if (progressInterval.current) {
+                clearInterval(progressInterval.current);
+            }
+            navigation.goBack();
         }
-        navigation.goBack();
+    };
+
+    const handleRetake = () => {
+        setCapturedPhoto(null);
+        setCurrentStep(1);
+    };
+
+    const handleLooksGood = () => {
+        if (capturedPhoto) {
+            setCurrentStep(3);
+        }
+    };
+
+    const handleConfirm = () => {
+        if (capturedPhoto) {
+            setCurrentStep(4);
+            processPhoto(capturedPhoto);
+        }
+    };
+
+    const handleBackFromConfirm = () => {
+        setCurrentStep(2);
+    };
+
+    const renderStepIndicator = () => {
+        return (
+            <View style={styles.stepIndicatorContainer}>
+                {[1, 2, 3, 4].map((step) => (
+                    <View
+                        key={step}
+                        style={[
+                            styles.stepDot,
+                            step <= currentStep && styles.stepDotActive,
+                        ]}
+                    />
+                ))}
+            </View>
+        );
     };
 
     if (isProcessing) {
@@ -186,81 +280,159 @@ export const CameraScreen: React.FC = () => {
         );
     }
 
+    // Step 3: Ready to Process Screen
+    if (capturedPhoto && currentStep === 3) {
+        return (
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.container}>
+                    {/* Header */}
+                    <View style={styles.header}>
+                        <TouchableOpacity
+                            onPress={handleBackFromConfirm}
+                            style={styles.backButton}
+                            activeOpacity={0.7}
+                        >
+                            <Icon name="arrow-back" size={24} color="#000" />
+                            <Text style={styles.backButtonText}>Back</Text>
+                        </TouchableOpacity>
+                        {renderStepIndicator()}
+                    </View>
+
+                    {/* Title and Subtitle */}
+                    <View style={styles.titleContainer}>
+                        <Text style={styles.title}>Ready to Process</Text>
+                        <Text style={styles.subtitle}>AI will analyze and summarize</Text>
+                    </View>
+
+                    {/* Privacy Notice Card */}
+                    <View style={styles.privacyCardContainer}>
+                        <View style={styles.privacyCard}>
+                            <View style={styles.privacyIconContainer}>
+                                <Icon name="security" size={24} color="#3B82F6" />
+                            </View>
+                            <Text style={styles.privacyTitle}>Privacy Notice</Text>
+                            <Text style={styles.privacyText}>
+                                By scanning, you confirm ownership and consent to AI analysis. Images auto-delete in 24hrs—only summaries are saved.
+                            </Text>
+                        </View>
+                    </View>
+
+                    {/* Action Buttons */}
+                    <View style={styles.reviewButtonContainer}>
+                        <TouchableOpacity
+                            onPress={handleBackFromConfirm}
+                            style={styles.retakeButton}
+                            activeOpacity={0.8}
+                        >
+                            <Text style={styles.retakeButtonText}>Back</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={handleConfirm}
+                            style={styles.looksGoodButton}
+                            activeOpacity={0.8}
+                        >
+                            <Text style={styles.looksGoodButtonText}>Confirm</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </SafeAreaView>
+        );
+    }
+
+    // Step 2: Photo Review Screen
+    if (capturedPhoto) {
+        return (
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.container}>
+                    {/* Header */}
+                    <View style={styles.header}>
+                        <TouchableOpacity
+                            onPress={handleBack}
+                            style={styles.backButton}
+                            activeOpacity={0.7}
+                        >
+                            <Icon name="arrow-back" size={24} color="#000" />
+                            <Text style={styles.backButtonText}>Back</Text>
+                        </TouchableOpacity>
+                        {renderStepIndicator()}
+                    </View>
+
+                    {/* Title and Subtitle */}
+                    <View style={styles.titleContainer}>
+                        <Text style={styles.title}>Review Photo</Text>
+                        <Text style={styles.subtitle}>Check if text is clear</Text>
+                    </View>
+
+                    {/* Photo Preview */}
+                    <View style={styles.cameraViewContainer}>
+                        <Image
+                            source={{ uri: capturedPhoto }}
+                            style={styles.capturedImage}
+                            resizeMode="contain"
+                        />
+                    </View>
+
+                    {/* Action Buttons */}
+                    <View style={styles.reviewButtonContainer}>
+                        <TouchableOpacity
+                            onPress={handleRetake}
+                            style={styles.retakeButton}
+                            activeOpacity={0.8}
+                        >
+                            <Text style={styles.retakeButtonText}>Retake</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={handleLooksGood}
+                            style={styles.looksGoodButton}
+                            activeOpacity={0.8}
+                        >
+                            <Text style={styles.looksGoodButtonText}>Looks Good</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </SafeAreaView>
+        );
+    }
+
     return (
-        <SafeAreaView style={styles.safeAreaDark}>
+        <SafeAreaView style={styles.safeArea}>
             <View style={styles.container}>
                 {/* Header */}
                 <View style={styles.header}>
                     <TouchableOpacity
                         onPress={handleBack}
                         style={styles.backButton}
-                        activeOpacity={0.85}
+                        activeOpacity={0.7}
                     >
-                        <Text style={styles.backButtonText}>← {t('camera.back')}</Text>
+                        <Icon name="arrow-back" size={24} color="#000" />
+                        <Text style={styles.backButtonText}>Back</Text>
                     </TouchableOpacity>
+                    {renderStepIndicator()}
                 </View>
 
-                {/* Instructions Text */}
-                <View style={styles.instructionsContainer}>
-                    <Text style={styles.instructionsText}>
-                        {t('camera.instructions')}
-                    </Text>
+                {/* Title and Subtitle */}
+                <View style={styles.titleContainer}>
+                    <Text style={styles.title}>Position Your Mail</Text>
+                    <Text style={styles.subtitle}>Ensure all text is visible</Text>
                 </View>
 
                 {/* Camera View */}
                 <View style={styles.cameraViewContainer}>
                     <View style={styles.cameraPreviewBox}>
-                        {/* Dotted Border */}
-                        <View style={styles.dottedBorder} />
-
-                        {/* Placeholder Content */}
-                        {showCamera ? (
-                            <View style={styles.cameraPlaceholder}>
-                                {/* Sample Mail Image */}
-                                <Image
-                                    source={{ uri: 'https://images.unsplash.com/photo-1627618998627-70a92a874cc2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvZmZpY2lhbCUyMGxldHRlciUyMGVudmVsb3BlJTIwbWFpbCUyMGRvY3VtZW50fGVufDF8fHx8MTc1ODEzMDMyN3ww&ixlib=rb-4.1.0&q=80&w=400' }}
-                                    style={styles.sampleImage}
-                                />
-
-                                {/* Sample Watermark */}
-                                <View style={styles.watermarkContainer}>
-                                    <View style={styles.watermark}>
-                                        <Text style={styles.watermarkText}>SAMPLE</Text>
-                                    </View>
-                                </View>
-
-                                {/* Camera Icon Overlay */}
-                                <View style={styles.cameraIconOverlay}>
-                                    <View style={styles.cameraIconCircle}>
-                                        <Text style={styles.cameraIconText}>📷</Text>
-                                    </View>
-                                </View>
-                            </View>
-                        ) : (
-                            <View style={styles.photoPlaceholder}>
-                                <Text style={styles.photoIcon}>📄</Text>
-                            </View>
-                        )}
+                        <Icon name="photo-camera" size={64} color="#6B7280" />
+                        <Text style={styles.cameraViewText}>Camera view</Text>
                     </View>
                 </View>
 
-                {/* Controls */}
-                <View style={styles.controlsContainer}>
-                    <CustomButton
-                        title={`📷 ${t('camera.takePicture')}`}
-                        onPress={handleTakePhoto}
-                        style={styles.takePictureButton}
-                        textStyle={styles.takePictureButtonText}
-                    />
-
+                {/* Take Photo Button */}
+                <View style={styles.buttonContainer}>
                     <TouchableOpacity
-                        onPress={handleChoosePhoto}
-                        style={styles.choosePhotoButton}
-                        activeOpacity={0.85}
+                        onPress={handleTakePhoto}
+                        style={styles.takePhotoButton}
+                        activeOpacity={0.8}
                     >
-                        <Text style={styles.choosePhotoButtonText}>
-                            📱 {t('camera.choosePhoto')}
-                        </Text>
+                        <Icon name="photo-camera" size={24} color="#FFF" />
+                        <Text style={styles.takePhotoButtonText}>Take Photo</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -271,49 +443,60 @@ export const CameraScreen: React.FC = () => {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-    },
-    safeAreaDark: {
-        flex: 1,
-        backgroundColor: '#000',
+        backgroundColor: '#FFFFFF',
     },
     container: {
         flex: 1,
-        backgroundColor: '#000',
+        backgroundColor: '#FFFFFF',
     },
     header: {
-        backgroundColor: '#1a1a1a',
-        paddingHorizontal: wp(4),
-        paddingVertical: hp(1.5),
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: wp(5),
+        paddingVertical: hp(2),
+        borderBottomWidth: 1,
+        borderBottomColor: '#F3F4F6',
     },
     backButton: {
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        paddingHorizontal: wp(4),
-        paddingVertical: hp(1.2),
-        borderRadius: wp(4),
-        alignSelf: 'flex-start',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: hp(0.3) },
-        shadowOpacity: 0.2,
-        shadowRadius: wp(1.5),
-        elevation: 4,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
     },
     backButtonText: {
-        color: '#1f2937',
-        fontSize: wp(4),
-        fontWeight: '600',
+        color: '#000',
+        fontSize: 18,
+        fontWeight: '400',
     },
-    instructionsContainer: {
-        backgroundColor: '#1a1a1a',
-        paddingHorizontal: wp(6),
-        paddingVertical: hp(2),
+    stepIndicatorContainer: {
+        flexDirection: 'row',
+        gap: 6,
+        alignItems: 'center',
     },
-    instructionsText: {
-        color: '#fff',
-        fontSize: wp(4.2),
-        lineHeight: hp(3),
-        textAlign: 'center',
-        maxWidth: wp(85),
-        alignSelf: 'center',
+    stepDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#D1D5DB',
+    },
+    stepDotActive: {
+        backgroundColor: '#3B82F6',
+    },
+    titleContainer: {
+        paddingTop: hp(4),
+        paddingBottom: hp(3),
+        alignItems: 'center',
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: '700',
+        color: '#000',
+        marginBottom: hp(1),
+    },
+    subtitle: {
+        fontSize: 16,
+        color: '#9CA3AF',
+        fontWeight: '400',
     },
     cameraViewContainer: {
         flex: 1,
@@ -323,117 +506,83 @@ const styles = StyleSheet.create({
     },
     cameraPreviewBox: {
         width: '100%',
-        maxWidth: wp(85),
-        aspectRatio: 4 / 3,
-        position: 'relative',
-    },
-    dottedBorder: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        borderWidth: 4,
-        borderColor: 'rgba(255, 255, 255, 0.8)',
-        borderStyle: 'dashed',
-        borderRadius: wp(4),
-        zIndex: 10,
-    },
-    cameraPlaceholder: {
-        width: '100%',
-        height: '100%',
-        backgroundColor: '#2d2d2d',
-        borderRadius: wp(4),
-        overflow: 'hidden',
-        position: 'relative',
-    },
-    sampleImage: {
-        width: '100%',
-        height: '100%',
-        borderRadius: wp(4),
-        opacity: 0.4,
-    },
-    watermarkContainer: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        height: hp(55),
+        backgroundColor: '#F1F5F9',
+        borderWidth:1,
+        borderColor:'#D8DCDF',
+        borderRadius: 24,
         justifyContent: 'center',
         alignItems: 'center',
     },
-    watermark: {
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',
-        paddingHorizontal: wp(4),
-        paddingVertical: hp(1),
-        borderRadius: wp(3),
-        borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.3)',
+    cameraViewText: {
+        marginTop: hp(2),
+        fontSize: 16,
+        color: '#6B7280',
+        fontWeight: '400',
     },
-    watermarkText: {
-        color: '#fff',
-        fontSize: wp(3.5),
-        fontWeight: 'bold',
-    },
-    cameraIconOverlay: {
-        position: 'absolute',
-        top: hp(2),
-        right: wp(4),
-    },
-    cameraIconCircle: {
-        width: wp(10),
-        height: wp(10),
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        borderRadius: wp(5),
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    cameraIconText: {
-        fontSize: wp(5),
-    },
-    photoPlaceholder: {
-        width: '100%',
-        height: '100%',
-        backgroundColor: '#e5e5e5',
-        borderRadius: wp(4),
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    photoIcon: {
-        fontSize: wp(16),
-    },
-    controlsContainer: {
-        backgroundColor: '#1a1a1a',
+    buttonContainer: {
         paddingHorizontal: wp(6),
-        paddingVertical: hp(3),
+        paddingBottom: hp(4),
+        paddingTop: hp(2),
     },
-    takePictureButton: {
-        backgroundColor: '#9b5de5',
-        paddingVertical: hp(2.5),
-        borderRadius: wp(7),
-        marginBottom: hp(2),
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: hp(0.5) },
-        shadowOpacity: 0.3,
-        shadowRadius: wp(2),
-        elevation: 6,
-    },
-    takePictureButtonText: {
-        fontSize: wp(5.5),
-    },
-    choosePhotoButton: {
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    takePhotoButton: {
+        backgroundColor: '#3B82F6',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
         paddingVertical: hp(2),
-        borderRadius: wp(7),
+        borderRadius: 50,
+        gap: 10,
+        shadowColor: '#3B82F6',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 5,
+    },
+    takePhotoButtonText: {
+        color: '#FFFFFF',
+        fontSize: 18,
+        fontWeight: '600',
+    },
+    reviewButtonContainer: {
+        flexDirection: 'row',
+        paddingHorizontal: wp(6),
+        paddingBottom: hp(4),
+        paddingTop: hp(2),
+        gap: 12,
+    },
+    retakeButton: {
+        flex: 1,
+        backgroundColor: '#FFFFFF',
         borderWidth: 2,
-        borderColor: 'rgba(255, 255, 255, 0.4)',
+        borderColor: '#E5E7EB',
+        paddingVertical: hp(2),
+        borderRadius: 50,
         alignItems: 'center',
         justifyContent: 'center',
     },
-    choosePhotoButtonText: {
-        color: '#fff',
-        fontSize: wp(4.5),
-        fontWeight: 'bold',
+    retakeButtonText: {
+        color: '#000',
+        fontSize: 18,
+        fontWeight: '600',
+    },
+    looksGoodButton: {
+        flex: 1,
+        backgroundColor: '#3B82F6',
+        paddingVertical: hp(2),
+        borderRadius: 50,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#3B82F6',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 5,
+    },
+    looksGoodButtonText: {
+        color: '#FFFFFF',
+        fontSize: 18,
+        fontWeight: '600',
     },
     // Processing Screen Styles
     processingContainer: {
@@ -493,5 +642,43 @@ const styles = StyleSheet.create({
         color: '#9b5de5',
         fontWeight: '600',
         textAlign: 'center',
+    },
+    capturedImage: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 24,
+    },
+    privacyCardContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        paddingHorizontal: wp(6),
+    },
+    privacyCard: {
+        backgroundColor: '#F8FAFC',
+        borderRadius: 20,
+        padding: wp(6),
+        borderWidth: 1,
+        borderColor: '#E2E8F0',
+    },
+    privacyIconContainer: {
+        width: 48,
+        height: 48,
+        borderRadius: 12,
+        backgroundColor: '#EFF6FF',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: hp(2),
+    },
+    privacyTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#000',
+        marginBottom: hp(1.5),
+    },
+    privacyText: {
+        fontSize: 15,
+        color: '#64748B',
+        lineHeight: 22,
+        fontWeight: '400',
     },
 });

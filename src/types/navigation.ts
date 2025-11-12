@@ -3,6 +3,7 @@ import { MailItem } from './mail';
 
 // Define the parameter list for all screens in the stack navigator
 export type RootStackParamList = {
+    [SCREENS.SPLASH]: undefined;
     [SCREENS.HOME]: undefined;
     [SCREENS.PROFILE]: undefined;
     [SCREENS.SETTINGS]: undefined;

@@ -189,6 +189,36 @@
     "forgot": "¿Olvidaste tu contraseña?",
     "noAccount": "¿No tienes una cuenta?",
     "haveAccount": "¿Ya tienes una cuenta?",
-    "continue": "Continuar"
+    "continue": "Continuar",
+    "createAccount": "Crear Cuenta",
+    "loginTitle": "Iniciar Sesión",
+    "signupTitle": "Crear Cuenta",
+    "startFreeScan": "Comienza con 1 escaneo gratis",
+    "emailAddress": "Dirección de Correo Electrónico",
+    "emailPlaceholder": "tu@ejemplo.com",
+    "namePlaceholder": "Ingresa tu Nombre",
+    "emailPlaceholderAlt": "Ingresa tu Correo",
+    "passwordPlaceholder": "Crea una contraseña segura",
+    "passwordPlaceholderAlt": "Ingresa tu Contraseña",
+    "confirmPasswordPlaceholder": "Confirma tu Contraseña",
+    "passwordHint": "Debe tener al menos 8 caracteres",
+    "agreeToTerms": "Acepto los",
+    "termsOfService": "Términos de Servicio",
+    "and": "y",
+    "privacyPolicy": "Política de Privacidad",
+    "orContinueWith": "O continuar con",
+    "orContinueWithAlt": "o continuar con",
+    "google": "Google",
+    "apple": "Apple",
+    "back": "Atrás"
+  },
+  "privacyModal": {
+    "title": "Tu Privacidad Importa",
+    "description": "Las imágenes se procesan temporalmente y se eliminan en 24 horas. Solo se almacenan resúmenes de texto. Nunca vendemos tus datos.",
+    "feature1": "Las imágenes se eliminan automáticamente en 24 horas",
+    "feature2": "Solo los resúmenes se almacenan de forma segura",
+    "feature3": "Los datos nunca se venden ni comparten",
+    "gotIt": "Entendido",
+    "viewPolicy": "Ver Política de Privacidad Completa"
   }
 }

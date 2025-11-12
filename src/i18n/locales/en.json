@@ -189,6 +189,36 @@
     "forgot": "Forgot password?",
     "noAccount": "Don't have an account?",
     "haveAccount": "Already have an account?",
-    "continue": "Continue"
+    "continue": "Continue",
+    "createAccount": "Create Account",
+    "loginTitle": "Log In",
+    "signupTitle": "Create Account",
+    "startFreeScan": "Start with 1 free scan",
+    "emailAddress": "Email Address",
+    "emailPlaceholder": "you@example.com",
+    "namePlaceholder": "Enter Name",
+    "emailPlaceholderAlt": "Enter Email",
+    "passwordPlaceholder": "Create a strong password",
+    "passwordPlaceholderAlt": "Enter Password",
+    "confirmPasswordPlaceholder": "Enter Confirm Password",
+    "passwordHint": "Must be at least 8 characters",
+    "agreeToTerms": "I agree to the",
+    "termsOfService": "Terms of Service",
+    "and": "and",
+    "privacyPolicy": "Privacy Policy",
+    "orContinueWith": "Or continue with",
+    "orContinueWithAlt": "or continue with",
+    "google": "Google",
+    "apple": "Apple",
+    "back": "Back"
+  },
+  "privacyModal": {
+    "title": "Your Privacy Matters",
+    "description": "Images are processed temporarily and deleted in 24 hours. Only text summaries are stored. We never sell your data.",
+    "feature1": "Images auto-delete in 24hrs",
+    "feature2": "Only summaries stored securely",
+    "feature3": "Data never sold or shared",
+    "gotIt": "Got It",
+    "viewPolicy": "View Full Privacy Policy"
   }
 }

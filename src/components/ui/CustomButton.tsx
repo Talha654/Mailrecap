@@ -38,11 +38,12 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
 const styles = StyleSheet.create({
     button: {
         width: '100%',
-        backgroundColor: '#AD47FF',
+        backgroundColor: '#2E70FF',
         paddingVertical: hp(2),
-        borderRadius: wp(4),
+        borderRadius: wp(10),
         alignItems: 'center',
         justifyContent: 'center',
+        alignSelf: 'center',
         // minHeight: hp(7),
     },
     buttonText: {

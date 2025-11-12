@@ -2,6 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {
+    SplashScreen,
     HomeScreen,
     ProfileScreen,
     SettingsScreen,
@@ -27,7 +28,7 @@ export const AppNavigator: React.FC = () => {
     return (
         <NavigationContainer>
             <Stack.Navigator
-                initialRouteName={SCREENS.LOGIN}
+                initialRouteName={SCREENS.SPLASH}
                 screenOptions={{
                     headerStyle: {
                         backgroundColor: '#007AFF',
@@ -39,6 +40,10 @@ export const AppNavigator: React.FC = () => {
                     headerShown: false,
                 }}
             >
+                <Stack.Screen
+                    name={SCREENS.SPLASH}
+                    component={SplashScreen}
+                />
                 <Stack.Screen
                     name={SCREENS.HOME}
                     component={HomeScreen}

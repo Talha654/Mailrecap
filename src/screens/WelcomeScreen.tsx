@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import LinearGradient from 'react-native-linear-gradient';
 import { hp, wp } from '../constants/StyleGuide';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SCREENS } from '../navigation';
@@ -15,129 +14,228 @@ export const WelcomeScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
 
     return (
-        <SafeAreaView style={{ flex: 1 }}>
-            <LinearGradient
-                colors={['#B3D6FF', '#91C6FF', '#D2D1FF']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.root}
+        <SafeAreaView style={styles.container}>
+            <ScrollView 
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
             >
-                <View style={styles.card}>
-                    {/* Illustration */}
-                    <View style={styles.illustrationWrapper}>
-                        <View style={styles.illustrationCircle}>
-                            <View style={styles.illustrationIconWrapper}>
-                                <Text style={styles.illustrationIcon}>📧</Text>
-                            </View>
+                {/* Mail Icon */}
+                <View style={styles.iconContainer}>
+                    <View style={styles.iconCircle}>
+                        <View style={styles.mailIcon}>
+                            <View style={styles.mailEnvelope} />
                         </View>
                     </View>
-                    {/* Texts */}
-                    <View style={styles.textBlock}>
-                        <Text style={styles.title}>{t('welcome.title')}</Text>
-                        <Text style={styles.subtitle}>{t('welcome.subtitle')}</Text>
-                        <Text style={styles.description}>{t('welcome.description')}</Text>
-                    </View>
-                    {/* Button */}
-                    {/* <TouchableOpacity style={styles.button} onPress={() => navigation.navigate(SCREENS.LANGUAGE_SELECTION)} activeOpacity={0.85}>
-                        <Text style={styles.buttonText}>{t('welcome.getStarted')}</Text>
-                    </TouchableOpacity> */}
+                </View>
+
+                {/* Title */}
+                <Text style={styles.title}>MailRecap</Text>
+                
+                {/* Subtitle */}
+                <Text style={styles.subtitle}>Your Smart Mail Assistant</Text>
+                
+                {/* Description */}
+                <Text style={styles.description}>
+                    Snap a photo, get an instant AI summary. Never miss important mail.
+                </Text>
+
+                {/* Get Started Button */}
+                <View style={styles.buttonContainer}>
                     <CustomButton
-                        title={t('welcome.getStarted')}
+                        title="Get Started Free"
+                        style={{width:'70%'}}
                         onPress={() => navigation.navigate(SCREENS.LANGUAGE_SELECTION)}
                     />
                 </View>
-            </LinearGradient>
+
+                {/* Free Scan Info */}
+                <Text style={styles.freeInfo}>1 free scan • No card required</Text>
+
+                {/* Features */}
+                <View style={styles.featuresContainer}>
+                    <View style={styles.featureItem}>
+                        <View style={styles.featureIconCircle}>
+                            <Text style={styles.featureIcon}>⚡</Text>
+                        </View>
+                        <Text style={styles.featureLabel}>Instant</Text>
+                    </View>
+                    
+                    <View style={styles.featureItem}>
+                        <View style={styles.featureIconCircle}>
+                            <Text style={styles.featureIcon}>🛡️</Text>
+                        </View>
+                        <Text style={styles.featureLabel}>Private</Text>
+                    </View>
+                    
+                    <View style={styles.featureItem}>
+                        <View style={styles.featureIconCircle}>
+                            <Text style={styles.featureIcon}>⏱️</Text>
+                        </View>
+                        <Text style={styles.featureLabel}>Simple</Text>
+                    </View>
+                </View>
+
+                {/* Privacy Notice */}
+                <View style={styles.privacyNotice}>
+                    <Text style={styles.privacyIcon}>🛡️</Text>
+                    <Text style={styles.privacyText}>
+                        Images auto-delete in 24hrs • Data never sold
+                    </Text>
+                </View>
+
+                {/* Footer */}
+                <View style={styles.footer}>
+                    <View style={styles.footerLinks}>
+                        <TouchableOpacity onPress={() => console.log('Privacy Policy pressed')}>
+                            <Text style={styles.footerLink}>Privacy Policy</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => console.log('Terms of Service pressed')}>
+                            <Text style={styles.footerLink}>Terms of Service</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <Text style={styles.copyright}>
+                        © 2024 MailRecap. All rights reserved.
+                    </Text>
+                </View>
+            </ScrollView>
         </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
-    root: {
+    container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+        backgroundColor: '#FFFFFF',
     },
-    card: {
-        width: '90%',
-        backgroundColor: '#fff',
-        borderRadius: wp(7),
-        padding: wp(8),
+    scrollContent: {
+        flexGrow: 1,
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: hp(0.7) },
-        shadowOpacity: 0.13,
-        shadowRadius: wp(4),
-        elevation: 8,
+        paddingHorizontal: wp(8),
+        paddingTop: hp(4),
+        paddingBottom: hp(4),
     },
-    illustrationWrapper: {
+    iconContainer: {
         marginBottom: hp(4),
+    },
+    iconCircle: {
+        width: wp(20),
+        height: wp(20),
+        borderRadius: wp(10),
+        backgroundColor: '#E8F1FD',
         alignItems: 'center',
         justifyContent: 'center',
-    },
-    illustrationCircle: {
-        width: wp(40),
-        height: wp(40),
-        borderRadius: wp(20),
-        backgroundColor: '#FEEA6C',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: hp(1.5),
-    },
-    illustrationIconWrapper: {
-        width: wp(24),
-        height: hp(14),
-        backgroundColor: '#AD47FF',
-        borderRadius: wp(6),
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: '#a78bfa',
-        shadowOffset: { width: 0, height: hp(0.5) },
-        shadowOpacity: 0.18,
-        shadowRadius: wp(2),
-        elevation: 6,
-    },
-    illustrationIcon: {
-        fontSize: wp(12),
-        color: '#fff',
-    },
-    textBlock: {
-        marginBottom: hp(4),
-        alignItems: 'center',
     },
     title: {
-        color: '#1f2937',
-        fontSize: wp(7.4),
-        fontWeight: 'bold',
+        fontSize: wp(9),
+        fontWeight: '700',
+        color: '#1F2937',
         marginBottom: hp(1.5),
         textAlign: 'center',
-        lineHeight: hp(4.5),
     },
     subtitle: {
-        color: '#4b5563',
         fontSize: wp(5),
-        marginBottom: hp(0.8),
+        color: '#6B7280',
+        marginBottom: hp(4),
         textAlign: 'center',
-        lineHeight: hp(3),
     },
     description: {
-        color: '#6b7280',
-        fontSize: wp(3.8),
+        fontSize: wp(4.2),
+        color: '#6B7280',
         textAlign: 'center',
-        lineHeight: hp(2.7),
+        lineHeight: hp(3.2),
+        marginBottom: hp(4),
+        paddingHorizontal: wp(4),
     },
-    button: {
+    buttonContainer: {
         width: '100%',
-        backgroundColor: '#AD47FF',
-        paddingVertical: hp(2),
-        borderRadius: wp(4.5),
+        marginBottom: hp(2),
+    },
+    freeInfo: {
+        fontSize: wp(3.8),
+        color: '#6B7280',
+        marginBottom: hp(6),
+        textAlign: 'center',
+    },
+    featuresContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        width: '100%',
+        marginBottom: hp(6),
+        paddingHorizontal: wp(8),
+    },
+    featureItem: {
+        alignItems: 'center',
+    },
+    featureIconCircle: {
+        width: wp(14),
+        height: wp(14),
+        borderRadius: wp(7),
+        backgroundColor: '#EFF6FF',
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: hp(7),
+        marginBottom: hp(1),
     },
-    buttonText: {
-        color: '#fff',
-        fontSize: wp(5),
-        fontWeight: 'bold',
-        letterSpacing: 0.5,
+    featureIcon: {
+        fontSize: wp(7),
+    },
+    featureLabel: {
+        fontSize: wp(4),
+        fontWeight: '600',
+        color: '#1F2937',
+    },
+    mailIcon: {
+        width: wp(16),
+        height: wp(12),
+        position: 'relative',
+    },
+    mailEnvelope: {
+        width: wp(10),
+        height: wp(10),
+        backgroundColor: '#4285F4',
+        borderRadius: wp(2),
+        borderWidth: 2,
+        borderColor: '#4285F4',
+    },
+    privacyNotice: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#F9FAFB',
+        paddingVertical: hp(2),
+        paddingHorizontal: wp(6),
+        borderRadius: wp(8),
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+    },
+    privacyIcon: {
+        fontSize: wp(4.5),
+        marginRight: wp(1),
+    },
+    privacyText: {
+        fontSize: wp(3.5),
+        color: '#6B7280',
+        marginLeft: wp(1),
+        textAlign: 'center',
+    },
+    footer: {
+        marginTop: hp(6),
+        alignItems: 'center',
+        width: '100%',
+    },
+    footerLinks: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: hp(2),
+        gap: wp(8),
+    },
+    footerLink: {
+        fontSize: wp(4),
+        color: '#6B7280',
+        fontWeight: '500',
+    },
+    copyright: {
+        fontSize: wp(3.5),
+        color: '#9CA3AF',
+        textAlign: 'center',
     },
 });

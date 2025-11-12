@@ -189,6 +189,36 @@
     "forgot": "Blije modpas?",
     "noAccount": "Pa gen kont?",
     "haveAccount": "Ou deja gen yon kont?",
-    "continue": "Kontinye"
+    "continue": "Kontinye",
+    "createAccount": "Kreye Kont",
+    "loginTitle": "Antre",
+    "signupTitle": "Kreye Kont",
+    "startFreeScan": "Kòmanse ak 1 eskane gratis",
+    "emailAddress": "Adrès Imel",
+    "emailPlaceholder": "ou@egzanp.com",
+    "namePlaceholder": "Antre Non w",
+    "emailPlaceholderAlt": "Antre Imel w",
+    "passwordPlaceholder": "Kreye yon modpas solid",
+    "passwordPlaceholderAlt": "Antre Modpas w",
+    "confirmPasswordPlaceholder": "Konfime Modpas w",
+    "passwordHint": "Dwe gen omwen 8 karaktè",
+    "agreeToTerms": "Mwen dakò ak",
+    "termsOfService": "Kondisyon Sèvis",
+    "and": "ak",
+    "privacyPolicy": "Politik Vi Prive",
+    "orContinueWith": "Oswa kontinye ak",
+    "orContinueWithAlt": "oswa kontinye ak",
+    "google": "Google",
+    "apple": "Apple",
+    "back": "Retounen"
+  },
+  "privacyModal": {
+    "title": "Vi Prive w Enpòtan",
+    "description": "Imaj yo trete tanporèman epi efase nan 24 èdtan. Sèlman rezime tèks yo estoke. Nou pa janm vann done w yo.",
+    "feature1": "Imaj yo efase otomatikman nan 24 èdtan",
+    "feature2": "Sèlman rezime yo estoke an sekirite",
+    "feature3": "Done yo pa janm vann oswa pataje",
+    "gotIt": "Konprann",
+    "viewPolicy": "Gade Politik Vi Prive Konplè"
   }
 }

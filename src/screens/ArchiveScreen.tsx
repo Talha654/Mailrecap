@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
     StyleSheet,
     TouchableOpacity,
     ScrollView,
+    ActivityIndicator,
+    RefreshControl,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { wp, hp } from '../constants/StyleGuide';
@@ -13,37 +15,63 @@ import { useNavigation } from '@react-navigation/native';
 import { SCREENS } from '../navigation';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
+import { getUserMailSummaries } from '../services/mailSummary.service';
 
 export const ArchiveScreen: React.FC = () => {
     const { t } = useTranslation();
     const navigation: any = useNavigation();
 
-    const [mailItems, setMailItems] = useState<MailItem[]>([
-        {
-            id: '1',
-            title: 'Electric Bill - Due Soon',
-            summary: 'Your electric bill is $127.45 and due on March 25th.',
-            fullText: 'Dear Customer, Your electric bill for February is $127.45. Payment is due by March 25th, 2024. You can pay online, by phone, or by mail.',
-            suggestions: ['Pay online at company website', 'Set up automatic payments', 'Call customer service: 1-800-555-0123'],
-            date: '2024-03-15'
-        },
-        {
-            id: '2',
-            title: 'Doctor Appointment Reminder',
-            summary: 'Appointment with Dr. Smith on March 20th at 2:00 PM.',
-            fullText: 'This is a reminder of your upcoming appointment with Dr. Smith on March 20th, 2024 at 2:00 PM. Please arrive 15 minutes early.',
-            suggestions: ['Add to calendar', 'Prepare list of questions', 'Bring insurance card and ID'],
-            date: '2024-03-12'
-        },
-        {
-            id: '3',
-            title: 'New Mail Item',
-            summary: 'This letter is about a subscription renewal for your magazine. It costs $29.99 per year.',
-            fullText: 'Dear Subscriber, We hope you have enjoyed your magazine subscription. Your subscription will expire next month. To continue receiving your magazine, please renew for $29.99 per year.',
-            suggestions: ['Renew subscription online', 'Call customer service', 'Consider digital subscription instead'],
-            date: new Date().toISOString().split('T')[0]
+    const [mailItems, setMailItems] = useState<MailItem[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    // Fetch mail summaries from Firestore
+    const fetchMailSummaries = async (showRefreshIndicator = false) => {
+        try {
+            if (showRefreshIndicator) {
+                setIsRefreshing(true);
+            } else {
+                setIsLoading(true);
+            }
+            setError(null);
+
+            const summaries = await getUserMailSummaries();
+            
+            // Convert to MailItem format
+            const items: MailItem[] = summaries.map(summary => ({
+                id: summary.id,
+                userId: summary.userId,
+                title: summary.title,
+                summary: summary.summary,
+                fullText: summary.fullText,
+                suggestions: summary.suggestions,
+                photoUrl: summary.photoUrl,
+                date: summary.createdAt.toISOString().split('T')[0],
+                createdAt: summary.createdAt,
+                updatedAt: summary.updatedAt,
+            }));
+
+            setMailItems(items);
+            console.log('[ArchiveScreen] Loaded', items.length, 'mail summaries');
+        } catch (err) {
+            console.error('[ArchiveScreen] Error fetching summaries:', err);
+            setError('Failed to load summaries. Please try again.');
+        } finally {
+            setIsLoading(false);
+            setIsRefreshing(false);
         }
-    ]);
+    };
+
+    // Load summaries on mount
+    useEffect(() => {
+        fetchMailSummaries();
+    }, []);
+
+    // Handle pull-to-refresh
+    const handleRefresh = () => {
+        fetchMailSummaries(true);
+    };
 
 
     const formatDate = (dateString: string) => {
@@ -61,11 +89,20 @@ export const ArchiveScreen: React.FC = () => {
                 <Text style={styles.emptyIcon}>📂</Text>
             </View>
             <Text style={styles.emptyTitle}>
-                {t('archive.empty')}
+                {error ? 'Error Loading Summaries' : t('archive.empty')}
             </Text>
             <Text style={styles.emptyDescription}>
-                {t('archive.emptyDesc')}
+                {error || t('archive.emptyDesc')}
             </Text>
+            {error && (
+                <TouchableOpacity
+                    style={styles.retryButton}
+                    onPress={() => fetchMailSummaries()}
+                    activeOpacity={0.7}
+                >
+                    <Text style={styles.retryButtonText}>Retry</Text>
+                </TouchableOpacity>
+            )}
         </View>
     );
 
@@ -118,17 +155,32 @@ export const ArchiveScreen: React.FC = () => {
                 </View>
 
                 {/* Content */}
-                <ScrollView
-                    style={styles.scrollView}
-                    contentContainerStyle={styles.scrollViewContent}
-                    showsVerticalScrollIndicator={false}
-                >
-                    {mailItems.length === 0 ? renderEmptyState() : (
-                        <View style={styles.mailListContainer}>
-                            {mailItems.map(renderMailItem)}
-                        </View>
-                    )}
-                </ScrollView>
+                {isLoading ? (
+                    <View style={styles.loadingContainer}>
+                        <ActivityIndicator size="large" color="#9333EA" />
+                        <Text style={styles.loadingText}>Loading summaries...</Text>
+                    </View>
+                ) : (
+                    <ScrollView
+                        style={styles.scrollView}
+                        contentContainerStyle={styles.scrollViewContent}
+                        showsVerticalScrollIndicator={false}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={isRefreshing}
+                                onRefresh={handleRefresh}
+                                tintColor="#9333EA"
+                                colors={['#9333EA']}
+                            />
+                        }
+                    >
+                        {mailItems.length === 0 ? renderEmptyState() : (
+                            <View style={styles.mailListContainer}>
+                                {mailItems.map(renderMailItem)}
+                            </View>
+                        )}
+                    </ScrollView>
+                )}
             </LinearGradient>
         </SafeAreaView>
     );
@@ -209,6 +261,30 @@ const styles = StyleSheet.create({
         color: '#6B7280',
         lineHeight: wp(6),
         textAlign: 'center',
+    },
+    retryButton: {
+        backgroundColor: '#9333EA',
+        paddingHorizontal: wp(8),
+        paddingVertical: hp(1.5),
+        borderRadius: wp(5),
+        marginTop: hp(2),
+    },
+    retryButtonText: {
+        color: '#FFFFFF',
+        fontSize: wp(4),
+        fontWeight: '600',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: hp(10),
+    },
+    loadingText: {
+        marginTop: hp(2),
+        fontSize: wp(4),
+        color: '#4B5563',
+        fontWeight: '500',
     },
     mailListContainer: {
         marginTop: hp(2),

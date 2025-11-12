@@ -1,5 +1,6 @@
 
 export const SCREENS = {
+    SPLASH: 'Splash',
     HOME: 'Home',
     PROFILE: 'Profile',
     SETTINGS: 'Settings',
