@@ -1,5 +1,5 @@
-import { getFirestore } from './firebase';
-import { getAuth } from './firebase';
+import firestore from '@react-native-firebase/firestore';
+import { getFirestore, getAuth } from './firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface MailSummary {
@@ -27,9 +27,9 @@ export interface MailSummaryInput {
  */
 export async function saveMailSummary(data: MailSummaryInput): Promise<MailSummary> {
     try {
-        const firestore = getFirestore();
+        const db = getFirestore();
         const auth = getAuth();
-        
+
         // Get user ID from auth or AsyncStorage
         let userId = auth.currentUser?.uid;
         if (!userId) {
@@ -53,9 +53,41 @@ export async function saveMailSummary(data: MailSummaryInput): Promise<MailSumma
         };
 
         // Add document to Firestore
-        const docRef = await firestore
+        const docRef = await db
             .collection('mailSummaries')
             .add(mailSummaryData);
+
+        // Check and update scan limits
+        const userRef = db.collection('users').doc(userId);
+        const userDoc = await userRef.get();
+
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            const scansRemaining = userData?.scansRemaining;
+
+            // If scansRemaining is defined
+            if (typeof scansRemaining === 'number') {
+                if (scansRemaining > 0) {
+                    await userRef.update({
+                        scansRemaining: firestore.FieldValue.increment(-1)
+                    });
+                    console.log('[MailSummary] Decremented scan count. New count:', scansRemaining - 1);
+                } else if (scansRemaining === 0) {
+                    console.warn('[MailSummary] Warning: Saving summary with 0 scans remaining');
+                } else if (scansRemaining === -1) {
+                    console.log('[MailSummary] User has unlimited scans');
+                }
+            } else {
+                // If scansRemaining is undefined (legacy users or error), default to 10 and decrement 1 -> 9
+                // Only do this if they are NOT on a paid plan that should be unlimited
+                // Safest bet: if it's undefined, we assume they are on a basic/free tier that defaults to 10.
+                // If they truly have a plan, revenueCat sync should have set it, but let's be safe.
+                console.log('[MailSummary] scansRemaining undefined. Initializing to 9 (10 - 1)');
+                await userRef.update({
+                    scansRemaining: 9
+                });
+            }
+        }
 
         console.log('[MailSummary] Saved to Firestore with ID:', docRef.id);
 
@@ -76,7 +108,7 @@ export async function getUserMailSummaries(): Promise<MailSummary[]> {
     try {
         const firestore = getFirestore();
         const auth = getAuth();
-        
+
         // Get user ID from auth or AsyncStorage
         let userId = auth.currentUser?.uid;
         if (!userId) {
@@ -124,7 +156,7 @@ export async function getMailSummaryById(summaryId: string): Promise<MailSummary
     try {
         const firestore = getFirestore();
         const auth = getAuth();
-        
+
         // Get user ID from auth or AsyncStorage
         let userId = auth.currentUser?.uid;
         if (!userId) {
@@ -146,7 +178,7 @@ export async function getMailSummaryById(summaryId: string): Promise<MailSummary
         }
 
         const data = doc.data();
-        
+
         // Verify the summary belongs to the current user
         if (data?.userId !== userId) {
             console.log('[MailSummary] Access denied: summary belongs to different user');
@@ -177,7 +209,7 @@ export async function deleteMailSummary(summaryId: string): Promise<void> {
     try {
         const firestore = getFirestore();
         const auth = getAuth();
-        
+
         // Get user ID from auth or AsyncStorage
         let userId = auth.currentUser?.uid;
         if (!userId) {
@@ -226,7 +258,7 @@ export async function updateMailSummary(
     try {
         const firestore = getFirestore();
         const auth = getAuth();
-        
+
         // Get user ID from auth or AsyncStorage
         let userId = auth.currentUser?.uid;
         if (!userId) {

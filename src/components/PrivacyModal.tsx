@@ -18,7 +18,7 @@ interface PrivacyModalProps {
 
 export const PrivacyModal = memo<PrivacyModalProps>(({ visible, onClose, onViewPolicy }) => {
   const { t } = useTranslation();
-  
+
   return (
     <Modal
       visible={visible}
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     width: wp(16),
     height: wp(16),
     borderRadius: wp(8),
-    backgroundColor: '#E8F0FE',
+    backgroundColor: '#000F54',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: wp(6),
     fontWeight: '700',
-    color: '#111827',
+    color: '#000F54',
     marginBottom: hp(2),
     textAlign: 'center',
   },
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   gotItButton: {
-    backgroundColor: '#2E70FF',
+    backgroundColor: '#000F54',
     borderRadius: wp(6),
     paddingVertical: hp(1.8),
     paddingHorizontal: wp(8),
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   policyLink: {
-    color: '#2E70FF',
+    color: '#000F54',
     fontSize: wp(3.8),
     fontWeight: '600',
   },

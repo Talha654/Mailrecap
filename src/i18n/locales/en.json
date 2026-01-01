@@ -3,7 +3,16 @@
     "title": "Welcome to Mailrecap.co",
     "subtitle": "Helping you to take care of your mail",
     "description": "Everyone deserves a better life",
-    "getStarted": "Get Started"
+    "getStarted": "Get Started",
+    "getStartedFree": "Get Started Free",
+    "freeScanInfo": "1 free scan • No card required",
+    "featureInstant": "Instant",
+    "featurePrivate": "Private",
+    "featureSimple": "Simple",
+    "privacyNotice": "Images auto-delete in 24hrs • Data never sold",
+    "footerPrivacy": "Privacy Policy",
+    "footerTerms": "Terms of Service",
+    "copyright": "© 2024 MailRecap. All rights reserved."
   },
   "home": {
     "title": "Mailrecap.co",
@@ -17,11 +26,29 @@
     "viewArchive": "View Archive",
     "thisMonth": "This Month",
     "lettersScanned": "Letters Scanned",
-    "remaining": "Remaining"
+    "remaining": "Remaining",
+    "scanMail": "Scan Mail",
+    "navArchive": "ARCHIVE",
+    "navProfile": "PROFILE",
+    "currentPlan": "Current Plan",
+    "daysLeft": "Days Left",
+    "scansLeft": "Scans Left",
+    "plan": {
+      "freeTrial": "Free Trial",
+      "daysLeft": "{{count}} days left",
+      "essentials": "Essentials plan",
+      "scansLeft": "{{count}} scans left",
+      "plus": "Mailrecap +",
+      "unlimited": "Unlimited"
+    }
   },
   "profile": {
     "title": "Profile",
-    "settings": "Settings"
+    "settings": "Settings",
+    "manageProfile": "Manage your profile information",
+    "memberSince": "Member since:",
+    "backToHome": "Back to Home",
+    "goToSettings": "Go to Settings"
   },
   "settings": {
     "title": "Settings",
@@ -41,13 +68,40 @@
     "privacy_policy": "Privacy Policy",
     "terms_of_service": "Terms of Service",
     "cancel": "Cancel Subscription",
-    "changeLanguage": "Change Language"
+    "changeLanguage": "Change Language",
+    "legalPrivacy": "Legal & Privacy",
+    "privacyPolicyTitle": "Privacy Policy",
+    "privacyPolicySubtitle": "Data collection & use",
+    "termsTitle": "Terms of Service",
+    "termsSubtitle": "Usage agreement",
+    "dataRightsTitle": "Your Data Rights (GDPR/CCPA)",
+    "downloadData": "Download My Data",
+    "request": "Request",
+    "deleteAccount": "Delete Account",
+    "support": "Support",
+    "email": "Email",
+    "footerCompliance": "GDPR & CCPA compliant • Version 1.3 (Jan 2024)",
+    "downloadDataTitle": "Download My Data",
+    "downloadDataMessage": "Your data download request has been submitted. You will receive an email with your data within 30 days.",
+    "deleteAccountTitle": "Delete Account",
+    "deleteAccountMessage": "Are you sure you want to delete your account? This action cannot be undone.",
+    "requestDeletion": "Request Deletion",
+    "requestSubmitted": "Request Submitted",
+    "deleteRequestSubmitted": "Your account deletion request has been submitted.",
+    "logout": "Log Out",
+    "logoutConfirmation": "Are you sure you want to log out?",
+    "accountDeleted": "Your account has been deleted successfully."
   },
   "common": {
     "save": "Save",
     "cancel": "Cancel",
     "back": "Back",
-    "next": "Next"
+    "next": "Next",
+    "ok": "OK",
+    "error": "Error",
+    "success": "Success",
+    "delete": "Delete",
+    "continue": "Continue"
   },
   "privacyTerms": {
     "title": "Privacy & Terms",
@@ -57,60 +111,168 @@
     "continue": "Continue"
   },
   "privacyPolicy": {
-    "title": "Mailrecap.co Privacy Policy",
-    "subtitle": "(Preview Version)",
-    "dataCollection": {
-      "title": "Data Collection",
-      "content": "We collect photos of your mail, generated summaries, and basic account info (name, email, subscription status)."
-    },
-    "dataUsage": {
-      "title": "Data Usage",
-      "content": "Photos are processed using AI to generate summaries.\n\nSummaries are stored in your account archive for your review."
-    },
-    "dataStorage": {
-      "title": "Data Storage",
-      "content": "Data may be stored locally on your device or securely in the cloud.\n\nAll data is encrypted in transit."
-    },
-    "dataSharing": {
-      "title": "Data Sharing",
-      "content": "We do not sell your personal data.\n\nData may be shared with service providers (e.g., AI processing, cloud hosting) as needed to deliver the service."
-    },
-    "yourRights": {
-      "title": "Your Rights",
-      "content": "You can request deletion of your account and associated data at any time."
-    },
-    "contact": {
-      "title": "Contact",
-      "content": "For questions, contact: support@Mailrecap.co"
-    }
+    "title": "MailRecap Privacy Policy (Version 1.2)",
+    "lastUpdated": "Effective Date: {{date}}",
+    "sections": [
+      {
+        "title": "1) What MailRecap does",
+        "content": "MailRecap helps you capture mail you own or are authorized to manage and provides:\n\n• a plain-language Summary,\n• Key Details (up to three items, such as Date, Amount, Contact), and\n• Next Steps (general informational guidance and common follow-ups).\n\nMailRecap is a document organization and information tool. It is not a law firm and does not provide legal advice."
+      },
+      {
+        "title": "2) The most important concept: processing vs. storing",
+        "content": "Mail can contain personal information and sometimes sensitive information. MailRecap is designed to minimize what is stored.\n\nWe process a mail image to extract text (OCR) and generate outputs (Summary, Key Details, Next Steps).\n\nWe do not store the original image after processing is complete (see Retention).\n\nWe store only what you choose to keep—typically the Summary + up to three Key Details + Next Steps, after applying automated PII-minimization steps intended to reduce common sensitive identifiers."
+      },
+      {
+        "title": "3) Information we collect and process",
+        "content": "A) Content you provide\n• Mail images you capture or upload in the app (used for processing).\n• Optional labels or notes you add.\n\nB) Information we generate (outputs)\n• Extracted text (OCR) derived from the image (used for processing).\n• PII-minimized text derived from OCR (used to generate outputs).\n• Summary, Key Details, and Next Steps generated from the mail content.\n• Organizational metadata (e.g., category tags, timestamps).\n\nImportant: Outputs may be inaccurate, incomplete, or misleading. Always verify the original document.\n\nC) Account and subscription data\n• Account identifiers (e.g., email, authentication tokens).\n• Subscription status and purchase confirmations.\n• Payments: Purchases may be processed by the Apple App Store and/or Google Play (as applicable). We do not store full payment card numbers.\n\nD) Device and usage data (minimized)\n• Device type, OS version, app version.\n• Diagnostics and crash logs.\n• Limited feature usage events (to improve reliability and performance)."
+      },
+      {
+        "title": "4) What we store (and what we don’t)",
+        "content": "We do not store (by default):\n• The original mail image after processing is complete (except brief technical handling in secure queues/caches needed to complete processing).\n• Full OCR text long-term.\n\nWe store:\n• The Summary and Next Steps you save.\n• Up to three Key Details you save.\n• Minimal metadata required to display and manage your saved items.\n• Account identifiers and subscription status.\n\nImportant: Saved outputs can still contain personal information if it appears in the source mail and is not detected/removed by automated methods."
+      },
+      {
+        "title": "5) PII minimization and redaction (not guaranteed)",
+        "content": "We use automated methods intended to reduce common sensitive content before storing outputs (for example, patterns resembling account numbers, long identifier strings, or barcode/tracking-like sequences). Minimization is not guaranteed and may miss content or remove content you wanted to keep. You are responsible for reviewing saved outputs."
+      },
+      {
+        "title": "6) How we use information",
+        "content": "We use information to:\n• Provide OCR, summarization, Key Details extraction, and Next Steps generation.\n• Organize saved items and improve usability.\n• Maintain security, prevent abuse, troubleshoot issues, and provide support.\n• Comply with legal obligations."
+      },
+      {
+        "title": "7) Service providers and third-party processing (including AI)",
+        "content": "We may use service providers for:\n• Hosting and infrastructure\n• OCR and summarization (including AI services)\n• Customer support tools\n• Analytics/diagnostics (minimized)\n\nWe require service providers to process information only to provide services to MailRecap, subject to their terms and applicable law.\n\nNo training on user content: We do not use your mail content (including images, extracted text, or saved outputs) to train public models. We do not permit our service providers to use your content to train their models for their general purposes.\n\nIf you want the current list of core service providers used in production, contact us at support@mailrecap.co."
+      },
+      {
+        "title": "8) Sharing",
+        "content": "We do not sell your mail content.\n\nWe may share information:\n• With service providers described above (to operate the app).\n• To comply with law or lawful requests, or to protect rights, safety, and security.\n• In connection with a merger, acquisition, or asset sale (with notice where required).\n\nAdvertising: MailRecap does not use your mail content for targeted advertising and does not share mail content for cross-context behavioral advertising."
+      },
+      {
+        "title": "9) Retention",
+        "content": "We retain information only as long as necessary for the purposes described above.\n\nDefault retention (Version 1.2):\n• Mail images: deleted after processing is completed, typically immediately after processing and in any event within 24 hours. Brief retention may occur in secure processing queues/caches needed to complete processing and error recovery.\n• Backups: our systems are designed to exclude mail images from backups.\n• Extracted text (OCR): used transiently for processing and not stored long-term.\n• Saved outputs (Summary + Key Details + Next Steps): retained until you delete them, delete your account, or we must retain limited records for support, security, dispute resolution, or legal compliance.\n• Diagnostics logs: retained for up to 90 days.\n• Backups of saved outputs/account data: retained on a rolling basis for up to 30 days, then overwritten in the ordinary course."
+      },
+      {
+        "title": "10) Your choices and controls",
+        "content": "Delete saved items: You can delete saved items in the app (where offered).\n\nDelete account: You can request account deletion by contacting support@mailrecap.co (and in-app deletion may be offered).\n\nExport: You can export your summaries and next steps (where offered in the app).\n\nWe may need to retain limited information for security, fraud prevention, dispute resolution, or legal compliance."
+      },
+      {
+        "title": "11) Security",
+        "content": "We use reasonable administrative, technical, and organizational safeguards designed to protect information, such as encryption in transit and access controls. No system can be guaranteed 100% secure."
+      },
+      {
+        "title": "12) Children",
+        "content": "MailRecap is not intended for children under 13 (or under 16 where required by law), and we do not knowingly collect personal information from children."
+      },
+      {
+        "title": "13) Region-specific notices",
+        "content": "United States (general): You can request access, correction, or deletion by contacting support@mailrecap.co. We will verify your request as appropriate.\n\nCalifornia: You may have rights to request access, deletion, or correction of certain personal information, and to opt out of “sharing” for cross-context behavioral advertising. MailRecap does not share mail content for that purpose. Submit requests to support@mailrecap.co."
+      },
+      {
+        "title": "14) Changes to this policy",
+        "content": "We may update this policy. We will update the effective date and provide additional notice where required."
+      },
+      {
+        "title": "15) Contact",
+        "content": "Questions, support, or privacy requests: support@mailrecap.co\n\nCompany: Gamut Creative, LLC\nPosted at: mailrecap.co/privacy"
+      }
+    ]
   },
   "termsOfService": {
-    "title": "Mailrecap.co Terms of Service",
-    "subtitle": "(Preview Version)",
-    "useOfService": {
-      "title": "Use of Service",
-      "content": "Mailrecap.co provides AI-generated summaries of postal mail for convenience.\n\nSummaries are for informational purposes only."
-    },
-    "noAdvice": {
-      "title": "No Legal, Financial, or Medical Advice",
-      "content": "Mailrecap.co is not a substitute for professional legal, financial, or medical advice.\n\nUsers remain responsible for verifying the contents of their mail."
-    },
-    "subscriptions": {
-      "title": "Subscriptions & Billing",
-      "content": "Subscription payments are processed through Apple App Store or Google Play.\n\nYou can cancel anytime in your account settings.\n\nRefunds are subject to Apple/Google policies."
-    },
-    "userResponsibilities": {
-      "title": "User Responsibilities",
-      "content": "Do not upload illegal, harmful, or offensive content.\n\nEnsure your device and account remain secure."
-    },
-    "liability": {
-      "title": "Liability Disclaimer",
-      "content": "Mailrecap.co is not responsible for missed payments, deadlines, or consequences arising from AI-generated summaries.\n\nThe app is provided \"as is\" without guarantees of accuracy."
-    },
-    "changes": {
-      "title": "Changes to Terms",
-      "content": "Terms may be updated periodically. Continued use of the app means acceptance of updated terms."
-    }
+    "title": "MailRecap Terms of Use (Version 1.2)",
+    "lastUpdated": "Effective Date: {{date}}",
+    "sections": [
+      {
+        "title": "1) Agreement to Terms",
+        "content": "By downloading, accessing, or using MailRecap (the “App” and related services, collectively the “Service”), you agree to these Terms. If you do not agree, do not use the Service."
+      },
+      {
+        "title": "2) Eligibility",
+        "content": "You must be at least 18 years old (or the age of majority where you live) to use the Service."
+      },
+      {
+        "title": "3) What the Service Does",
+        "content": "MailRecap helps you capture mail you are authorized to handle and provides:\n\n• a Summary (plain-language),\n• Key Details (up to three items such as Date / Amount / Contact),\n• Next Steps (general informational guidance and common follow-ups)."
+      },
+      {
+        "title": "4) Informational Use Only (No Professional Advice)",
+        "content": "The Service provides general information and educational content to help you understand and organize documents.\n\nNo legal advice / no attorney-client relationship: MailRecap is not a law firm and does not provide legal advice. Using the Service does not create an attorney-client relationship."
+      },
+      {
+        "title": "5) “Next Steps” definition",
+        "content": "“Next Steps” are general informational suggestions and common follow-ups that people often consider in similar situations. They are not personalized legal advice, do not apply law to your facts, and may not be appropriate for your situation. If you need advice about your specific situation, consult a licensed professional."
+      },
+      {
+        "title": "6) Authorization to Scan Mail (Required)",
+        "content": "You agree you will only scan or upload mail that:\n• is addressed to you, or\n• you are authorized to manage (e.g., explicit consent, power of attorney, employment role, or similar authority).\n\nYou are responsible for ensuring you have the rights/permission to scan and process the mail content you submit."
+      },
+      {
+        "title": "7) Your Account and Security",
+        "content": "You are responsible for all activity under your account and for maintaining the confidentiality of login credentials. Notify us promptly of any suspected unauthorized access."
+      },
+      {
+        "title": "8) User Content and License to Operate the Service",
+        "content": "You retain ownership of content you submit (e.g., mail images). You grant MailRecap a limited, non-exclusive license to host, process, transmit, and analyze your content only as necessary to provide the Service (e.g., OCR, automated PII minimization, summarization, Key Details extraction, and Next Steps generation).\n\nYou represent that you have the rights and authorization needed to submit the content and allow MailRecap to process it as described."
+      },
+      {
+        "title": "9) Processing and deletion of images",
+        "content": "The Service is designed to process images to generate outputs, then delete the original image after processing, typically immediately after processing and in any event within 24 hours, as described in the Privacy Policy."
+      },
+      {
+        "title": "10) Subscriptions, billing, and App Store / Play Store purchases",
+        "content": "If you purchase a subscription or paid features:\n• subscriptions (if offered) may renew automatically unless canceled through your App Store/Play Store account settings;\n• charges, renewals, cancellations, refunds, and billing disputes for in-app purchases are handled by the App Distributor (Apple/Google) under its policies; and\n• we do not store full payment card numbers."
+      },
+      {
+        "title": "11) Acceptable Use and Prohibited Activities",
+        "content": "You agree not to:\n• use the Service for unlawful activity or unauthorized access to another person’s mail;\n• misrepresent your authorization to scan mail;\n• attempt to bypass security features or probe vulnerabilities;\n• use automated scraping or activity that burdens the Service;\n• reverse engineer or attempt to derive source code except where permitted by law;\n• upload malware or interfere with Service operation."
+      },
+      {
+        "title": "12) Modifications and Availability",
+        "content": "We may modify, suspend, or discontinue any part of the Service at any time. We are not obligated to provide updates or continued availability of any feature."
+      },
+      {
+        "title": "13) Termination",
+        "content": "We may suspend or terminate your access if we reasonably believe you violated these Terms or used the Service unlawfully. You may stop using the Service at any time."
+      },
+      {
+        "title": "14) Disclaimers",
+        "content": "THE SERVICE IS PROVIDED “AS IS” AND “AS AVAILABLE.” YOUR USE IS AT YOUR SOLE RISK. TO THE MAXIMUM EXTENT PERMITTED BY LAW, WE DISCLAIM WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.\n\nWe do not guarantee accuracy or completeness of outputs. You must verify the original document, including dates, deadlines, and obligations."
+      },
+      {
+        "title": "15) Limitation of Liability",
+        "content": "TO THE MAXIMUM EXTENT PERMITTED BY LAW, MAILRECAP WILL NOT BE LIABLE FOR INDIRECT, INCIDENTAL, CONSEQUENTIAL, SPECIAL, EXEMPLARY, OR PUNITIVE DAMAGES, OR FOR LOST PROFITS/REVENUE OR LOSS OF DATA.\n\nOUR TOTAL LIABILITY FOR ANY CLAIM WILL NOT EXCEED THE AMOUNT YOU PAID TO US IN THE 12 MONTHS BEFORE THE EVENT GIVING RISE TO THE CLAIM (OR $100 IF YOU PAID NOTHING), UNLESS LAW REQUIRES OTHERWISE."
+      },
+      {
+        "title": "16) Indemnification",
+        "content": "You agree to defend and indemnify MailRecap from claims arising out of:\n• your misuse of the Service,\n• your breach of these Terms, or\n• your scanning/uploading mail without authorization."
+      },
+      {
+        "title": "17) User Data and Backups",
+        "content": "While we perform routine backups as part of operating the Service, you are responsible for maintaining your own records of any information that matters to you. We are not liable for loss/corruption of data to the extent permitted by law."
+      },
+      {
+        "title": "18) Electronic Communications and Notices",
+        "content": "You consent to receiving communications electronically (in-app, email, or via the Service) and agree those communications satisfy legal writing requirements.\n\nNotices to MailRecap: You agree to send any notices to MailRecap electronically at support@mailrecap.co.\n\nNotices to you: We may send notices to you electronically, including by email or in-app messages, where permitted by law."
+      },
+      {
+        "title": "19) App Store / Play Store Terms",
+        "content": "If you obtained the App from the Apple App Store or Google Play (“App Distributor”):\n• the license is limited to use on a device you own/control and subject to the App Distributor’s usage rules;\n• the App Distributor has no obligation to provide maintenance/support; and\n• the App Distributor is not responsible for claims relating to the App, except as required by law.\n\nThird-party beneficiary (Apple): To the extent applicable, Apple and Apple’s subsidiaries are third-party beneficiaries of these Terms and may enforce these Terms against you."
+      },
+      {
+        "title": "20) Governing Law",
+        "content": "These Terms are governed by the laws of the State of Florida, USA, excluding conflict-of-law principles, except that the arbitration agreement below is governed by the Federal Arbitration Act."
+      },
+      {
+        "title": "21) Dispute Resolution (Arbitration; Class Action Waiver)",
+        "content": "Informal resolution first. Before filing a claim, you agree to contact us at support@mailrecap.co and provide a brief description of the dispute and your contact information. We will try to resolve it informally within 30 days.\n\nBinding arbitration. If the dispute is not resolved, you and MailRecap agree to resolve any claim arising out of or relating to the Service or these Terms by binding arbitration, rather than in court, except that either party may bring claims in small claims court if eligible.\n\nProvider and rules. Unless you and we agree otherwise, arbitration will be administered by the American Arbitration Association (AAA) under its applicable rules.\n\nLocation / language. Arbitration will take place in Florida unless the parties agree otherwise, and will be conducted in English.\n\nNo class actions. You and MailRecap agree that claims will be brought only in an individual capacity and not as a plaintiff or class member in any class, collective, or representative proceeding.\n\nOpt-out (email-only). You may opt out of this arbitration agreement within 30 days of first accepting these Terms by emailing support@mailrecap.co with the subject line “Arbitration Opt-Out.” Your email must include your name, the email used for your account, and a clear statement that you want to opt out of arbitration."
+      },
+      {
+        "title": "22) Changes to These Terms",
+        "content": "We may update these Terms. Continued use after changes means you accept the updated Terms."
+      },
+      {
+        "title": "23) Contact",
+        "content": "Questions about these Terms: support@mailrecap.co"
+      }
+    ]
   },
   "subscriptionPlan": {
     "title": "Choose Your Plan",
@@ -136,7 +298,33 @@
     },
     "continue": "Continue",
     "selectPlan": "Please select a plan to continue",
-    "legalFootnote": "Subscriptions are billed through your App Store or Google Play account. You can cancel anytime in your account settings. Refunds are handled by Apple/Google."
+    "legalFootnote": "Subscriptions are billed through your App Store or Google Play account. You can cancel anytime in your account settings. Refunds are handled by Apple/Google.",
+    "initializationError": "Initialization Error",
+    "initializationErrorDesc": "Unable to initialize payment system. Please try again later.",
+    "failedInit": "Failed to initialize payment system",
+    "confirmPurchase": "Confirm Purchase",
+    "confirmPurchaseDesc": "You will be charged using {{platform}}. Continue?",
+    "subscriptionActivated": "Your subscription has been activated.",
+    "purchaseFailed": "Purchase Failed",
+    "purchaseError": "Purchase Error",
+    "purchaseErrorTitle": "Purchase Error",
+    "purchaseErrorMessage": "Purchase failed. Please try again.",
+    "paymentInvalid": "Payment method is invalid",
+    "networkError": "Network error. Please check your connection",
+    "alreadyOwned": "You already own this subscription",
+    "notAvailable": "This subscription is not available",
+    "loadingInit": "Initializing payment system...",
+    "mailMadeSimple": "Mail made simple for you",
+    "subscribe": "Subscribe",
+    "cancellationText": "Cancel anytime • No hidden fees",
+    "freeTrial": "Free Trial",
+    "freeTrialPrice": "Free Trial",
+    "freeTrialDesc": "$0 – 1 week trial",
+    "essentials": "MailRecap Essentials",
+    "essentialsDesc": "Perfect for individuals and households who just want peace of mind with their important mail.",
+    "plus": "MailRecap+",
+    "plusDesc": "Best for busy households, caregivers, and anyone who handles a lot of mail each month.",
+    "savePercent": "Save over 15%"
   },
   "cameraPermission": {
     "title": "Camera Access Needed",
@@ -155,8 +343,21 @@
     "instructions": "Position your mail inside the dotted box below, then tap the button to take a photo",
     "takePicture": "Take Picture",
     "choosePhoto": "Choose from Photos",
-    "processing": "Reading your mail...",
-    "back": "Back"
+    "processing": "Analyzing mail...",
+    "processingSubTitle": "Creating summary",
+    "back": "Back",
+    "failedOpen": "Failed to open camera. Please try again.",
+    "userCancelled": "User cancelled camera",
+    "readyToProcess": "Ready to Process",
+    "aiAnalyze": "AI will analyze and summarize",
+    "privacyNoticeTitle": "Privacy Notice",
+    "privacyNoticeDesc": "By scanning, you confirm ownership and consent to AI analysis. Images auto-delete in 24hrs—only summaries are saved.",
+    "retake": "Retake",
+    "looksGood": "Looks Good",
+    "confirm": "Confirm",
+    "positionMail": "Position Your Mail",
+    "ensureVisible": "Ensure all text is visible",
+    "cameraView": "Camera view"
   },
   "mailSummary": {
     "title": "Mail Summary",
@@ -171,13 +372,27 @@
     "home": "Home",
     "back": "Back",
     "disclaimer": "This summary was generated using AI. Accuracy is not guaranteed. Mailrecap.co is not responsible for missed payments, deadlines, or actions taken based on summaries.",
-    "noMailFound": "No mail item found"
+    "noMailFound": "No mail item found",
+    "freeScanUsed": "Free scan used",
+    "getUnlimited": "Get unlimited scans with Pro",
+    "unlockUnlimited": "Unlock Unlimited",
+    "nextSteps": "Next Steps",
+    "readOutLoud": "Read Out Loud",
+    "stopReading": "Stop Reading",
+    "aiDisclaimer": "AI-generated. Verify important details.",
+    "upgradeNow": "Upgrade Now",
+    "privacy": "Privacy",
+    "terms": "Terms"
   },
   "archive": {
     "title": "Saved Mail",
     "empty": "No saved mail yet",
     "emptyDesc": "Take photos of your mail to see them here.",
-    "back": "Back"
+    "back": "Back",
+    "errorLoading": "Error Loading Summaries",
+    "errorLoadingMessage": "Failed to load summaries. Please try again.",
+    "retry": "Retry",
+    "loading": "Loading summaries..."
   },
   "auth": {
     "login": "Log In",
@@ -210,7 +425,24 @@
     "orContinueWithAlt": "or continue with",
     "google": "Google",
     "apple": "Apple",
-    "back": "Back"
+    "back": "Back",
+    "loginSuccess": "Login successful",
+    "loginFailed": "Login failed",
+    "invalidCredentials": "Invalid email or password",
+    "unknownError": "An unknown error occurred",
+    "emailRequired": "Email Required",
+    "enterEmail": "Please enter your email address",
+    "passwordRequired": "Password Required",
+    "enterPassword": "Please enter a password",
+    "passwordMismatch": "Password Mismatch",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "termsRequired": "Terms Required",
+    "agreeTerms": "Please agree to the terms and conditions",
+    "accountCreated": "Account Created Successfully",
+    "welcomeMessage": "Welcome to MailRecap!",
+    "signupFailed": "Signup Failed",
+    "signupError": "An error occurred during signup",
+    "errorAgreeToTerms": "Please agree to the terms and conditions"
   },
   "privacyModal": {
     "title": "Your Privacy Matters",
@@ -220,5 +452,16 @@
     "feature3": "Data never sold or shared",
     "gotIt": "Got It",
     "viewPolicy": "View Full Privacy Policy"
+  },
+  "splash": {
+    "tagline": "Snap your mail. Get a smart summary, with clear next steps you can read or listen to.",
+    "instant": "Instant",
+    "private": "Private",
+    "simple": "Simple",
+    "getStartedFree": "Get Started Free"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "requiresRecentLogin": "This action requires a recent login. Please log out and log back in, then try again."
   }
 }

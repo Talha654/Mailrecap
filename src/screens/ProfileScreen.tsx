@@ -14,26 +14,26 @@ export const ProfileScreen: React.FC = () => {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>{t('profile.title')}</Text>
-            <Text style={styles.subtitle}>Manage your profile information</Text>
+            <Text style={styles.subtitle}>{t('profile.manageProfile')}</Text>
 
             <View style={styles.profileInfo}>
                 <Text style={styles.infoText}>Name: John Doe</Text>
                 <Text style={styles.infoText}>Email: john.doe@example.com</Text>
-                <Text style={styles.infoText}>Member since: January 2024</Text>
+                <Text style={styles.infoText}>{t('profile.memberSince')} January 2024</Text>
             </View>
 
             <TouchableOpacity
                 style={styles.button}
                 onPress={() => navigation.navigate(SCREENS.HOME)}
             >
-                <Text style={styles.buttonText}>{t('common.back')} to {t('home.title')}</Text>
+                <Text style={styles.buttonText}>{t('common.back')} {t('common.to')} {t('home.title')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
                 style={styles.button}
                 onPress={() => navigation.navigate(SCREENS.SETTINGS)}
             >
-                <Text style={styles.buttonText}>Go to {t('settings.title')}</Text>
+                <Text style={styles.buttonText}>{t('profile.goToSettings')}</Text>
             </TouchableOpacity>
         </View>
     );

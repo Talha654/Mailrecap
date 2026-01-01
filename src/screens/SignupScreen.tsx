@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Image } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { CustomButton, CustomInput, showSuccessToast, showErrorToast, PrivacyModal } from '../components';
 import { hp, wp } from '../constants/StyleGuide';
@@ -7,6 +7,9 @@ import { SCREENS } from '../navigation';
 import { RootStackNavigationProp } from '../types/navigation';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { signUpWithEmailPassword } from '../services/auth';
+import { fonts } from '../constants/fonts';
+import { icons, images } from '../constants/images';
+import { AppleIcon, GoogleIcon } from '../components/SocialIcons';
 
 type Props = {
     navigation: RootStackNavigationProp<typeof SCREENS.SIGNUP>;
@@ -37,35 +40,35 @@ export const SignupScreen: React.FC<Props> = ({ navigation }) => {
 
     const onSignup = async () => {
         if (loading) return;
-        
+
         // Validation
         if (!email.trim()) {
-            showErrorToast('Email Required', 'Please enter your email address');
+            showErrorToast(t('auth.emailRequired'), t('auth.enterEmail'));
             return;
         }
         if (!password) {
-            showErrorToast('Password Required', 'Please enter a password');
+            showErrorToast(t('auth.passwordRequired'), t('auth.enterPassword'));
             return;
         }
         if (password !== confirmPassword) {
-            showErrorToast('Password Mismatch', 'Passwords do not match');
+            showErrorToast(t('auth.passwordMismatch'), t('auth.passwordsDoNotMatch'));
             return;
         }
         if (!agreedToTerms) {
-            showErrorToast('Terms Required', 'Please agree to the terms and conditions');
+            showErrorToast(t('auth.termsRequired'), t('auth.agreeTerms'));
             return;
         }
-        
+
         setLoading(true);
         try {
             await signUpWithEmailPassword(email, password, name || undefined);
-            showSuccessToast('Account Created Successfully', 'Welcome to MailRecap!');
+            showSuccessToast(t('auth.accountCreated'), t('auth.welcomeMessage'));
             // Show privacy modal after successful signup
             setShowPrivacyModal(true);
         } catch (e: any) {
             console.warn('Signup failed', e);
-            const errorMessage = e?.message || 'An error occurred during signup';
-            showErrorToast('Signup Failed', errorMessage);
+            const errorMessage = e?.message || t('auth.signupError');
+            showErrorToast(t('auth.signupFailed'), errorMessage);
         } finally {
             setLoading(false);
         }
@@ -85,12 +88,13 @@ export const SignupScreen: React.FC<Props> = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.container}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
-                <ScrollView contentContainerStyle={{ paddingHorizontal: wp(6), paddingBottom: hp(4) }}>
+                <ScrollView contentContainerStyle={{ paddingHorizontal: wp(6), paddingBottom: hp(12) }} showsVerticalScrollIndicator={false}>
+
 
                     {/* Mail Icon */}
                     <View style={styles.iconContainer}>
                         <View style={styles.iconCircle}>
-                            <Text style={styles.mailIcon}>✉</Text>
+                            <Image source={icons.mail} style={styles.icon} resizeMode="contain" />
                         </View>
                     </View>
 
@@ -158,11 +162,17 @@ export const SignupScreen: React.FC<Props> = ({ navigation }) => {
                                 {' '}{t('auth.and')} <Text style={styles.termsLink}>{t('auth.privacyPolicy')}</Text>
                             </Text>
                         </TouchableOpacity>
-                        <CustomButton title={t('auth.createAccount')} onPress={onSignup} loading={loading} />
+                        {/* signup button */}
+                        <CustomButton
+                            title={t('auth.createAccount')}
+                            onPress={onSignup}
+                            loading={loading}
+                            style={styles.signupButton}
+                        />
 
                         {/* Social Login Buttons */}
 
-     {/* Divider */}
+                        {/* Divider */}
                         <View style={styles.dividerContainer}>
                             <View style={styles.divider} />
                             <Text style={styles.dividerText}>{t('auth.orContinueWith')}</Text>
@@ -171,11 +181,13 @@ export const SignupScreen: React.FC<Props> = ({ navigation }) => {
 
                         <View style={styles.socialButtonsRow}>
                             <TouchableOpacity style={styles.socialButton}>
-                                <Text style={styles.socialButtonText}>G</Text>
+                                <GoogleIcon width={wp(5)} height={wp(5)} />
                                 <Text style={styles.socialButtonLabel}>{t('auth.google')}</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.socialButton}>
-                                <Text style={styles.appleIcon}></Text>
+                            <TouchableOpacity
+                                onPress={() => setShowPrivacyModal(true)}
+                                style={styles.socialButton}>
+                                <AppleIcon width={wp(5)} height={wp(5)} />
                                 <Text style={styles.socialButtonLabel}>{t('auth.apple')}</Text>
                             </TouchableOpacity>
                         </View>
@@ -188,8 +200,19 @@ export const SignupScreen: React.FC<Props> = ({ navigation }) => {
                         </TouchableOpacity>
                     </View>
 
+                    {/* Bottom Image */}
+                    <View style={styles.bottomImageContainer}>
+                        <Image
+                            source={images.bottom_img}
+                            style={styles.bottomImage}
+                            resizeMode="contain"
+                        />
+                    </View>
+
                 </ScrollView>
             </KeyboardAvoidingView>
+
+
 
             {/* Privacy Modal */}
             <PrivacyModal
@@ -204,7 +227,7 @@ export const SignupScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: '#E9EFF5',
     },
     heading: {
         fontSize: wp(10),
@@ -214,38 +237,41 @@ const styles = StyleSheet.create({
     },
     iconContainer: {
         alignItems: 'center',
-        marginBottom: hp(3),
+        marginBottom: hp(2),
+        marginTop: hp(2)
     },
     iconCircle: {
         width: wp(20),
         height: wp(20),
         borderRadius: wp(10),
-        backgroundColor: '#E8F0FE',
+        backgroundColor: '#D6212F',
         justifyContent: 'center',
         alignItems: 'center',
     },
-    mailIcon: {
-        fontSize: wp(10),
-        color: '#5B8DEF',
+    icon: {
+        width: wp(15),
+        height: wp(15),
     },
     content: {
         flex: 1,
         borderRadius: wp(6),
         borderWidth: 1,
-        borderColor: '#E4E4E4',
+        borderColor: '#c1bebeff',
         padding: wp(6),
     },
     title: {
         fontSize: wp(7),
         fontWeight: '700',
-        color: '#111827',
+        color: '#000F54',
         textAlign: 'center',
+        fontFamily: fonts.sourceSerif.bold,
     },
     subtitle: {
         fontSize: wp(4),
         color: '#6B7280',
         textAlign: 'center',
         marginBottom: hp(4),
+        fontFamily: fonts.inter.regular,
     },
     spacer: {
         height: hp(2),
@@ -261,7 +287,7 @@ const styles = StyleSheet.create({
         borderColor: '#E5E7EB',
         borderRadius: wp(10),
     },
-        dividerContainer: {
+    dividerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         marginVertical: hp(3),
@@ -290,7 +316,7 @@ const styles = StyleSheet.create({
         borderRadius: wp(8),
         paddingVertical: hp(1.8),
         borderWidth: 1,
-        borderColor: '#E5E7EB',
+        borderColor: '#000F54',
     },
     socialButtonText: {
         fontSize: wp(5),
@@ -302,6 +328,7 @@ const styles = StyleSheet.create({
         fontSize: wp(4),
         fontWeight: '600',
         color: '#111827',
+        marginLeft: wp(2),
     },
     appleIcon: {
         fontSize: wp(5),
@@ -342,8 +369,16 @@ const styles = StyleSheet.create({
         color: '#5B8DEF',
         fontWeight: '600',
     },
+    signupButton: {
+        marginTop: hp(2),
+        borderRadius: wp(8),
+        paddingVertical: hp(2),
+        width: '100%',
+        fontFamily: fonts.inter.semiBold,
+        backgroundColor: '#000F54'
+    },
     link: {
-        color: '#2563EB',
+        color: '#000F54',
         fontWeight: '600',
         fontSize: wp(3.6),
     },
@@ -356,6 +391,18 @@ const styles = StyleSheet.create({
     switchText: {
         color: '#6B7280',
         fontSize: wp(3.6),
+    },
+    bottomImageContainer: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: '#E9EFF5',
+    },
+    bottomImage: {
+        width: '110%',
+        height: hp(7),
+        alignSelf: 'center',
     },
 });
 

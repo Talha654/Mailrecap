@@ -37,7 +37,7 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
 
 const styles = StyleSheet.create({
     button: {
-        width: '100%',
+        // width: '100%',
         backgroundColor: '#2E70FF',
         paddingVertical: hp(2),
         borderRadius: wp(10),
@@ -49,7 +49,6 @@ const styles = StyleSheet.create({
     buttonText: {
         color: '#fff',
         fontSize: wp(5),
-        fontWeight: 'bold',
         letterSpacing: 0.5,
     },
     disabledButton: {

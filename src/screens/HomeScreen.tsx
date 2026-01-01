@@ -1,5 +1,4 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { hp, wp } from '../constants/StyleGuide';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,94 +6,108 @@ import { SCREENS } from '../navigation';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationProp } from '../types/navigation';
 import Icon from 'react-native-vector-icons/Feather';
+import { icons, images } from '../constants/images';
+import { fonts } from '../constants/fonts';
+import { useSubscription } from '../hooks/useSubscription';
 
 export const HomeScreen: React.FC = () => {
     const { t } = useTranslation();
     const navigation = useNavigation<NavigationProp>();
+    const { subscriptionPlan, scansLeft, daysLeft } = useSubscription();
+
+    const handleSubscribe = () => {
+        navigation.navigate(SCREENS.SUBSCRIPTION_PLAN);
+    };
 
     return (
-        <SafeAreaView style={styles.safeArea} edges={['top']}>
+        <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
             <View style={styles.container}>
-                <ScrollView
-                    style={styles.scrollView}
-                    contentContainerStyle={styles.scrollContent}
-                    showsVerticalScrollIndicator={false}
-                >
-                    {/* Header */}
-                    <View style={styles.header}>
-                        <View style={styles.headerLeft}>
-                            <View style={styles.logoContainer}>
-                                <Icon name="mail" size={wp(6)} color="#3B82F6" />
-                            </View>
-                            <View style={styles.headerTextContainer}>
-                                <Text style={styles.title}>MailRecap</Text>
-                                <Text style={styles.subtitle}>Your Smart Mail Assistant</Text>
-                            </View>
-                        </View>
-                        <TouchableOpacity
-                            style={styles.settingsButton}
-                            onPress={() => navigation.navigate(SCREENS.SETTINGS)}
-                            activeOpacity={0.7}
-                        >
-                            <Icon name="settings" size={wp(5.5)} color="#6B7280" />
-                        </TouchableOpacity>
+                {/* Main Content */}
+                <View style={styles.mainContent}>
+                    {/* Logo and Tagline */}
+                    <View style={styles.logoSection}>
+                        <Image source={images.home_logo} resizeMode='contain' style={styles.homeLogo} />
                     </View>
 
-                    {/* Free Scan Badge */}
-                    <View style={styles.badgeContainer}>
-                        <View style={styles.badge}>
-                            <Icon name="zap" size={wp(4)} color="#3B82F6" />
-                            <Text style={styles.badgeText}>1 free scan available</Text>
-                        </View>
-                    </View>
-
-                    {/* Main Scan Card */}
-                    <View style={styles.mainCard}>
-                        <View style={styles.cameraIconContainer}>
-                            <Icon name="camera" size={wp(10)} color="#3B82F6" />
-                        </View>
-                        <Text style={styles.mainCardTitle}>Scan Mail</Text>
-                        <Text style={styles.mainCardSubtitle}>Photo → AI summary in seconds</Text>
+                    {/* Scan Mail Button */}
+                    <View style={styles.scanSection}>
                         <TouchableOpacity
-                            style={styles.startScanButton}
                             onPress={() => navigation.navigate(SCREENS.CAMERA_SCREEN)}
                             activeOpacity={0.8}
-                        >
-                            <Icon name="camera" size={wp(5)} color="#FFFFFF" />
-                            <Text style={styles.startScanButtonText}>Start Scan</Text>
+                            style={styles.cameraIconContainer}>
+                            <Image source={icons.camera} resizeMode='contain' style={styles.cameraIcon} />
                         </TouchableOpacity>
+                        <Text style={styles.scanMailText}>{t('home.scanMail')}</Text>
+                    </View>
+                </View>
+
+                {/* Bottom Section */}
+                <View style={styles.bottomSectionContainer}>
+                    {/* Strip Image */}
+                    <Image
+                        source={images.bottom_img}
+                        style={styles.bottomStripImage}
+                        resizeMode="contain"
+                    />
+
+                    {/* Info Bar (Grey) */}
+                    <View style={styles.infoBar}>
+                        {subscriptionPlan === 'free_trial' && (
+                            <>
+                                <Text style={styles.infoBarText}>{t('home.plan.freeTrial')}</Text>
+                                <Text style={styles.infoBarText}>{t('home.plan.daysLeft', { count: daysLeft ?? 7 })}</Text>
+                            </>
+                        )}
+                        {(subscriptionPlan === 'essentials_monthly' || subscriptionPlan === 'essentials_yearly') && (
+                            <>
+                                <Text style={styles.infoBarText}>{subscriptionPlan === 'essentials_yearly' ? 'Essentials Yearly' : t('home.plan.essentials')}</Text>
+                                <Text style={styles.infoBarText}>{t('home.plan.scansLeft', { count: scansLeft ?? 10 })}</Text>
+                            </>
+                        )}
+                        {(subscriptionPlan === 'plus_monthly' || subscriptionPlan === 'plus_yearly') && (
+                            <>
+                                <Text style={styles.infoBarText}>{t('home.plan.plus')}</Text>
+                                <Text style={styles.infoBarText}>{t('home.plan.unlimited')}</Text>
+                            </>
+                        )}
                     </View>
 
-                    {/* Bottom Cards */}
-                    <View style={styles.bottomCardsContainer}>
-                        <TouchableOpacity
-                            style={styles.bottomCard}
-                            onPress={() => navigation.navigate(SCREENS.ARCHIVE)}
-                            activeOpacity={0.7}
-                        >
-                            <View style={styles.bottomCardIconContainer}>
-                                <Icon name="folder" size={wp(7)} color="#3B82F6" />
-                            </View>
-                            <Text style={styles.bottomCardTitle}>Archive</Text>
-                        </TouchableOpacity>
+                    {/* Dark Blue Area */}
+                    <View style={styles.darkBlueArea}>
+                        {/* Subscribe Button (Hidden for Unlimited?) - Image shows it for Free Trial and Essentials */}
+                        {subscriptionPlan !== 'plus_monthly' && subscriptionPlan !== 'plus_yearly' && (
+                            <TouchableOpacity
+                                onPress={handleSubscribe}
+                                activeOpacity={0.8}
+                                style={styles.subscribeButton}
+                            >
+                                <Text style={styles.subscribeButtonText}>{t('mailSummary.subscribe')}</Text>
+                            </TouchableOpacity>
+                        )}
+                        {/* Spacer if no subscribe button to keep nav at bottom? No, flex space-between in darkBlueArea */}
 
-                        <TouchableOpacity
-                            style={styles.bottomCard}
-                            onPress={() => navigation.navigate(SCREENS.SETTINGS)}
-                            activeOpacity={0.7}
-                        >
-                            <View style={styles.bottomCardIconContainer}>
-                                <Icon name="settings" size={wp(7)} color="#3B82F6" />
-                            </View>
-                            <Text style={styles.bottomCardTitle}>Settings</Text>
-                        </TouchableOpacity>
-                    </View>
+                        {/* Navigation Row */}
+                        <View style={styles.navigationRow}>
+                            <TouchableOpacity
+                                style={[styles.navButton, { borderRightWidth: 2 }]}
+                                onPress={() => navigation.navigate(SCREENS.ARCHIVE)}
+                                activeOpacity={0.7}
+                            >
+                                <Icon name="folder" size={wp(8)} color="#FFFFFF" />
+                                <Text style={styles.navButtonText}>{t('home.navArchive')}</Text>
+                            </TouchableOpacity>
 
-                    {/* Privacy Notice */}
-                    <View style={styles.privacyNotice}>
-                        <Text style={styles.privacyText}>🔒 Images delete in 24hrs • Data never sold</Text>
+                            <TouchableOpacity
+                                style={[styles.navButton, { borderLeftWidth: 2 }]}
+                                onPress={() => navigation.navigate(SCREENS.SETTINGS)}
+                                activeOpacity={0.7}
+                            >
+                                <Icon name="user" size={wp(8)} color="#FFFFFF" />
+                                <Text style={styles.navButtonText}>{t('home.navProfile')}</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                </ScrollView>
+                </View>
             </View>
         </SafeAreaView>
     );
@@ -103,161 +116,114 @@ export const HomeScreen: React.FC = () => {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: '#F9FAFB',
+        backgroundColor: '#E8EAED',
     },
     container: {
         flex: 1,
-        backgroundColor: '#F9FAFB',
+        backgroundColor: '#E8EAED',
     },
-    scrollView: {
+    mainContent: {
         flex: 1,
-    },
-    scrollContent: {
-        paddingHorizontal: wp(5),
-        paddingTop: hp(2),
-        paddingBottom: hp(4),
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: hp(3),
-        paddingTop: hp(1),
-    },
-    headerLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    logoContainer: {
-        width: wp(12),
-        height: wp(12),
-        backgroundColor: '#EBF1FF',
-        borderRadius: wp(3),
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: wp(3),
-    },
-    headerTextContainer: {
-        justifyContent: 'center',
-    },
-    title: {
-        fontSize: wp(5.5),
-        fontWeight: '700',
-        color: '#111827',
-        marginBottom: hp(0.3),
-    },
-    subtitle: {
-        fontSize: wp(3.5),
-        color: '#9CA3AF',
-        fontWeight: '400',
-    },
-    settingsButton: {
-        width: wp(10),
-        height: wp(10),
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    badgeContainer: {
-        alignItems: 'center',
-        marginBottom: hp(3),
-    },
-    badge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#EFF6FF',
-        paddingHorizontal: wp(4),
-        paddingVertical: hp(1.2),
-        borderRadius: wp(6),
-    },
-    badgeText: {
-        fontSize: wp(3.8),
-        color: '#2E70FF',
-        fontWeight: '600',
-        marginLeft: wp(2),
-    },
-    mainCard: {
-        backgroundColor: '#F0F5FF',
-        borderWidth:1,
-        borderColor:'#CDDBFF',
-        borderRadius: wp(6),
         paddingVertical: hp(5),
-        paddingHorizontal: wp(6),
+    },
+    logoSection: {
         alignItems: 'center',
-        marginBottom: hp(3),
+        paddingTop: hp(3),
+    },
+    homeLogo: {
+        width: wp(70),
+        height: hp(13),
+        marginBottom: hp(2),
+    },
+    scanSection: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        flex: 1,
     },
     cameraIconContainer: {
-        width: wp(20),
-        height: wp(20),
-        backgroundColor: '#DBEAFE',
-        borderRadius: wp(5),
+        width: wp(35),
+        height: wp(35),
+        backgroundColor: '#D6212F',
+        borderRadius: wp(35),
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: hp(3),
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 8,
     },
-    mainCardTitle: {
-        fontSize: wp(5.5),
-        fontWeight: '700',
-        color: '#111827',
-        marginBottom: hp(1),
+    cameraIcon: {
+        width: wp(18),
+        height: wp(18),
     },
-    mainCardSubtitle: {
-        fontSize: wp(3.8),
-        color: '#6B7280',
-        marginBottom: hp(3),
+    scanMailText: {
+        fontSize: wp(9),
+        fontFamily: Platform.OS === 'ios' ? fonts.sourceSerif.semiBold : fonts.sourceSerif.semiBoldItalic,
+        fontStyle: Platform.OS === 'ios' ? 'italic' : 'normal',
+        color: '#000F54',
     },
-    startScanButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#3B82F6',
-        paddingHorizontal: wp(8),
-        paddingVertical: hp(1.8),
-        borderRadius: wp(6),
+    bottomSectionContainer: {
+        width: '100%',
     },
-    startScanButtonText: {
-        fontSize: wp(4.2),
-        fontWeight: '600',
-        color: '#FFFFFF',
-        marginLeft: wp(2),
+    bottomStripImage: {
+        width: '100%',
+        height: hp(1.5),
+        marginBottom: -1, // Fix potential gap
     },
-    bottomCardsContainer: {
+    infoBar: {
+        backgroundColor: '#B1BDC8', // Greyish blue from image
         flexDirection: 'row',
         justifyContent: 'space-between',
+        paddingHorizontal: wp(6),
+        paddingVertical: hp(1.5),
+        alignItems: 'center',
+    },
+    infoBarText: {
+        fontSize: wp(4.5),
+        fontFamily: Platform.OS === 'ios' ? fonts.sourceSerif.semiBold : fonts.sourceSerif.semiBoldItalic,
+        fontStyle: Platform.OS === 'ios' ? 'italic' : 'normal',
+        color: '#000F54',
+    },
+    darkBlueArea: {
+        backgroundColor: '#000F54',
+        // paddingTop: hp(2),
+        // paddingBottom: hp(3),
+    },
+    subscribeButton: {
+        alignSelf: 'center',
         marginBottom: hp(3),
-        gap: wp(4),
     },
-    bottomCard: {
-        flex: 1,
-        backgroundColor: '#FFFFFF',
-        borderRadius: wp(5),
-        paddingVertical: hp(4),
+    subscribeButtonText: {
+        color: '#FFFFFF',
+        fontSize: wp(5),
+        fontFamily: fonts.sourceSerif.bold,
+        fontStyle: 'italic',
+    },
+    navigationRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-        elevation: 2,
     },
-    bottomCardIconContainer: {
-        width: wp(14),
-        height: wp(14),
-        backgroundColor: '#EFF6FF',
-        borderRadius: wp(4),
+    navButton: {
         alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: hp(1.5),
-    },
-    bottomCardTitle: {
-        fontSize: wp(4),
-        fontWeight: '700',
-        color: '#111827',
-    },
-    privacyNotice: {
-        alignItems: 'center',
+        // justifyContent: 'center',
         paddingVertical: hp(2),
+        flex: 1,
     },
-    privacyText: {
-        fontSize: wp(3.2),
-        color: '#9CA3AF',
-        textAlign: 'center',
+    navButtonText: {
+        fontSize: wp(3),
+        fontWeight: '600',
+        color: '#FFFFFF',
+        marginTop: hp(0.5),
+        letterSpacing: 0.5,
+        textTransform: 'uppercase',
     },
+    // navDivider: {
+    //     width: 1,
+    //     // height: hp(5),
+    //     backgroundColor: '#000C43',
+    // },
 });

@@ -11,6 +11,12 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NavigationProp } from '../types/navigation';
 import { SCREENS } from '../navigation/screens';
 import { saveMailSummary } from '../services/mailSummary.service';
+import { fonts } from '../constants/fonts';
+import { Shield } from 'lucide-react-native';
+import { icons } from '../constants/images';
+import { analyzeImage } from '../services/openai.service';
+import Toast from 'react-native-toast-message';
+import { useSubscription } from '../hooks/useSubscription';
 
 export interface MailItem {
     id: string;
@@ -26,8 +32,9 @@ export interface MailItem {
 }
 
 export const CameraScreen: React.FC = () => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigation = useNavigation<NavigationProp>();
+    const { scansLeft, subscriptionPlan } = useSubscription(); // Use subscription hook
     const [isProcessing, setIsProcessing] = useState(false);
     const [progress, setProgress] = useState(0);
     const [showCamera, setShowCamera] = useState(true);
@@ -71,11 +78,26 @@ export const CameraScreen: React.FC = () => {
     ]);
 
     const handleTakePhoto = async () => {
+        // Check for scan limits
+        // 0 scans left AND not on an unlimited plan (which behaves as -1, but let's be safe with explicit check)
+        // Actually, if scansLeft is 0, it means they ran out. Unlimited plans would return -1 or a high number.
+        // Based on implementation: Plus plans scansRemaining = -1.
+        // useSubscription returns scansLeft directly from DB.
+        // So we only block if scansLeft === 0.
+        if (scansLeft === 0) {
+            Toast.show({
+                type: 'error',
+                text1: 'Zero Scans Left',
+                text2: 'You have 0 scans left. Please update the plan.',
+            });
+            return;
+        }
+
         try {
             const image = await ImagePicker.openCamera({
                 width: 1200,
                 height: 1600,
-                cropping: true,
+                // cropping: true,
                 cropperCircleOverlay: false,
                 compressImageQuality: 0.8,
                 includeBase64: false,
@@ -91,7 +113,7 @@ export const CameraScreen: React.FC = () => {
             if (error instanceof Error && 'code' in error) {
                 const errorWithCode = error as { code: string; message: string };
                 if (errorWithCode.code === 'E_PICKER_CANCELLED') {
-                    console.log('User cancelled camera');
+                    console.log(t('camera.userCancelled'));
                 } else {
                     console.log('Camera Error:', errorWithCode.message);
                     Alert.alert('Error', 'Failed to open camera. Please try again.....');
@@ -103,100 +125,125 @@ export const CameraScreen: React.FC = () => {
         }
     };
 
-    const handleChoosePhoto = async () => {
-        try {
-            const image = await ImagePicker.openPicker({
-                width: 1200,
-                height: 1600,
-                cropping: true,
-                cropperCircleOverlay: false,
-                compressImageQuality: 0.8,
-                includeBase64: false,
-                mediaType: 'photo',
-            });
+    // const handleChoosePhoto = async () => {
+    //     try {
+    //         const image = await ImagePicker.openPicker({
+    //             width: 1200,
+    //             height: 1600,
+    //             cropping: true,
+    //             cropperCircleOverlay: false,
+    //             compressImageQuality: 0.8,
+    //             includeBase64: false,
+    //             mediaType: 'photo',
+    //         });
 
-            if (image) {
-                console.log('Image selected:', image.path);
-                processPhoto(image.path);
-            }
-        } catch (error: unknown) {
-            if (error instanceof Error && 'code' in error) {
-                const errorWithCode = error as { code: string; message: string };
-                if (errorWithCode.code === 'E_PICKER_CANCELLED') {
-                    console.log('User cancelled image picker');
-                } else {
-                    console.log('Image Picker Error:', errorWithCode.message);
-                    Alert.alert('Error', 'Failed to select image. Please try again.');
-                }
-            } else {
-                console.log('Image Picker Error:', error);
-                Alert.alert('Error', 'Failed to select image. Please try again.');
-            }
-        }
-    };
+    //         if (image) {
+    //             console.log('Image selected:', image.path);
+    //             processPhoto(image.path);
+    //         }
+    //     } catch (error: unknown) {
+    //         if (error instanceof Error && 'code' in error) {
+    //             const errorWithCode = error as { code: string; message: string };
+    //             if (errorWithCode.code === 'E_PICKER_CANCELLED') {
+    //                 console.log('User cancelled image picker');
+    //             } else {
+    //                 console.log('Image Picker Error:', errorWithCode.message);
+    //                 Alert.alert('Error', 'Failed to select image. Please try again.');
+    //             }
+    //         } else {
+    //             console.log('Image Picker Error:', error);
+    //             Alert.alert('Error', 'Failed to select image. Please try again.');
+    //         }
+    //     }
+    // };
 
     const processPhoto = async (photoPath: string) => {
         setIsProcessing(true);
         setShowCamera(false);
 
-        // Simulate processing with progress
+        // Simulate processing with progress for UI feedback
         let currentProgress = 0;
         progressInterval.current = setInterval(() => {
-            currentProgress += 10;
-            setProgress(currentProgress);
-
-            if (currentProgress >= 100) {
-                if (progressInterval.current) {
-                    clearInterval(progressInterval.current);
-                }
-                setTimeout(async () => {
-                    try {
-                        // Simulate processing a new mail item
-                        const mailSummaryData = {
-                            title: 'New Mail Item',
-                            summary: 'This letter is about a subscription renewal for your magazine. It costs $29.99 per year.',
-                            fullText: 'Dear Subscriber, We hope you have enjoyed your magazine subscription. Your subscription will expire next month. To continue receiving your magazine, please renew for $29.99 per year.',
-                            suggestions: ['Renew subscription online', 'Call customer service', 'Consider digital subscription instead'],
-                            photoUrl: photoPath,
-                        };
-
-                        // Save to Firestore
-                        const savedSummary = await saveMailSummary(mailSummaryData);
-                        console.log('[CameraScreen] Summary saved to Firestore:', savedSummary.id);
-
-                        // Convert to MailItem for navigation
-                        const newMailItem: MailItem = {
-                            id: savedSummary.id,
-                            userId: savedSummary.userId,
-                            title: savedSummary.title,
-                            summary: savedSummary.summary,
-                            fullText: savedSummary.fullText,
-                            suggestions: savedSummary.suggestions,
-                            photoUrl: savedSummary.photoUrl,
-                            date: savedSummary.createdAt.toISOString().split('T')[0],
-                            createdAt: savedSummary.createdAt,
-                            updatedAt: savedSummary.updatedAt,
-                        };
-
-                        setMailItems(prev => [newMailItem, ...prev]);
-
-                        setIsProcessing(false);
-                        setProgress(0);
-                        setShowCamera(true);
-
-                        // Navigate to MailSummaryScreen with the new mail item
-                        navigation.navigate(SCREENS.MAIL_SUMMARY, { mailItem: newMailItem });
-                        setCurrentStep(1);
-                    } catch (error) {
-                        console.error('[CameraScreen] Error saving summary:', error);
-                        setIsProcessing(false);
-                        setProgress(0);
-                        setShowCamera(true);
-                        Alert.alert('Error', 'Failed to save scanned summary. Please try again.');
-                    }
-                }, 500);
+            if (currentProgress < 90) {
+                currentProgress += 5;
+                setProgress(currentProgress);
             }
-        }, 200);
+        }, 500);
+
+        try {
+            // Map i18n language codes to full language names
+            const languageMap: { [key: string]: string } = {
+                'en': 'English',
+                'es': 'Spanish',
+                'ht': 'Haitian Creole'
+            };
+
+            const targetLanguage = languageMap[i18n.language] || 'English';
+            console.log('[CameraScreen] Selected language:', i18n.language, '→', targetLanguage);
+
+            // Call OpenAI Backend with the user's selected language
+            const analysisResult = await analyzeImage(photoPath, targetLanguage);
+
+            // Complete the progress bar
+            if (progressInterval.current) clearInterval(progressInterval.current);
+            setProgress(100);
+
+            setTimeout(async () => {
+                try {
+                    const mailSummaryData = {
+                        title: analysisResult.title || 'Scanned Mail',
+                        summary: analysisResult.summary,
+                        fullText: analysisResult.fullText,
+                        suggestions: analysisResult.suggestions,
+                        photoUrl: photoPath,
+                        date: analysisResult.date || new Date().toISOString().split('T')[0],
+                    };
+
+                    // Save to Firestore
+                    const savedSummary = await saveMailSummary(mailSummaryData);
+                    console.log('[CameraScreen] Summary saved to Firestore:', savedSummary.id);
+
+                    // Convert to MailItem for navigation
+                    const newMailItem: MailItem = {
+                        id: savedSummary.id,
+                        userId: savedSummary.userId,
+                        title: savedSummary.title,
+                        summary: savedSummary.summary,
+                        fullText: savedSummary.fullText,
+                        suggestions: savedSummary.suggestions,
+                        photoUrl: savedSummary.photoUrl,
+                        date: savedSummary.createdAt.toISOString().split('T')[0],
+                        createdAt: savedSummary.createdAt,
+                        updatedAt: savedSummary.updatedAt,
+                    };
+
+                    setMailItems(prev => [newMailItem, ...prev]);
+
+                    setIsProcessing(false);
+                    setProgress(0);
+                    setShowCamera(true);
+
+                    // Navigate to MailSummaryScreen with the new mail item
+                    navigation.navigate(SCREENS.MAIL_SUMMARY, { mailItem: newMailItem });
+                    setCurrentStep(1);
+                } catch (error) {
+                    console.error('[CameraScreen] Error saving summary:', error);
+                    setIsProcessing(false);
+                    setProgress(0);
+                    setShowCamera(true);
+                    Alert.alert('Error', 'Failed to save scanned summary. Please try again.');
+                }
+            }, 500);
+
+        } catch (error) {
+            if (progressInterval.current) clearInterval(progressInterval.current);
+            console.error('[CameraScreen] Error analyzing image:', error);
+            setIsProcessing(false);
+            setProgress(0);
+            setShowCamera(true);
+            // Alert.alert('Error', 'Failed to analyze image. Please check your internet connection and try again.');
+            // Error is handled by the service with a Toast message
+        }
     };
 
     const handleBack = () => {
@@ -251,31 +298,25 @@ export const CameraScreen: React.FC = () => {
 
     if (isProcessing) {
         return (
-            <SafeAreaView style={styles.safeArea}>
-                <LinearGradient
-                    colors={['#B3D6FF', '#91C6FF', '#D2D1FF']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.processingContainer}
-                >
-                    <View style={styles.processingCard}>
-                        <LinearGradient
-                            colors={['#9b5de5', '#8b4fd9']}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 1 }}
-                            style={styles.processingIconContainer}
-                        >
-                            <Text style={styles.processingIcon}>📖</Text>
-                        </LinearGradient>
-                        <Text style={styles.processingTitle}>{t('camera.processing')}</Text>
-                        <View style={styles.progressContainer}>
-                            <View style={styles.progressBar}>
-                                <View style={[styles.progressFill, { width: `${progress}%` }]} />
-                            </View>
-                            <Text style={styles.progressText}>{progress}%</Text>
+            <SafeAreaView style={[styles.safeArea, { justifyContent: 'center', alignItems: 'center' }]}>
+                <View style={styles.processingCard}>
+                    <LinearGradient
+                        colors={['#D6212F', '#D6212F']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.processingIconContainer}
+                    >
+                        <Image source={icons.file} style={styles.processingIcon} resizeMode='contain' />
+                    </LinearGradient>
+                    <Text style={styles.processingTitle}>{t('camera.processing')}</Text>
+                    <Text style={styles.processingSubTitle}>{t('camera.processingSubTitle')}</Text>
+                    <View style={styles.progressContainer}>
+                        <View style={styles.progressBar}>
+                            <View style={[styles.progressFill, { width: `${progress}%` }]} />
                         </View>
+                        <Text style={styles.progressText}>{progress}%</Text>
                     </View>
-                </LinearGradient>
+                </View>
             </SafeAreaView>
         );
     }
@@ -300,19 +341,19 @@ export const CameraScreen: React.FC = () => {
 
                     {/* Title and Subtitle */}
                     <View style={styles.titleContainer}>
-                        <Text style={styles.title}>Ready to Process</Text>
-                        <Text style={styles.subtitle}>AI will analyze and summarize</Text>
+                        <Text style={styles.title}>{t('camera.readyToProcess')}</Text>
+                        <Text style={styles.subtitle}>{t('camera.aiAnalyze')}</Text>
                     </View>
 
                     {/* Privacy Notice Card */}
                     <View style={styles.privacyCardContainer}>
                         <View style={styles.privacyCard}>
                             <View style={styles.privacyIconContainer}>
-                                <Icon name="security" size={24} color="#3B82F6" />
+                                <Shield color="#FFFFFF" size={28} strokeWidth={2.5} />
                             </View>
-                            <Text style={styles.privacyTitle}>Privacy Notice</Text>
+                            <Text style={styles.privacyTitle}>{t('camera.privacyNoticeTitle')}</Text>
                             <Text style={styles.privacyText}>
-                                By scanning, you confirm ownership and consent to AI analysis. Images auto-delete in 24hrs—only summaries are saved.
+                                {t('camera.privacyNoticeDesc')}
                             </Text>
                         </View>
                     </View>
@@ -320,18 +361,18 @@ export const CameraScreen: React.FC = () => {
                     {/* Action Buttons */}
                     <View style={styles.reviewButtonContainer}>
                         <TouchableOpacity
-                            onPress={handleBackFromConfirm}
+                            onPress={handleRetake}
                             style={styles.retakeButton}
                             activeOpacity={0.8}
                         >
-                            <Text style={styles.retakeButtonText}>Back</Text>
+                            <Text style={styles.retakeButtonText}>{t('camera.back')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={handleConfirm}
                             style={styles.looksGoodButton}
                             activeOpacity={0.8}
                         >
-                            <Text style={styles.looksGoodButtonText}>Confirm</Text>
+                            <Text style={styles.looksGoodButtonText}>{t('camera.confirm')}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -379,14 +420,14 @@ export const CameraScreen: React.FC = () => {
                             style={styles.retakeButton}
                             activeOpacity={0.8}
                         >
-                            <Text style={styles.retakeButtonText}>Retake</Text>
+                            <Text style={styles.retakeButtonText}>{t('camera.retake')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={handleLooksGood}
                             style={styles.looksGoodButton}
                             activeOpacity={0.8}
                         >
-                            <Text style={styles.looksGoodButtonText}>Looks Good</Text>
+                            <Text style={styles.looksGoodButtonText}>{t('camera.looksGood')}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -412,7 +453,6 @@ export const CameraScreen: React.FC = () => {
 
                 {/* Title and Subtitle */}
                 <View style={styles.titleContainer}>
-                    <Text style={styles.title}>Position Your Mail</Text>
                     <Text style={styles.subtitle}>Ensure all text is visible</Text>
                 </View>
 
@@ -432,7 +472,7 @@ export const CameraScreen: React.FC = () => {
                         activeOpacity={0.8}
                     >
                         <Icon name="photo-camera" size={24} color="#FFF" />
-                        <Text style={styles.takePhotoButtonText}>Take Photo</Text>
+                        <Text style={styles.takePhotoButtonText}>{t('camera.takePicture')}</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -443,11 +483,11 @@ export const CameraScreen: React.FC = () => {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#E9EFF5',
     },
     container: {
         flex: 1,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#E9EFF5',
     },
     header: {
         flexDirection: 'row',
@@ -464,9 +504,9 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     backButtonText: {
-        color: '#000',
+        color: '#000F54',
         fontSize: 18,
-        fontWeight: '400',
+        fontFamily: fonts.inter.regular,
     },
     stepIndicatorContainer: {
         flexDirection: 'row',
@@ -480,7 +520,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#D1D5DB',
     },
     stepDotActive: {
-        backgroundColor: '#3B82F6',
+        backgroundColor: '#D6212F',
     },
     titleContainer: {
         paddingTop: hp(4),
@@ -489,14 +529,14 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 24,
-        fontWeight: '700',
-        color: '#000',
+        fontFamily: fonts.inter.bold,
+        color: '#000F54',
         marginBottom: hp(1),
     },
     subtitle: {
         fontSize: 16,
+        fontFamily: fonts.inter.regular,
         color: '#9CA3AF',
-        fontWeight: '400',
     },
     cameraViewContainer: {
         flex: 1,
@@ -508,8 +548,8 @@ const styles = StyleSheet.create({
         width: '100%',
         height: hp(55),
         backgroundColor: '#F1F5F9',
-        borderWidth:1,
-        borderColor:'#D8DCDF',
+        borderWidth: 1,
+        borderColor: '#D8DCDF',
         borderRadius: 24,
         justifyContent: 'center',
         alignItems: 'center',
@@ -526,7 +566,7 @@ const styles = StyleSheet.create({
         paddingTop: hp(2),
     },
     takePhotoButton: {
-        backgroundColor: '#3B82F6',
+        backgroundColor: '#000F54',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
@@ -555,7 +595,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#FFFFFF',
         borderWidth: 2,
-        borderColor: '#E5E7EB',
+        borderColor: '#000F54',
         paddingVertical: hp(2),
         borderRadius: 50,
         alignItems: 'center',
@@ -568,7 +608,7 @@ const styles = StyleSheet.create({
     },
     looksGoodButton: {
         flex: 1,
-        backgroundColor: '#3B82F6',
+        backgroundColor: '#000F54',
         paddingVertical: hp(2),
         borderRadius: 50,
         alignItems: 'center',
@@ -611,12 +651,21 @@ const styles = StyleSheet.create({
         marginBottom: hp(3),
     },
     processingIcon: {
-        fontSize: wp(10),
+        width: wp(10),
+        height: wp(10),
+        tintColor: '#fff'
     },
     processingTitle: {
         color: '#1f2937',
         fontSize: wp(5.5),
-        fontWeight: 'bold',
+        fontFamily: fonts.inter.bold,
+        marginBottom: hp(1),
+        textAlign: 'center',
+    },
+    processingSubTitle: {
+        color: '#64738B',
+        fontSize: wp(4),
+        fontFamily: fonts.inter.regular,
         marginBottom: hp(3),
         textAlign: 'center',
     },
@@ -634,12 +683,12 @@ const styles = StyleSheet.create({
     },
     progressFill: {
         height: '100%',
-        backgroundColor: '#9b5de5',
+        backgroundColor: '#D6212F',
         borderRadius: hp(0.75),
     },
     progressText: {
         fontSize: wp(4),
-        color: '#9b5de5',
+        color: '#D6212F',
         fontWeight: '600',
         textAlign: 'center',
     },
@@ -664,10 +713,11 @@ const styles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 12,
-        backgroundColor: '#EFF6FF',
+        backgroundColor: '#D6212F',
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: hp(2),
+        alignSelf: 'center'
     },
     privacyTitle: {
         fontSize: 18,

@@ -5,78 +5,51 @@ import LinearGradient from 'react-native-linear-gradient';
 import { hp, wp } from '../constants/StyleGuide';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { fonts } from '../constants/fonts';
 
 export const TermsOfServiceScreen: React.FC = () => {
     const { t } = useTranslation();
     const navigation: any = useNavigation();
 
-    const sections = [
-        {
-            title: t('termsOfService.useOfService.title'),
-            content: t('termsOfService.useOfService.content')
-        },
-        {
-            title: t('termsOfService.noAdvice.title'),
-            content: t('termsOfService.noAdvice.content')
-        },
-        {
-            title: t('termsOfService.subscriptions.title'),
-            content: t('termsOfService.subscriptions.content')
-        },
-        {
-            title: t('termsOfService.userResponsibilities.title'),
-            content: t('termsOfService.userResponsibilities.content')
-        },
-        {
-            title: t('termsOfService.liability.title'),
-            content: t('termsOfService.liability.content')
-        },
-        {
-            title: t('termsOfService.changes.title'),
-            content: t('termsOfService.changes.content')
-        }
-    ];
+    const effectiveDate = t('termsOfService.lastUpdated', { date: 'December 23, 2025' });
+
+    const rawSections = t('termsOfService.sections', { returnObjects: true });
+    // Ensure sections is an array to prevent crashes if translation is missing/malformed initially
+    const sections = Array.isArray(rawSections) ? rawSections : [];
 
     return (
         <SafeAreaView style={styles.safeArea}>
-            <LinearGradient
-                colors={['#B3D6FF', '#91C6FF', '#D2D1FF']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.gradient}
+            <ScrollView
+                style={styles.scrollView}
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
             >
-                <ScrollView
-                    style={styles.scrollView}
-                    contentContainerStyle={styles.scrollContent}
-                    showsVerticalScrollIndicator={false}
-                >
-                    {/* Header Card */}
-                    <View style={styles.headerCard}>
-                        <TouchableOpacity
-                            style={styles.backButton}
-                            onPress={() => navigation.goBack()}
-                            activeOpacity={0.7}
-                        >
-                            <Text style={styles.backButtonText}>← {t('common.back')}</Text>
-                        </TouchableOpacity>
+                {/* Header Card */}
+                <View style={styles.headerCard}>
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => navigation.goBack()}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={styles.backButtonText}>← {t('common.back')}</Text>
+                    </TouchableOpacity>
 
-                        <View style={styles.titleContainer}>
-                            <Text style={styles.title}>{t('termsOfService.title')}</Text>
-                            <Text style={styles.subtitle}>{t('termsOfService.subtitle')}</Text>
+                    <View style={styles.titleContainer}>
+                        <Text style={styles.title}>{t('termsOfService.title')}</Text>
+                        <Text style={styles.subtitle}>{effectiveDate}</Text>
+                    </View>
+                </View>
+
+                {/* Content Card */}
+                <View style={styles.contentCard}>
+                    {sections.map((section: any, index: number) => (
+                        <View key={index} style={styles.section}>
+                            <Text style={styles.sectionTitle}>{section.title}</Text>
+                            <Text style={styles.sectionContent}>{section.content}</Text>
                         </View>
-                    </View>
-
-                    {/* Content Card */}
-                    <View style={styles.contentCard}>
-                        {sections.map((section, index) => (
-                            <View key={index} style={styles.section}>
-                                <Text style={styles.sectionTitle}>{section.title}</Text>
-                                <Text style={styles.sectionContent}>{section.content}</Text>
-                            </View>
-                        ))}
-                    </View>
-                </ScrollView>
-            </LinearGradient>
+                    ))}
+                </View>
+            </ScrollView>
         </SafeAreaView>
     );
 };
@@ -84,9 +57,7 @@ export const TermsOfServiceScreen: React.FC = () => {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-    },
-    gradient: {
-        flex: 1,
+        backgroundColor: '#E9EFF5'
     },
     scrollView: {
         flex: 1,
@@ -116,16 +87,16 @@ const styles = StyleSheet.create({
     },
     backButtonText: {
         fontSize: wp(4),
-        fontWeight: '600',
-        color: '#1f2937',
+        fontFamily: fonts.inter.bold,
+        color: '#000F54',
     },
     titleContainer: {
         alignItems: 'center',
     },
     title: {
         fontSize: wp(7),
-        fontWeight: 'bold',
-        color: '#1f2937',
+        fontFamily: fonts.inter.bold,
+        color: '#000F54',
         marginBottom: hp(1),
         textAlign: 'center',
         paddingHorizontal: wp(4),
@@ -150,13 +121,14 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         fontSize: wp(4.5),
-        fontWeight: 'bold',
-        color: '#1f2937',
+        fontFamily: fonts.inter.bold,
+        color: '#000F54',
         marginBottom: hp(1.5),
     },
     sectionContent: {
         fontSize: wp(3.8),
+        fontFamily: fonts.inter.regular,
         color: '#4A5565',
-        lineHeight: hp(3),
+        lineHeight: hp(2.5),
     },
 });

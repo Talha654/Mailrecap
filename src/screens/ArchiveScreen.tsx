@@ -14,8 +14,8 @@ import { MailItem } from '../types/mail';
 import { useNavigation } from '@react-navigation/native';
 import { SCREENS } from '../navigation';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import LinearGradient from 'react-native-linear-gradient';
 import { getUserMailSummaries } from '../services/mailSummary.service';
+import { ArrowLeft, ArrowRight, Mail } from 'lucide-react-native';
 
 export const ArchiveScreen: React.FC = () => {
     const { t } = useTranslation();
@@ -37,7 +37,7 @@ export const ArchiveScreen: React.FC = () => {
             setError(null);
 
             const summaries = await getUserMailSummaries();
-            
+
             // Convert to MailItem format
             const items: MailItem[] = summaries.map(summary => ({
                 id: summary.id,
@@ -86,13 +86,13 @@ export const ArchiveScreen: React.FC = () => {
     const renderEmptyState = () => (
         <View style={styles.emptyContainer}>
             <View style={styles.emptyIconContainer}>
-                <Text style={styles.emptyIcon}>📂</Text>
+                <Mail color={'#fff'} size={wp(10)} />
             </View>
             <Text style={styles.emptyTitle}>
-                {error ? 'Error Loading Summaries' : t('archive.empty')}
+                {error ? t('archive.errorLoading') : t('archive.empty')}
             </Text>
             <Text style={styles.emptyDescription}>
-                {error || t('archive.emptyDesc')}
+                {error ? t('archive.errorLoadingMessage') : t('archive.emptyDesc')}
             </Text>
             {error && (
                 <TouchableOpacity
@@ -100,7 +100,7 @@ export const ArchiveScreen: React.FC = () => {
                     onPress={() => fetchMailSummaries()}
                     activeOpacity={0.7}
                 >
-                    <Text style={styles.retryButtonText}>Retry</Text>
+                    <Text style={styles.retryButtonText}>{t('archive.retry')}</Text>
                 </TouchableOpacity>
             )}
         </View>
@@ -127,7 +127,7 @@ export const ArchiveScreen: React.FC = () => {
                 </View>
                 <View style={styles.mailItemArrowContainer}>
                     <View style={styles.arrowIconContainer}>
-                        <Text style={styles.arrowIcon}>→</Text>
+                        <ArrowRight color={'#fff'} size={wp(6)} />
                     </View>
                 </View>
             </View>
@@ -136,52 +136,48 @@ export const ArchiveScreen: React.FC = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <LinearGradient
-                colors={['#B3D6FF', '#91C6FF', '#D2D1FF']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.container}
-            >
-                {/* Header */}
-                <View style={styles.header}>
-                    <TouchableOpacity
-                        onPress={() => navigation.goBack()}
-                        style={styles.backButton}
-                        activeOpacity={0.7}
-                    >
-                        <Text style={styles.backButtonText}>← {t('archive.back')}</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle}>{t('archive.title')}</Text>
-                </View>
-
-                {/* Content */}
-                {isLoading ? (
-                    <View style={styles.loadingContainer}>
-                        <ActivityIndicator size="large" color="#9333EA" />
-                        <Text style={styles.loadingText}>Loading summaries...</Text>
+            {/* Header */}
+            <View style={styles.header}>
+                <TouchableOpacity
+                    onPress={() => navigation.goBack()}
+                    style={styles.backButton}
+                    activeOpacity={0.7}
+                >
+                    <View style={styles.backButtonContainer}>
+                        <ArrowLeft />
+                        <Text style={styles.backButtonText}> {t('archive.back')}</Text>
                     </View>
-                ) : (
-                    <ScrollView
-                        style={styles.scrollView}
-                        contentContainerStyle={styles.scrollViewContent}
-                        showsVerticalScrollIndicator={false}
-                        refreshControl={
-                            <RefreshControl
-                                refreshing={isRefreshing}
-                                onRefresh={handleRefresh}
-                                tintColor="#9333EA"
-                                colors={['#9333EA']}
-                            />
-                        }
-                    >
-                        {mailItems.length === 0 ? renderEmptyState() : (
-                            <View style={styles.mailListContainer}>
-                                {mailItems.map(renderMailItem)}
-                            </View>
-                        )}
-                    </ScrollView>
-                )}
-            </LinearGradient>
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>{t('archive.title')}</Text>
+            </View>
+
+            {/* Content */}
+            {isLoading ? (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#D6212F" />
+                    <Text style={styles.loadingText}>{t('archive.loading')}</Text>
+                </View>
+            ) : (
+                <ScrollView
+                    style={styles.scrollView}
+                    contentContainerStyle={styles.scrollViewContent}
+                    showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={isRefreshing}
+                            onRefresh={handleRefresh}
+                            tintColor="#D6212F"
+                            colors={['#D6212F']}
+                        />
+                    }
+                >
+                    {mailItems.length === 0 ? renderEmptyState() : (
+                        <View style={styles.mailListContainer}>
+                            {mailItems.map(renderMailItem)}
+                        </View>
+                    )}
+                </ScrollView>
+            )}
         </SafeAreaView>
     );
 }
@@ -189,6 +185,7 @@ export const ArchiveScreen: React.FC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: '#E9EFF5'
     },
     header: {
         flexDirection: 'row',
@@ -207,6 +204,10 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 3,
+    },
+    backButtonContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     backButtonText: {
         color: '#374151',
@@ -240,7 +241,7 @@ const styles = StyleSheet.create({
     emptyIconContainer: {
         width: wp(20),
         height: wp(20),
-        backgroundColor: '#F3F4F6',
+        backgroundColor: '#D6212F',
         borderRadius: wp(5),
         alignItems: 'center',
         justifyContent: 'center',
@@ -332,7 +333,7 @@ const styles = StyleSheet.create({
     arrowIconContainer: {
         width: wp(8),
         height: wp(8),
-        backgroundColor: '#F3E8FF',
+        backgroundColor: '#D6212F',
         borderRadius: wp(5),
         alignItems: 'center',
         justifyContent: 'center',

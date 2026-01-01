@@ -8,6 +8,11 @@ import { CustomButton } from '../components/ui/CustomButton';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationProp } from '../types/navigation';
 import { SCREENS } from '../navigation';
+import { ArrowLeft } from 'lucide-react-native';
+import { fonts } from '../constants/fonts';
+import { LanguageDropdown } from '../components/LanguageDropdown';
+import { signOut, deleteUserAccount } from '../services/auth';
+import { CommonActions } from '@react-navigation/native';
 
 export const SettingsScreen: React.FC = () => {
     const { t, i18n } = useTranslation();
@@ -15,17 +20,6 @@ export const SettingsScreen: React.FC = () => {
 
     const changeLanguage = (lang: string) => {
         i18n.changeLanguage(lang);
-    };
-
-    const getCurrentLanguageText = () => {
-        switch (i18n.language) {
-            case 'es':
-                return 'Actual: Español';
-            case 'ht':
-                return 'Kounye a: Kreyòl';
-            default:
-                return 'Current: English';
-        }
     };
 
     const languages = [
@@ -36,23 +30,49 @@ export const SettingsScreen: React.FC = () => {
 
     const handleDownloadData = () => {
         Alert.alert(
-            'Download My Data',
-            'Your data download request has been submitted. You will receive an email with your data within 30 days.',
-            [{ text: 'OK' }]
+            t('settings.downloadDataTitle'),
+            t('settings.downloadDataMessage'),
+            [{ text: t('common.ok') }]
         );
     };
 
     const handleDeleteAccount = () => {
         Alert.alert(
-            'Delete Account',
-            'Are you sure you want to delete your account? This action cannot be undone.',
+            t('settings.deleteAccountTitle'),
+            t('settings.deleteAccountMessage'),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('common.cancel'), style: 'cancel' },
                 {
-                    text: 'Request Deletion',
+                    text: t('common.delete'),
                     style: 'destructive',
-                    onPress: () => {
-                        Alert.alert('Request Submitted', 'Your account deletion request has been submitted.');
+                    onPress: async () => {
+                        try {
+                            await deleteUserAccount();
+                            Alert.alert(
+                                t('common.success'), // Or a specific success message
+                                t('settings.accountDeleted'), // You might need to add this key
+                                [
+                                    {
+                                        text: t('common.ok'),
+                                        onPress: () => {
+                                            navigation.dispatch(
+                                                CommonActions.reset({
+                                                    index: 0,
+                                                    routes: [{ name: SCREENS.LOGIN }],
+                                                })
+                                            );
+                                        }
+                                    }
+                                ]
+                            );
+                        } catch (error: any) {
+                            console.error('Account deletion failed:', error);
+                            let errorMessage = t('errors.generic'); // Fallback
+                            if (error.code === 'auth/requires-recent-login') {
+                                errorMessage = t('errors.requiresRecentLogin'); // Ideally add this key
+                            }
+                            Alert.alert(t('common.error'), errorMessage);
+                        }
                     },
                 },
             ]
@@ -60,7 +80,41 @@ export const SettingsScreen: React.FC = () => {
     };
 
     const handlePrivacyQuestions = () => {
-        Linking.openURL('mailto:privacy@mailrecap.com?subject=Privacy Question');
+        const subject = 'Help with MailRecap';
+        const body = `Hi MailRecap Support,
+I'm having an issue with the app and could use help.
+
+For example...`;
+
+        const mailtoUrl = `mailto:support@mailrecap.co?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        Linking.openURL(mailtoUrl);
+    };
+
+    const handleLogout = () => {
+        Alert.alert(
+            t('settings.logout'),
+            t('settings.logoutConfirmation'),
+            [
+                { text: t('common.cancel'), style: 'cancel' },
+                {
+                    text: t('settings.logout'),
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await signOut();
+                            navigation.dispatch(
+                                CommonActions.reset({
+                                    index: 0,
+                                    routes: [{ name: SCREENS.LOGIN }],
+                                })
+                            );
+                        } catch (error) {
+                            console.error('Logout failed:', error);
+                        }
+                    },
+                },
+            ]
+        );
     };
 
     return (
@@ -73,9 +127,12 @@ export const SettingsScreen: React.FC = () => {
                         onPress={() => navigation.goBack()}
                         activeOpacity={0.7}
                     >
-                        <Text style={styles.backButtonText}>← Back</Text>
+                        <View style={styles.backButtonContainer}>
+                            <ArrowLeft />
+                            <Text style={styles.backButtonText}> {t('archive.back')}</Text>
+                        </View>
                     </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Legal & Privacy</Text>
+                    <Text style={styles.headerTitle}>{t('settings.legalPrivacy')}</Text>
                 </View>
 
                 <ScrollView
@@ -85,30 +142,13 @@ export const SettingsScreen: React.FC = () => {
                 >
                     {/* Language Settings */}
                     <View style={styles.card}>
-                        <Text style={styles.cardTitle}>{t('settings.language')}</Text>
-                        <Text style={styles.currentLanguageText}>{getCurrentLanguageText()}</Text>
-
-                        <View style={styles.languageButtonsContainer}>
-                            {languages.map((lang) => {
-                                const isSelected = i18n.language === lang.code;
-                                return (
-                                    <CustomButton
-                                        key={lang.code}
-                                        title={`${lang.name} ${isSelected ? '✓' : ''}`}
-                                        onPress={() => changeLanguage(lang.code)}
-                                        style={
-                                            isSelected
-                                                ? styles.selectedLanguageButton
-                                                : styles.unselectedLanguageButton
-                                        }
-                                        textStyle={
-                                            isSelected
-                                                ? styles.selectedLanguageButtonText
-                                                : styles.unselectedLanguageButtonText
-                                        }
-                                    />
-                                );
-                            })}
+                        <View style={styles.cardHeader}>
+                            <Text style={styles.cardTitle}>{t('settings.language')}</Text>
+                            <LanguageDropdown
+                                selectedLanguage={i18n.language}
+                                onSelect={changeLanguage}
+                                options={languages.map(l => ({ label: l.name, value: l.code }))}
+                            />
                         </View>
                     </View>
 
@@ -119,12 +159,12 @@ export const SettingsScreen: React.FC = () => {
                         activeOpacity={0.7}
                     >
                         <View style={styles.menuItemLeft}>
-                            <View style={[styles.iconContainer, { backgroundColor: '#DBEAFE' }]}>
-                                <Icon name="shield-outline" size={wp(6)} color="#3B82F6" />
+                            <View style={[styles.iconContainer, { backgroundColor: '#D6212F' }]}>
+                                <Icon name="shield-outline" size={wp(6)} color="#fff" />
                             </View>
                             <View style={styles.menuItemTextContainer}>
-                                <Text style={styles.menuItemTitle}>Privacy Policy</Text>
-                                <Text style={styles.menuItemSubtitle}>Data collection & use</Text>
+                                <Text style={styles.menuItemTitle}>{t('settings.privacyPolicyTitle')}</Text>
+                                <Text style={styles.menuItemSubtitle}>{t('settings.privacyPolicySubtitle')}</Text>
                             </View>
                         </View>
                         <Text style={styles.chevron}>›</Text>
@@ -137,34 +177,51 @@ export const SettingsScreen: React.FC = () => {
                         activeOpacity={0.7}
                     >
                         <View style={styles.menuItemLeft}>
-                            <View style={[styles.iconContainer, { backgroundColor: '#DBEAFE' }]}>
-                                <Icon name="document-text-outline" size={wp(6)} color="#3B82F6" />
+                            <View style={[styles.iconContainer, { backgroundColor: '#D6212F' }]}>
+                                <Icon name="document-text-outline" size={wp(6)} color="#fff" />
                             </View>
                             <View style={styles.menuItemTextContainer}>
-                                <Text style={styles.menuItemTitle}>Terms of Service</Text>
-                                <Text style={styles.menuItemSubtitle}>Usage agreement</Text>
+                                <Text style={styles.menuItemTitle}>{t('settings.termsTitle')}</Text>
+                                <Text style={styles.menuItemSubtitle}>{t('settings.termsSubtitle')}</Text>
                             </View>
                         </View>
                         <Text style={styles.chevron}>›</Text>
                     </TouchableOpacity>
 
                     {/* Data Rights Section */}
-                    <Text style={styles.sectionTitle}>Your Data Rights (GDPR/CCPA)</Text>
+                    <Text style={styles.sectionTitle}>{t('settings.dataRightsTitle')}</Text>
 
                     {/* Download My Data */}
                     <View style={styles.dataRightItem}>
                         <View style={styles.menuItemLeft}>
-                            <View style={[styles.iconContainer, { backgroundColor: '#DBEAFE' }]}>
-                                <Icon name="download-outline" size={wp(6)} color="#3B82F6" />
+                            <View style={[styles.iconContainer, { backgroundColor: '#D6212F' }]}>
+                                <Icon name="download-outline" size={wp(6)} color="#fff" />
                             </View>
-                            <Text style={styles.dataRightTitle}>Download My Data</Text>
+                            <Text style={styles.dataRightTitle}>{t('settings.downloadData')}</Text>
                         </View>
                         <TouchableOpacity
                             style={styles.requestButton}
                             onPress={handleDownloadData}
                             activeOpacity={0.7}
                         >
-                            <Text style={styles.requestButtonText}>Request</Text>
+                            <Text style={styles.requestButtonText}>{t('settings.request')}</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* Privacy Questions */}
+                    <View style={styles.dataRightItem}>
+                        <View style={styles.menuItemLeft}>
+                            <View style={[styles.iconContainer, { backgroundColor: '#D6212F' }]}>
+                                <Icon name="mail-outline" size={wp(6)} color="#fff" />
+                            </View>
+                            <Text style={styles.dataRightTitle}>{t('settings.support')}</Text>
+                        </View>
+                        <TouchableOpacity
+                            style={styles.requestButton}
+                            onPress={handlePrivacyQuestions}
+                            activeOpacity={0.7}
+                        >
+                            <Text style={styles.requestButtonText}>{t('settings.email')}</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -174,38 +231,38 @@ export const SettingsScreen: React.FC = () => {
                             <View style={[styles.iconContainer, { backgroundColor: '#FEE2E2' }]}>
                                 <Icon name="trash-outline" size={wp(6)} color="#EF4444" />
                             </View>
-                            <Text style={styles.dataRightTitle}>Delete Account</Text>
+                            <Text style={styles.dataRightTitle}>{t('settings.deleteAccount')}</Text>
                         </View>
                         <TouchableOpacity
                             style={[styles.requestButton, styles.deleteRequestButton]}
                             onPress={handleDeleteAccount}
                             activeOpacity={0.7}
                         >
-                            <Text style={styles.deleteRequestButtonText}>Request</Text>
+                            <Text style={styles.deleteRequestButtonText}>{t('settings.request')}</Text>
                         </TouchableOpacity>
                     </View>
 
-                    {/* Privacy Questions */}
+                    {/* Logout */}
                     <View style={styles.dataRightItem}>
                         <View style={styles.menuItemLeft}>
-                            <View style={[styles.iconContainer, { backgroundColor: '#DBEAFE' }]}>
-                                <Icon name="mail-outline" size={wp(6)} color="#3B82F6" />
+                            <View style={[styles.iconContainer, { backgroundColor: '#FEE2E2' }]}>
+                                <Icon name="log-out-outline" size={wp(6)} color="#EF4444" />
                             </View>
-                            <Text style={styles.dataRightTitle}>Privacy Questions</Text>
+                            <Text style={styles.dataRightTitle}>{t('settings.logout')}</Text>
                         </View>
                         <TouchableOpacity
-                            style={styles.requestButton}
-                            onPress={handlePrivacyQuestions}
+                            style={[styles.requestButton, styles.deleteRequestButton]}
+                            onPress={handleLogout}
                             activeOpacity={0.7}
                         >
-                            <Text style={styles.requestButtonText}>Email</Text>
+                            <Text style={styles.deleteRequestButtonText}>{t('settings.logout')}</Text>
                         </TouchableOpacity>
                     </View>
 
                     {/* Footer */}
                     <View style={styles.footer}>
                         <Text style={styles.footerText}>
-                            GDPR & CCPA compliant • Version 1.3 (Jan 2024)
+                            {t('settings.footerCompliance')}
                         </Text>
                     </View>
                 </ScrollView>
@@ -217,18 +274,18 @@ export const SettingsScreen: React.FC = () => {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: '#F9FAFB',
+        backgroundColor: '#E9EFF5',
     },
     root: {
         flex: 1,
-        backgroundColor: '#F9FAFB',
+        backgroundColor: '#E9EFF5',
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: wp(4),
         paddingVertical: hp(2),
-        backgroundColor: '#fff',
+        backgroundColor: '#E9EFF5',
         borderBottomWidth: 1,
         borderBottomColor: '#E5E7EB',
     },
@@ -237,15 +294,20 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginRight: wp(3),
     },
+    backButtonContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
     backButtonText: {
         fontSize: wp(4),
-        fontWeight: '600',
-        color: '#1f2937',
+        fontFamily: fonts.inter.bold,
+        color: '#000F54',
+        marginLeft: wp(1),
     },
     headerTitle: {
         fontSize: wp(5),
         fontWeight: 'bold',
-        color: '#1f2937',
+        color: '#000F54',
     },
     scrollView: {
         flex: 1,
@@ -269,37 +331,16 @@ const styles = StyleSheet.create({
     cardTitle: {
         fontSize: wp(4.5),
         fontWeight: 'bold',
-        color: '#1f2937',
+        color: '#000F54',
         marginBottom: hp(1.5),
     },
-    currentLanguageText: {
-        fontSize: wp(3.8),
-        color: '#6b7280',
-        marginBottom: hp(1.5),
+    cardHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        zIndex: 10,
     },
-    languageButtonsContainer: {
-        gap: hp(1.2),
-    },
-    selectedLanguageButton: {
-        backgroundColor: '#2E70FF',
-        borderRadius: wp(5),
-        paddingVertical: hp(1.8),
-    },
-    unselectedLanguageButton: {
-        backgroundColor: '#f3f4f6',
-        borderRadius: wp(5),
-        paddingVertical: hp(1.8),
-    },
-    selectedLanguageButtonText: {
-        color: '#fff',
-        fontSize: wp(4),
-        fontWeight: 'bold' as const,
-    },
-    unselectedLanguageButtonText: {
-        color: '#374151',
-        fontSize: wp(4),
-        fontWeight: 'bold' as const,
-    },
+
     menuItem: {
         backgroundColor: '#fff',
         borderRadius: wp(4),
@@ -318,6 +359,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         flex: 1,
+        flexShrink: 1,
+        marginRight: wp(2),
     },
     iconContainer: {
         width: wp(12),
@@ -333,7 +376,7 @@ const styles = StyleSheet.create({
     menuItemTitle: {
         fontSize: wp(4.2),
         fontWeight: '600',
-        color: '#1f2937',
+        color: '#000F54',
         marginBottom: hp(0.3),
     },
     menuItemSubtitle: {
@@ -348,7 +391,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: wp(4),
         fontWeight: '600',
-        color: '#1f2937',
+        color: '#000F54',
         marginTop: hp(2),
         marginBottom: hp(1.5),
         paddingHorizontal: wp(1),
@@ -370,7 +413,9 @@ const styles = StyleSheet.create({
     dataRightTitle: {
         fontSize: wp(4.2),
         fontWeight: '600',
-        color: '#1f2937',
+        color: '#000F54',
+        flex: 1,
+        flexWrap: 'wrap',
     },
     requestButton: {
         backgroundColor: '#fff',
@@ -379,11 +424,12 @@ const styles = StyleSheet.create({
         borderRadius: wp(5),
         paddingHorizontal: wp(5),
         paddingVertical: hp(1),
+        flexShrink: 0,
     },
     requestButtonText: {
         fontSize: wp(3.8),
         fontWeight: '600',
-        color: '#1f2937',
+        color: '#000F54',
     },
     deleteRequestButton: {
         borderColor: '#FEE2E2',

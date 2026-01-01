@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CLIENT_ID</key>
+	<string>409218471461-5k3no3ns7khh1si4md0ns7hdujvs7uge.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.409218471461-5k3no3ns7khh1si4md0ns7hdujvs7uge</string>
 	<key>API_KEY</key>
 	<string>AIzaSyDEkGJ5m2Y-4qWFmnl2UQ7PRa7Q9xowYEA</string>
 	<key>GCM_SENDER_ID</key>
@@ -9,7 +13,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>org.reactjs.native.example.mailrecap</string>
+	<string>com.mailrecap.co</string>
 	<key>PROJECT_ID</key>
 	<string>mailrecap-e10e2</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:409218471461:ios:333ef5ef71ba1045d091cc</string>
+	<string>1:409218471461:ios:4e5251ccc7bda06bd091cc</string>
 </dict>
 </plist>

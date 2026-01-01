@@ -15,7 +15,7 @@ export const WelcomeScreen: React.FC = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView 
+            <ScrollView
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
@@ -30,10 +30,10 @@ export const WelcomeScreen: React.FC = () => {
 
                 {/* Title */}
                 <Text style={styles.title}>MailRecap</Text>
-                
+
                 {/* Subtitle */}
                 <Text style={styles.subtitle}>Your Smart Mail Assistant</Text>
-                
+
                 {/* Description */}
                 <Text style={styles.description}>
                     Snap a photo, get an instant AI summary. Never miss important mail.
@@ -42,14 +42,14 @@ export const WelcomeScreen: React.FC = () => {
                 {/* Get Started Button */}
                 <View style={styles.buttonContainer}>
                     <CustomButton
-                        title="Get Started Free"
-                        style={{width:'70%'}}
+                        title={t('welcome.getStartedFree')}
+                        style={{ width: '70%' }}
                         onPress={() => navigation.navigate(SCREENS.LANGUAGE_SELECTION)}
                     />
                 </View>
 
                 {/* Free Scan Info */}
-                <Text style={styles.freeInfo}>1 free scan • No card required</Text>
+                <Text style={styles.freeInfo}>{t('welcome.freeScanInfo')}</Text>
 
                 {/* Features */}
                 <View style={styles.featuresContainer}>
@@ -57,21 +57,21 @@ export const WelcomeScreen: React.FC = () => {
                         <View style={styles.featureIconCircle}>
                             <Text style={styles.featureIcon}>⚡</Text>
                         </View>
-                        <Text style={styles.featureLabel}>Instant</Text>
+                        <Text style={styles.featureLabel}>{t('welcome.featureInstant')}</Text>
                     </View>
-                    
+
                     <View style={styles.featureItem}>
                         <View style={styles.featureIconCircle}>
                             <Text style={styles.featureIcon}>🛡️</Text>
                         </View>
-                        <Text style={styles.featureLabel}>Private</Text>
+                        <Text style={styles.featureLabel}>{t('welcome.featurePrivate')}</Text>
                     </View>
-                    
+
                     <View style={styles.featureItem}>
                         <View style={styles.featureIconCircle}>
                             <Text style={styles.featureIcon}>⏱️</Text>
                         </View>
-                        <Text style={styles.featureLabel}>Simple</Text>
+                        <Text style={styles.featureLabel}>{t('welcome.featureSimple')}</Text>
                     </View>
                 </View>
 
@@ -79,7 +79,7 @@ export const WelcomeScreen: React.FC = () => {
                 <View style={styles.privacyNotice}>
                     <Text style={styles.privacyIcon}>🛡️</Text>
                     <Text style={styles.privacyText}>
-                        Images auto-delete in 24hrs • Data never sold
+                        {t('welcome.privacyNotice')}
                     </Text>
                 </View>
 
@@ -87,18 +87,18 @@ export const WelcomeScreen: React.FC = () => {
                 <View style={styles.footer}>
                     <View style={styles.footerLinks}>
                         <TouchableOpacity onPress={() => console.log('Privacy Policy pressed')}>
-                            <Text style={styles.footerLink}>Privacy Policy</Text>
+                            <Text style={styles.footerLink}>{t('welcome.footerPrivacy')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => console.log('Terms of Service pressed')}>
-                            <Text style={styles.footerLink}>Terms of Service</Text>
+                            <Text style={styles.footerLink}>{t('welcome.footerTerms')}</Text>
                         </TouchableOpacity>
                     </View>
                     <Text style={styles.copyright}>
-                        © 2024 MailRecap. All rights reserved.
+                        {t('welcome.copyright')}
                     </Text>
                 </View>
             </ScrollView>
-        </SafeAreaView>
+        </SafeAreaView >
     );
 };
 

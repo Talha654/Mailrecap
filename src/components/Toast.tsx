@@ -11,9 +11,9 @@ const toastConfig: ToastConfig = {
     <BaseToast
       {...props}
       style={{
-        borderLeftColor: '#10B981',
+        borderLeftColor: '#000F54',
         borderLeftWidth: 5,
-        backgroundColor: '#F0FDF4',
+        backgroundColor: '#000F54',
         height: hp(8),
       }}
       contentContainerStyle={{
@@ -22,11 +22,11 @@ const toastConfig: ToastConfig = {
       text1Style={{
         fontSize: wp(4),
         fontWeight: '700',
-        color: '#065F46',
+        color: '#fff',
       }}
       text2Style={{
         fontSize: wp(3.5),
-        color: '#047857',
+        color: '#fff',
       }}
     />
   ),
@@ -34,7 +34,7 @@ const toastConfig: ToastConfig = {
     <ErrorToast
       {...props}
       style={{
-        borderLeftColor: '#EF4444',
+        borderLeftColor: '#D6212F',
         borderLeftWidth: 5,
         backgroundColor: '#FEF2F2',
         height: hp(8),

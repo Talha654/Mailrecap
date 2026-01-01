@@ -1,74 +1,130 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert, Platform, TouchableOpacity, Image } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { hp, wp } from '../constants/StyleGuide';
-import { iapService } from '../services/iap.service';
-import { PurchaseError } from '../types/iap';
+import { revenueCatService } from '../services/revenueCat.service';
+import { PurchasesPackage } from 'react-native-purchases';
+import { PurchaseError } from '../types/subscription';
 import { useNavigation } from '@react-navigation/native';
 import { SCREENS } from '../navigation';
+import { fonts } from '../constants/fonts';
+import { Shield, Sparkles } from 'lucide-react-native';
+import { icons } from '../constants/images';
 
-type PlanType = 'monthly' | 'annual';
+type PlanId = 'essentials_monthly' | 'essentials_yearly' | 'plus_monthly' | 'plus_yearly';
 
-interface Plan {
-    id: PlanType;
-    name: string;
+interface PricingOption {
+    id: PlanId;
     price: string;
-    period: string;
-    isPopular?: boolean;
+    period?: string;
     savings?: string;
+    description?: string;
+}
+
+interface Tier {
+    id: string;
+    title: string;
+    description?: string;
+    badge?: string;
+    options: PricingOption[];
+    features: string[];
 }
 
 export const SubscriptionPlanScreen: React.FC = () => {
     const { t } = useTranslation();
-    const [selectedPlan, setSelectedPlan] = useState<PlanType>('monthly');
+    const [selectedPlan, setSelectedPlan] = useState<PlanId>('essentials_yearly');
     const [isInitializing, setIsInitializing] = useState(true);
     const [isPurchasing, setIsPurchasing] = useState(false);
+    const [availablePackages, setAvailablePackages] = useState<PurchasesPackage[]>([]);
 
     const navigation: any = useNavigation();
 
-    const plans: Plan[] = [
-        { 
-            id: 'monthly', 
-            name: 'Monthly',
-            price: '$4.99',
-            period: '/month',
+    const tiers: Tier[] = [
+        {
+            id: 'essentials',
+            title: 'MailRecap Essentials',
+            description: 'Perfect for individuals and households who just want peace of mind with their important mail.',
+            options: [
+                {
+                    id: 'essentials_monthly',
+                    price: '$3.99 / month'
+                },
+                {
+                    id: 'essentials_yearly',
+                    price: '$39 / year',
+                    savings: 'Save over 15%'
+                }
+            ],
+            features: [
+                'Up to 10 letters per month',
+                'Mail summaries shown in large, easy-to-read text',
+                'Suggestions for next steps (pay, call, save, calendar, etc.)',
+                'Archive of all scanned mail so you can find things later'
+            ]
         },
-        { 
-            id: 'annual', 
-            name: 'Annual',
-            price: '$39.99',
-            period: '/year',
-            savings: 'Save 33%',
-            isPopular: true 
-        },
+        {
+            id: 'plus',
+            title: 'MailRecap+',
+            badge: 'Popular',
+            description: 'Best for busy households, caregivers, and anyone who handles a lot of mail each month.',
+            options: [
+                {
+                    id: 'plus_monthly',
+                    price: '$14.99 / month'
+                },
+                {
+                    id: 'plus_yearly',
+                    price: '$149 / year',
+                    savings: 'Save over 15%'
+                }
+            ],
+            features: [
+                'Unlimited letters per month',
+                'Mail summaries in large text + spoken read-out',
+                'Suggestions for next steps on every letter',
+                'Archive of all scanned mail with full history'
+            ]
+        }
     ];
 
-    // Initialize IAP on component mount
+    // Initialize RevenueCat on component mount
     useEffect(() => {
-        initializeIAP();
-        return () => {
-            // Cleanup on unmount
-            iapService.disconnect();
-        };
+        initializeRevenueCat();
     }, []);
 
-    const initializeIAP = async () => {
+    const initializeRevenueCat = async () => {
         try {
             setIsInitializing(true);
-            const initialized = await iapService.initialize();
-            
-            if (!initialized) {
+            const initialized = await revenueCatService.initialize();
+
+            if (initialized) {
+                const packages = await revenueCatService.loadOfferings();
+                setAvailablePackages(packages);
+
+                // Show warning if no packages are available
+                if (!packages || packages.length === 0) {
+                    Alert.alert(
+                        'Configuration Issue',
+                        'Subscription products are not available at the moment. This may be due to:\n\n' +
+                        '• Products not configured in App Store Connect / Play Console\n' +
+                        '• RevenueCat dashboard configuration incomplete\n' +
+                        '• Sync delay (wait 10-15 minutes)\n\n' +
+                        'Please check your configuration and try again later.',
+                        [{ text: 'OK' }]
+                    );
+                }
+            } else {
                 Alert.alert(
-                    'Initialization Error',
-                    'Unable to initialize payment system. Please try again later.'
+                    t('subscriptionPlan.initializationError'),
+                    'Failed to initialize subscription service. Please check your internet connection and try again.'
                 );
             }
-        } catch (error) {
-            console.error('IAP initialization error:', error);
+        } catch (error: any) {
+            console.error('RevenueCat initialization error:', error);
             Alert.alert(
-                'Error',
-                'Failed to initialize payment system'
+                t('common.error'),
+                error?.message || t('subscriptionPlan.failedInit')
             );
         } finally {
             setIsInitializing(false);
@@ -78,21 +134,21 @@ export const SubscriptionPlanScreen: React.FC = () => {
     const handleSubscribe = async () => {
         try {
             setIsPurchasing(true);
-            
+
             // Show confirmation with platform-specific payment method
             const platform = Platform.OS === 'ios' ? 'Apple Pay' : 'Google Pay';
-            
+
             Alert.alert(
-                'Confirm Purchase',
-                `You will be charged using ${platform}. Continue?`,
+                t('subscriptionPlan.confirmPurchase'),
+                t('subscriptionPlan.confirmPurchaseDesc', { platform: platform }),
                 [
                     {
-                        text: 'Cancel',
+                        text: t('common.cancel'),
                         style: 'cancel',
                         onPress: () => setIsPurchasing(false),
                     },
                     {
-                        text: 'Continue',
+                        text: t('common.continue'),
                         onPress: async () => {
                             await processPurchase();
                         },
@@ -108,19 +164,75 @@ export const SubscriptionPlanScreen: React.FC = () => {
     const processPurchase = async () => {
         try {
             console.log(`Processing purchase for plan: ${selectedPlan}`);
-            
-            // Map our plan types to the IAP service plan types
-            const iapPlanType = selectedPlan === 'monthly' ? 'basic' : 'unlimited';
-            const result = await iapService.purchasePlan(iapPlanType as any);
-            
+
+            if (!availablePackages || availablePackages.length === 0) {
+                Alert.alert(t('common.error'), 'Offerings not loaded. Please try again.');
+                return;
+            }
+
+            // Find the package that matches our selectedPlan
+            // RevenueCat product IDs may be in format: "essentials_monthly:essentials-monthly"
+            // We need to match against the part before the colon
+            let packageToPurchase: PurchasesPackage | undefined;
+
+            packageToPurchase = availablePackages.find(pkg => {
+                const productId = pkg.product.identifier;
+                const packageId = pkg.identifier;
+
+                // Extract the base product ID (part before colon if it exists)
+                const baseProductId = productId.includes(':')
+                    ? productId.split(':')[0]
+                    : productId;
+
+                return (
+                    packageId === selectedPlan ||           // Direct package match
+                    productId === selectedPlan ||           // Full product ID match
+                    baseProductId === selectedPlan ||       // Base product ID match (before colon)
+                    productId.includes(selectedPlan) ||     // Product ID contains match
+                    baseProductId.includes(selectedPlan)    // Base product ID contains match
+                );
+            });
+
+            if (!packageToPurchase) {
+                console.error('[SubscriptionPlan] ❌ No matching package found!');
+                console.error('[SubscriptionPlan] Looking for:', selectedPlan);
+                console.error('[SubscriptionPlan] Available products:');
+                availablePackages.forEach((p, idx) => {
+                    console.error(`  ${idx + 1}. Package ID: "${p.identifier}" | Product ID: "${p.product.identifier}"`);
+                });
+
+                // Show user-friendly error with available options
+                const availableIds = availablePackages.map(p => `"${p.product.identifier}"`).join(', ');
+                Alert.alert(
+                    'Product Configuration Error',
+                    `The selected plan "${selectedPlan}" doesn't match any configured products.\n\nAvailable products:\n${availableIds}\n\nPlease check your RevenueCat dashboard or contact support.`,
+                    [{ text: 'OK' }]
+                );
+                return;
+            }
+
+            console.log('[SubscriptionPlan] ✅ Found matching package!');
+            console.log('[SubscriptionPlan] ========================================');
+            console.log('[SubscriptionPlan] PURCHASE DETAILS:');
+            console.log('[SubscriptionPlan] Selected Plan ID:', selectedPlan);
+            console.log('[SubscriptionPlan] Package Identifier:', packageToPurchase.identifier);
+            console.log('[SubscriptionPlan] Product ID:', packageToPurchase.product.identifier);
+            console.log('[SubscriptionPlan] Product Title:', packageToPurchase.product.title);
+            console.log('[SubscriptionPlan] Price:', packageToPurchase.product.priceString);
+            console.log('[SubscriptionPlan] Product Type:', packageToPurchase.product.productType);
+            console.log('[SubscriptionPlan] ========================================');
+            console.log('[SubscriptionPlan] Attempting purchase...');
+
+            const result = await revenueCatService.purchasePlan(packageToPurchase, selectedPlan);
+
             if (result.success) {
                 // Purchase successful
                 Alert.alert(
-                    'Success!',
-                    'Your subscription has been activated.',
+                    t('common.success'),
+                    t('subscriptionPlan.subscriptionActivated'),
                     [
                         {
-                            text: 'Continue',
+                            text: t('common.continue'),
                             onPress: () => {
                                 navigation.navigate(SCREENS.HOME);
                             },
@@ -128,15 +240,51 @@ export const SubscriptionPlanScreen: React.FC = () => {
                     ]
                 );
             } else {
-                // Handle purchase errors
-                handlePurchaseError(result.error);
+                // Handle specific purchase errors (like ALREADY_OWNED)
+                handlePurchaseError(result.error?.code);
             }
         } catch (error) {
             console.error('Purchase error:', error);
             Alert.alert(
-                'Purchase Failed',
-                'An unexpected error occurred. Please try again.'
+                t('subscriptionPlan.purchaseFailed'),
+                t('subscriptionPlan.purchaseError')
             );
+        } finally {
+            setIsPurchasing(false);
+        }
+    };
+
+    const handleRestorePurchases = async () => {
+        try {
+            setIsPurchasing(true);
+            const customerInfo = await revenueCatService.restorePurchases();
+
+            if (customerInfo) {
+                // Check if they actually have an active entitlement now
+                const activeEntitlements = Object.keys(customerInfo.entitlements.active);
+                if (activeEntitlements.length > 0) {
+                    Alert.alert(
+                        t('common.success'),
+                        'Purchases restored successfully!',
+                        [
+                            {
+                                text: t('common.continue'),
+                                onPress: () => navigation.navigate(SCREENS.HOME),
+                            },
+                        ]
+                    );
+                } else {
+                    Alert.alert(
+                        'No Active Subscriptions',
+                        'We found your purchase history, but no active subscriptions were found to restore.'
+                    );
+                }
+            } else {
+                Alert.alert(t('common.error'), 'Failed to restore purchases. Please try again.');
+            }
+        } catch (error) {
+            console.error('Restore error:', error);
+            Alert.alert(t('common.error'), 'An error occurred while restoring purchases.');
         } finally {
             setIsPurchasing(false);
         }
@@ -149,64 +297,122 @@ export const SubscriptionPlanScreen: React.FC = () => {
         }
 
         let message = 'An error occurred during purchase';
-        
-        switch (error) {
-            case PurchaseError.PAYMENT_INVALID:
-                message = 'Payment method is invalid';
-                break;
-            case PurchaseError.NETWORK_ERROR:
-                message = 'Network error. Please check your connection';
-                break;
-            case PurchaseError.ALREADY_OWNED:
-                message = 'You already own this subscription';
-                break;
-            case PurchaseError.NOT_AVAILABLE:
-                message = 'This subscription is not available';
-                break;
-            default:
-                message = 'Purchase failed. Please try again';
+
+        if (error === PurchaseError.ALREADY_OWNED) {
+            Alert.alert(
+                'Already Subscribed',
+                'It looks like you already have an active subscription with this App Store / Play Store account.\n\nWould you like to restore your purchase?',
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Restore Purchase', onPress: handleRestorePurchases }
+                ]
+            );
+            return;
         }
 
-        Alert.alert('Purchase Error', message);
+        switch (error) {
+            case PurchaseError.PAYMENT_INVALID:
+                message = t('subscriptionPlan.paymentInvalid');
+                break;
+            case PurchaseError.NETWORK_ERROR:
+                message = t('subscriptionPlan.networkError');
+                break;
+            case PurchaseError.NOT_AVAILABLE:
+                message = t('subscriptionPlan.notAvailable');
+                break;
+            default:
+                message = t('subscriptionPlan.purchaseError');
+        }
+
+        Alert.alert(t('subscriptionPlan.purchaseErrorTitle'), message);
     };
 
-    const renderPlanOption = (plan: Plan) => {
-        const isSelected = selectedPlan === plan.id;
-
+    const renderTier = (tier: Tier) => {
         return (
-            <TouchableOpacity
-                key={plan.id}
-                style={[
-                    styles.planOption,
-                    isSelected && styles.planOptionSelected,
-                ]}
-                onPress={() => setSelectedPlan(plan.id)}
-                activeOpacity={0.7}
-            >
-                <View style={styles.planOptionLeft}>
-                    <View style={[
-                        styles.radioButton,
-                        isSelected && styles.radioButtonSelected,
-                    ]}>
-                        {isSelected && <View style={styles.radioButtonInner} />}
-                    </View>
-                    <View style={styles.planInfo}>
-                        <Text style={styles.planName}>{plan.name}</Text>
-                        {plan.savings && (
-                            <Text style={styles.savingsText}>{plan.savings}</Text>
-                        )}
-                    </View>
-                </View>
-                <View style={styles.planPriceContainer}>
-                    <Text style={styles.planPrice}>{plan.price}</Text>
-                    <Text style={styles.planPeriod}>{plan.period}</Text>
-                </View>
-                {plan.isPopular && (
+            <View key={tier.id} style={styles.tierCard}>
+                {tier.badge && (
                     <View style={styles.popularBadge}>
-                        <Text style={styles.popularBadgeText}>Popular</Text>
+                        <Text style={styles.popularBadgeText}>{tier.badge}</Text>
                     </View>
                 )}
-            </TouchableOpacity>
+
+                <View style={styles.tierHeader}>
+                    <Sparkles size={20} color="#D6212F" style={styles.tierIcon} />
+                    <Text style={styles.tierTitle}>{tier.title}</Text>
+                </View>
+
+                {tier.description && (
+                    <Text style={styles.tierDescription}>{tier.description}</Text>
+                )}
+
+                <View style={styles.optionsContainer}>
+                    {tier.options.map((option) => {
+                        const isSelected = selectedPlan === option.id;
+
+                        // Find dynamic price from RevenueCat packages
+                        let dynamicPrice = option.price;
+                        if (availablePackages.length > 0) {
+                            const pkg = availablePackages.find(p => {
+                                const productId = p.product.identifier;
+                                const baseProductId = productId.includes(':')
+                                    ? productId.split(':')[0]
+                                    : productId;
+
+                                return (
+                                    p.identifier === option.id ||
+                                    productId === option.id ||
+                                    baseProductId === option.id ||
+                                    productId.includes(option.id) ||
+                                    baseProductId.includes(option.id)
+                                );
+                            });
+                            if (pkg) {
+                                dynamicPrice = pkg.product.priceString;
+                                // If it's a monthly or yearly, we can append the period
+                                if (option.id.includes('monthly')) dynamicPrice += ' / month';
+                                else if (option.id.includes('yearly')) dynamicPrice += ' / year';
+                            }
+                        }
+
+                        return (
+                            <TouchableOpacity
+                                key={option.id}
+                                style={[
+                                    styles.optionButton,
+                                    isSelected && styles.optionButtonSelected
+                                ]}
+                                onPress={() => setSelectedPlan(option.id)}
+                                activeOpacity={0.7}
+                            >
+                                <View style={[
+                                    styles.radioButton,
+                                    isSelected && styles.radioButtonSelected
+                                ]}>
+                                    {isSelected && <View style={styles.radioButtonInner} />}
+                                </View>
+                                <View style={styles.optionInfo}>
+                                    <Text style={styles.optionPrice}>{dynamicPrice}</Text>
+                                    {option.description && (
+                                        <Text style={styles.optionDescription}>{option.description}</Text>
+                                    )}
+                                    {option.savings && (
+                                        <Text style={styles.savingsText}>{option.savings}</Text>
+                                    )}
+                                </View>
+                            </TouchableOpacity>
+                        );
+                    })}
+                </View>
+
+                <View style={styles.featuresList}>
+                    {tier.features.map((feature, index) => (
+                        <View key={index} style={styles.featureItem}>
+                            <Text style={styles.featureCheck}>✓</Text>
+                            <Text style={styles.featureText}>{feature}</Text>
+                        </View>
+                    ))}
+                </View>
+            </View>
         );
     };
 
@@ -216,18 +422,11 @@ export const SubscriptionPlanScreen: React.FC = () => {
             <SafeAreaView style={styles.safeArea}>
                 <View style={styles.loadingScreen}>
                     <ActivityIndicator size="large" color="#2563eb" />
-                    <Text style={styles.loadingScreenText}>Initializing payment system...</Text>
+                    <Text style={styles.loadingScreenText}>{t('subscriptionPlan.loadingInit')}</Text>
                 </View>
             </SafeAreaView>
         );
     }
-
-    const features = [
-        { icon: '✓', text: 'Unlimited mail scans' },
-        { icon: '✓', text: 'AI-powered summaries' },
-        { icon: '✓', text: 'Archive & search all mail' },
-        { icon: '✓', text: 'Priority support' },
-    ];
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -238,46 +437,29 @@ export const SubscriptionPlanScreen: React.FC = () => {
             >
                 {/* Header */}
                 <View style={styles.header}>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         style={styles.backButton}
                         onPress={() => navigation.goBack()}
                     >
-                        <Text style={styles.backButtonText}>← Back</Text>
+                        <Text style={styles.backButtonText}>← {t('common.back')}</Text>
                     </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Upgrade to Pro</Text>
+                    <Text style={styles.headerTitle}>{t('subscriptionPlan.title')}</Text>
                 </View>
 
                 <View style={styles.container}>
                     {/* Icon */}
                     <View style={styles.iconContainer}>
                         <View style={styles.iconCircle}>
-                            <Text style={styles.iconText}>📊</Text>
+                            <Image source={icons.mail} style={styles.icon} resizeMode="contain" />
                         </View>
                     </View>
 
                     {/* Title */}
-                    <Text style={styles.title}>MailRecap Pro</Text>
-                    <Text style={styles.subtitle}>Unlimited scans • Organized archive</Text>
-
-                    {/* Plans */}
-                    <View style={styles.plansContainer}>
-                        {plans.map(renderPlanOption)}
-                    </View>
-
-                    {/* Features Grid */}
-                    <View style={styles.featuresContainer}>
-                        {features.map((feature, index) => (
-                            <View key={index} style={styles.featureItem}>
-                                <Text style={styles.featureIcon}>{feature.icon}</Text>
-                                <Text style={styles.featureText}>{feature.text}</Text>
-                            </View>
-                        ))}
-                    </View>
-
-                    {/* Security Message */}
-                    <View style={styles.securityContainer}>
-                        <Text style={styles.securityIcon}>🔒</Text>
-                        <Text style={styles.securityText}>Data secure • Never sold</Text>
+                    <Text style={styles.title}>{t('home.title')}</Text>
+                    <Text style={styles.subtitle}>{t('subscriptionPlan.mailMadeSimple')}</Text>
+                    {/* Tiers */}
+                    <View style={styles.tiersContainer}>
+                        {tiers.map(renderTier)}
                     </View>
 
                     {/* Subscribe Button */}
@@ -294,7 +476,7 @@ export const SubscriptionPlanScreen: React.FC = () => {
                             <ActivityIndicator size="small" color="#ffffff" />
                         ) : (
                             <Text style={styles.subscribeButtonText}>
-                                Subscribe {selectedPlan === 'monthly' ? '$4.99/mo' : '$39.99/yr'}
+                                {t('subscriptionPlan.subscribe')}
                             </Text>
                         )}
                     </TouchableOpacity>
@@ -302,11 +484,15 @@ export const SubscriptionPlanScreen: React.FC = () => {
                     {/* Footer Links */}
                     <View style={styles.footerLinks}>
                         <TouchableOpacity>
-                            <Text style={styles.footerLinkText}>Privacy</Text>
+                            <Text style={styles.footerLinkText}>{t('mailSummary.privacy')}</Text>
                         </TouchableOpacity>
                         <Text style={styles.footerLinkSeparator}>•</Text>
                         <TouchableOpacity>
-                            <Text style={styles.footerLinkText}>Terms</Text>
+                            <Text style={styles.footerLinkText}>{t('mailSummary.terms')}</Text>
+                        </TouchableOpacity>
+                        <Text style={styles.footerLinkSeparator}>•</Text>
+                        <TouchableOpacity onPress={handleRestorePurchases}>
+                            <Text style={styles.footerLinkText}>Restore Purchases</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -323,7 +509,7 @@ export const SubscriptionPlanScreen: React.FC = () => {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: '#ffffff',
+        backgroundColor: '#E9EFF5',
     },
     scrollView: {
         flex: 1,
@@ -337,25 +523,24 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: wp(5),
         paddingVertical: hp(2),
-        borderBottomWidth: 1,
-        borderBottomColor: '#f3f4f6',
+        backgroundColor: '#E9EFF5',
     },
     backButton: {
         marginRight: wp(3),
     },
     backButtonText: {
         fontSize: wp(4),
-        color: '#1f2937',
-        fontWeight: '500',
+        color: '#000F54',
+        fontFamily: fonts.inter.medium,
     },
     headerTitle: {
         fontSize: wp(4.5),
-        fontWeight: '600',
-        color: '#1f2937',
+        fontFamily: fonts.inter.bold,
+        color: '#000F54',
     },
     container: {
         paddingHorizontal: wp(5),
-        paddingTop: hp(3),
+        paddingTop: hp(1),
     },
     iconContainer: {
         alignItems: 'center',
@@ -365,63 +550,107 @@ const styles = StyleSheet.create({
         width: wp(18),
         height: wp(18),
         borderRadius: wp(9),
-        backgroundColor: '#dbeafe',
+        backgroundColor: '#D6212F',
         alignItems: 'center',
         justifyContent: 'center',
     },
-    iconText: {
-        fontSize: wp(10),
+    icon: {
+        width: wp(9),
+        height: wp(9),
+        tintColor: '#fff',
     },
     title: {
         fontSize: wp(6.5),
-        fontWeight: '700',
-        color: '#1f2937',
+        fontFamily: fonts.inter.bold,
+        color: '#000F54',
         textAlign: 'center',
         marginBottom: hp(1),
     },
     subtitle: {
-        fontSize: wp(3.8),
+        fontSize: wp(4),
         color: '#6b7280',
         textAlign: 'center',
         marginBottom: hp(3),
     },
-    plansContainer: {
+    tiersContainer: {
+        gap: hp(2),
         marginBottom: hp(3),
     },
-    planOption: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
+    tierCard: {
         backgroundColor: '#ffffff',
-        borderWidth: 2,
-        borderColor: '#e5e7eb',
-        borderRadius: wp(4),
-        padding: wp(4),
-        marginBottom: hp(1.5),
+        borderRadius: wp(6),
+        padding: wp(5),
+        borderWidth: 1,
+        borderColor: '#ffcccc', // Light red border for paid tiers
         position: 'relative',
     },
-    planOptionSelected: {
-        borderColor: '#2563eb',
-        backgroundColor: '#eff6ff',
+
+    popularBadge: {
+        position: 'absolute',
+        top: -hp(1.5),
+        right: wp(5),
+        backgroundColor: '#D6212F',
+        paddingHorizontal: wp(3),
+        paddingVertical: hp(0.5),
+        borderRadius: wp(4),
+        zIndex: 10,
     },
-    planOptionLeft: {
+    popularBadgeText: {
+        color: '#ffffff',
+        fontSize: wp(3.5),
+        fontWeight: 'bold',
+    },
+    tierHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        flex: 1,
+        marginBottom: hp(1),
+    },
+    tierIcon: {
+        marginRight: wp(2),
+    },
+    tierTitle: {
+        fontSize: wp(5),
+        fontFamily: fonts.inter.bold,
+        color: '#000F54',
+    },
+    tierDescription: {
+        fontSize: wp(3.8),
+        color: '#6b7280',
+        marginBottom: hp(2),
+        lineHeight: wp(5),
+    },
+    optionsContainer: {
+        gap: hp(1.5),
+        marginBottom: hp(2),
+    },
+    optionButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: wp(4),
+        borderRadius: wp(8),
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
+        backgroundColor: '#ffffff',
+    },
+    optionButtonSelected: {
+        borderColor: '#D6212F',
+        backgroundColor: '#FFF5F5',
+        borderWidth: 1.5,
     },
     radioButton: {
         width: wp(6),
         height: wp(6),
         borderRadius: wp(3),
-        borderWidth: 2,
+        borderWidth: 1,
         borderColor: '#d1d5db',
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: wp(3),
     },
     radioButtonSelected: {
-        borderColor: '#2563eb',
-        backgroundColor: '#2563eb',
+        borderColor: '#D6212F',
+        backgroundColor: '#D6212F',
+        borderWidth: 0,
     },
     radioButtonInner: {
         width: wp(2.5),
@@ -429,84 +658,47 @@ const styles = StyleSheet.create({
         borderRadius: wp(1.25),
         backgroundColor: '#ffffff',
     },
-    planInfo: {
+    optionInfo: {
         flex: 1,
     },
-    planName: {
-        fontSize: wp(4.5),
-        fontWeight: '600',
-        color: '#1f2937',
-        marginBottom: hp(0.3),
+    optionPrice: {
+        fontSize: wp(4),
+        fontFamily: fonts.inter.bold,
+        color: '#000F54',
+    },
+    optionDescription: {
+        fontSize: wp(3.5),
+        color: '#6b7280',
+        marginTop: hp(0.5),
     },
     savingsText: {
-        fontSize: wp(3.2),
-        color: '#2563eb',
+        fontSize: wp(3.5),
+        color: '#D6212F',
         fontWeight: '600',
+        marginTop: hp(0.5),
     },
-    planPriceContainer: {
-        alignItems: 'flex-end',
-    },
-    planPrice: {
-        fontSize: wp(6),
-        fontWeight: '700',
-        color: '#1f2937',
-    },
-    planPeriod: {
-        fontSize: wp(3.2),
-        color: '#6b7280',
-    },
-    popularBadge: {
-        position: 'absolute',
-        top: -hp(1),
-        right: wp(4),
-        backgroundColor: '#2563eb',
-        paddingHorizontal: wp(3),
-        paddingVertical: hp(0.5),
-        borderRadius: wp(2),
-    },
-    popularBadgeText: {
-        fontSize: wp(3),
-        color: '#ffffff',
-        fontWeight: '600',
-    },
-    featuresContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        marginBottom: hp(3),
+    featuresList: {
+        gap: hp(1),
     },
     featureItem: {
         flexDirection: 'row',
-        alignItems: 'center',
-        width: '50%',
-        marginBottom: hp(1.5),
+        alignItems: 'flex-start',
     },
-    featureIcon: {
+    featureCheck: {
+        color: '#D6212F',
         fontSize: wp(4),
-        color: '#2563eb',
         marginRight: wp(2),
+        fontWeight: 'bold',
     },
     featureText: {
-        fontSize: wp(3.5),
-        color: '#4b5563',
-        flex: 1,
-    },
-    securityContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: hp(3),
-    },
-    securityIcon: {
-        fontSize: wp(4),
-        marginRight: wp(2),
-    },
-    securityText: {
-        fontSize: wp(3.5),
+        fontSize: wp(3.8),
         color: '#6b7280',
+        flex: 1,
+        lineHeight: wp(5),
     },
     subscribeButton: {
-        backgroundColor: '#2563eb',
-        borderRadius: wp(6),
+        backgroundColor: '#000F54',
+        borderRadius: wp(8),
         paddingVertical: hp(2),
         alignItems: 'center',
         justifyContent: 'center',
@@ -527,18 +719,17 @@ const styles = StyleSheet.create({
         marginBottom: hp(1),
     },
     footerLinkText: {
-        fontSize: wp(3.8),
-        color: '#778299',
-        fontWeight: '700',
+        fontSize: wp(3.5),
+        color: '#6b7280',
     },
     footerLinkSeparator: {
-        fontSize: wp(3.8),
+        fontSize: wp(3.5),
         color: '#9ca3af',
         marginHorizontal: wp(2),
     },
     cancellationText: {
         fontSize: wp(3.2),
-        color: '#778299',
+        color: '#9ca3af',
         textAlign: 'center',
     },
     loadingScreen: {

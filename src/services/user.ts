@@ -6,6 +6,7 @@ export interface UserData {
     displayName?: string;
     createdAt: Date;
     updatedAt: Date;
+    scansRemaining?: number;
 }
 
 export async function createUserDocument(uid: string, email: string, displayName?: string) {
@@ -15,8 +16,9 @@ export async function createUserDocument(uid: string, email: string, displayName
         displayName,
         createdAt: new Date(),
         updatedAt: new Date(),
+        scansRemaining: 10,
     };
-    
+
     await getFirestore().collection('users').doc(uid).set(userData);
     return userData;
 }

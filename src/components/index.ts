@@ -1,4 +1,5 @@
 export { LanguageSelector } from './LanguageSelector';
+export { LanguageDropdown } from './LanguageDropdown';
 export { PlanCard } from './PlanCard';
 export type { PlanType } from './PlanCard';
 export { PrivacyModal } from './PrivacyModal';

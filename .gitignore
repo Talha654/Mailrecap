@@ -73,3 +73,10 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Secrets
+backend/.env
+
+# Large build artifacts
+*.apk
+*.aab
