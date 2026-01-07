@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Platform, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { hp, wp } from '../constants/StyleGuide';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -32,7 +32,13 @@ export const HomeScreen: React.FC = () => {
                     {/* Scan Mail Button */}
                     <View style={styles.scanSection}>
                         <TouchableOpacity
-                            onPress={() => navigation.navigate(SCREENS.CAMERA_SCREEN)}
+                            onPress={() => {
+                                if (subscriptionPlan === 'no_plan') {
+                                    Alert.alert(t('common.error'), t('errors.noPlanError'));
+                                    return;
+                                }
+                                navigation.navigate(SCREENS.CAMERA_SCREEN);
+                            }}
                             activeOpacity={0.8}
                             style={styles.cameraIconContainer}>
                             <Image source={icons.camera} resizeMode='contain' style={styles.cameraIcon} />
@@ -70,12 +76,15 @@ export const HomeScreen: React.FC = () => {
                                 <Text style={styles.infoBarText}>{t('home.plan.unlimited')}</Text>
                             </>
                         )}
+                        {subscriptionPlan === 'no_plan' && (
+                            <Text style={styles.infoBarText}>{t('home.plan.noPlan')}</Text>
+                        )}
                     </View>
 
                     {/* Dark Blue Area */}
                     <View style={styles.darkBlueArea}>
                         {/* Subscribe Button (Hidden for Unlimited?) - Image shows it for Free Trial and Essentials */}
-                        {subscriptionPlan !== 'plus_monthly' && subscriptionPlan !== 'plus_yearly' && (
+                        {/* {subscriptionPlan !== 'plus_monthly' && subscriptionPlan !== 'plus_yearly' && (
                             <TouchableOpacity
                                 onPress={handleSubscribe}
                                 activeOpacity={0.8}
@@ -83,7 +92,7 @@ export const HomeScreen: React.FC = () => {
                             >
                                 <Text style={styles.subscribeButtonText}>{t('mailSummary.subscribe')}</Text>
                             </TouchableOpacity>
-                        )}
+                        )} */}
                         {/* Spacer if no subscribe button to keep nav at bottom? No, flex space-between in darkBlueArea */}
 
                         {/* Navigation Row */}

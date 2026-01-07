@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, Alert } from 'react-native';
+import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
 import { hp, wp } from '../constants/StyleGuide';
@@ -13,6 +14,10 @@ import { fonts } from '../constants/fonts';
 import { LanguageDropdown } from '../components/LanguageDropdown';
 import { signOut, deleteUserAccount } from '../services/auth';
 import { CommonActions } from '@react-navigation/native';
+import { generatePDF } from 'react-native-html-to-pdf';
+import RNFS from 'react-native-fs';
+import { getUserMailSummaries } from '../services/mailSummary.service';
+import { Platform } from 'react-native';
 
 export const SettingsScreen: React.FC = () => {
     const { t, i18n } = useTranslation();
@@ -28,11 +33,106 @@ export const SettingsScreen: React.FC = () => {
         { code: 'ht', name: t('settings.haitianCreole') },
     ];
 
-    const handleDownloadData = () => {
+    const handleDownloadData = async () => {
         Alert.alert(
             t('settings.downloadDataTitle'),
             t('settings.downloadDataMessage'),
-            [{ text: t('common.ok') }]
+            [
+                { text: t('common.cancel'), style: 'cancel' },
+                {
+                    text: t('common.yes'),
+                    onPress: async () => {
+                        try {
+                            const summaries = await getUserMailSummaries();
+                            if (summaries.length === 0) {
+                                Alert.alert(t('common.info'), t('settings.noDataToDownload'));
+                                return;
+                            }
+
+                            // Generate a single HTML string for all summaries
+                            let htmlContent = `
+                                <html>
+                                  <head>
+                                    <style>
+                                      body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 20px; }
+                                      h1 { text-align: center; color: #000F54; margin-bottom: 30px; }
+                                      .summary-item { margin-bottom: 40px; border-bottom: 1px solid #ccc; padding-bottom: 20px; page-break-inside: avoid; }
+                                      .title { font-size: 18px; font-weight: bold; margin-bottom: 5px; color: #333; }
+                                      .date { font-size: 12px; color: #666; margin-bottom: 10px; }
+                                      .section-label { font-weight: bold; margin-top: 20px; font-size: 14px; }
+                                      .text-content { font-size: 12px; color: #444;  margin-top: 10;line-height: 1.4;}
+                                      ul { margin-top: 0; padding-top: 0; padding-left: 20px; }
+                                      li { margin-bottom: 5px; }
+                                    </style>
+                                  </head>
+                                  <body>
+                                    <h1>${t('settings.mailSummaries')}</h1>
+                            `;
+
+                            summaries.forEach(item => {
+                                htmlContent += `
+                                  <div class="summary-item">
+                                    <div class="title">${item.title}</div>
+                                    <div class="date">${new Date(item.createdAt).toLocaleDateString()}</div>
+                                    
+                                    <div class="section-label">Summary:</div>
+                                    <div class="text-content">${item.summary ? item.summary.replace(/\n/g, '<br>') : ''}</div>
+                                    
+                                    <div class="section-label">${t('settings.nextSteps')}:</div>
+                                    <div class="text-content">
+                                      <ul>
+                                        ${item.suggestions && item.suggestions.length > 0
+                                        ? item.suggestions.map(s => `<li>${s}</li>`).join('')
+                                        : `<li>${t('settings.noSuggestions')}</li>`}
+                                      </ul>
+                                    </div>
+                                  </div>
+                                `;
+                            });
+
+                            htmlContent += `
+                                  </body>
+                                </html>
+                            `;
+
+                            const folderName = 'Mailrecap Summaries';
+                            let targetDir = '';
+
+                            if (Platform.OS === 'android') {
+                                targetDir = `${RNFS.DownloadDirectoryPath}/${folderName}`;
+                            } else {
+                                targetDir = `${RNFS.DocumentDirectoryPath}/${folderName}`;
+                            }
+
+                            const exists = await RNFS.exists(targetDir);
+                            if (!exists) {
+                                await RNFS.mkdir(targetDir);
+                            }
+
+                            const options = {
+                                html: htmlContent,
+                                fileName: `Mailrecap_All_Summaries_${new Date().getTime()}`,
+                                directory: 'Documents',
+                            };
+
+                            const file = await generatePDF(options);
+
+                            const finalPath = `${targetDir}/${options.fileName}.pdf`;
+                            await RNFS.moveFile(file.filePath!, finalPath);
+
+                            Toast.show({
+                                type: 'success',
+                                text1: t('settings.downloadSuccessToast'),
+                                // text2: `${finalPath}`
+                            });
+
+                        } catch (error) {
+                            console.error('Download data failed:', error);
+                            Alert.alert(t('common.error'), (error as Error).message || t('settings.downloadError'));
+                        }
+                    }
+                }
+            ]
         );
     };
 

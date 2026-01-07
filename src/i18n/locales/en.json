@@ -35,6 +35,7 @@
     "scansLeft": "Scans Left",
     "plan": {
       "freeTrial": "Free Trial",
+      "noPlan": "No Plan",
       "daysLeft": "{{count}} days left",
       "essentials": "Essentials plan",
       "scansLeft": "{{count}} scans left",
@@ -81,8 +82,15 @@
     "support": "Support",
     "email": "Email",
     "footerCompliance": "GDPR & CCPA compliant • Version 1.3 (Jan 2024)",
+    "mailSummaries": "Mailrecap Summaries",
+    "nextSteps": "Next Steps",
+    "noSuggestions": "No next steps available",
     "downloadDataTitle": "Download My Data",
-    "downloadDataMessage": "Your data download request has been submitted. You will receive an email with your data within 30 days.",
+    "downloadDataMessage": "Are you sure you want to download all your mail summaries as PDF files?",
+    "noDataToDownload": "No mail summaries found to download.",
+    "downloadSuccess": "Successfully downloaded {{count}} files to {{path}}",
+    "downloadSuccessToast": "Download successful",
+    "downloadError": "Failed to download data. Please try again or contact support.",
     "deleteAccountTitle": "Delete Account",
     "deleteAccountMessage": "Are you sure you want to delete your account? This action cannot be undone.",
     "requestDeletion": "Request Deletion",
@@ -101,7 +109,9 @@
     "error": "Error",
     "success": "Success",
     "delete": "Delete",
-    "continue": "Continue"
+    "continue": "Continue",
+    "yes": "Yes",
+    "info": "Info"
   },
   "privacyTerms": {
     "title": "Privacy & Terms",
@@ -462,6 +472,7 @@
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
+    "noPlanError": "No active plan available to scan mail.",
     "requiresRecentLogin": "This action requires a recent login. Please log out and log back in, then try again."
   }
 }

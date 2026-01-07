@@ -14,6 +14,7 @@ import { SCREENS } from '../navigation';
 import { fonts } from '../constants/fonts';
 import { icons, images } from '../constants/images';
 import { ttsService } from '../services/ttsService';
+import { useSubscription } from '../hooks/useSubscription';
 
 type MailSummaryScreenRouteProp = RouteProp<RootStackParamList, 'MailSummary'>;
 
@@ -26,30 +27,8 @@ export const MailSummaryScreen: React.FC = () => {
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isFullTextExpanded, setIsFullTextExpanded] = useState(false);
-    const [subscriptionPlan, setSubscriptionPlan] = useState<string | null>(null);
-    const [loadingSubscription, setLoadingSubscription] = useState(true);
+    const { subscriptionPlan, loading: loadingSubscription } = useSubscription();
     const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
-
-    useEffect(() => {
-        const fetchSubscription = async () => {
-            try {
-                const user = auth().currentUser;
-                if (user) {
-                    const userDoc = await firestore().collection('users').doc(user.uid).get();
-                    if (userDoc.exists()) {
-                        const userData = userDoc.data();
-                        setSubscriptionPlan(userData?.subscriptionPlan || null);
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching subscription:', error);
-            } finally {
-                setLoadingSubscription(false);
-            }
-        };
-
-        fetchSubscription();
-    }, []);
 
     useEffect(() => {
         // Initialize TTS service when component mounts
@@ -286,7 +265,7 @@ export const MailSummaryScreen: React.FC = () => {
             </ScrollView>
 
             {/*Free Trial Bottom Section */}
-            {(!subscriptionPlan || subscriptionPlan === 'free_trial') && (
+            {/* {(!subscriptionPlan || subscriptionPlan === 'free_trial') && (
                 <View style={styles.bottomSectionContainer}>
                     <Image
                         source={images.bottom_img}
@@ -305,7 +284,7 @@ export const MailSummaryScreen: React.FC = () => {
                         <Text style={styles.newUpgradeButtonText}>{t('mailSummary.upgradeNow')}</Text>
                     </TouchableOpacity>
                 </View>
-            )}
+            )} */}
 
         </SafeAreaView>
     );

@@ -34,7 +34,7 @@ export const useSubscription = (): SubscriptionState => {
             .doc(user.uid)
             .onSnapshot(
                 (doc) => {
-                    if (doc?.exists) {
+                    if (doc?.exists()) {
                         const data = doc.data();
                         const plan = data?.subscriptionPlan || 'free_trial'; // Default to free_trial if not set
                         setSubscriptionPlan(plan);
@@ -55,7 +55,13 @@ export const useSubscription = (): SubscriptionState => {
                             // If trial expired, it might be 0 or negative, handle display logic in UI or here.
                             // For now, let's just return the diff.
                             // If now > trialEnd, it's 0.
-                            setDaysLeft(now > trialEnd ? 0 : diffDays);
+                            const days = diffDays;
+                            if (now > trialEnd) {
+                                setDaysLeft(0);
+                                setSubscriptionPlan('no_plan');
+                            } else {
+                                setDaysLeft(diffDays);
+                            }
                         } else {
                             setDaysLeft(null);
                         }

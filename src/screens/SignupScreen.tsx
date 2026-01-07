@@ -6,7 +6,7 @@ import { hp, wp } from '../constants/StyleGuide';
 import { SCREENS } from '../navigation';
 import { RootStackNavigationProp } from '../types/navigation';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { signUpWithEmailPassword } from '../services/auth';
+import { signUpWithEmailPassword, signInWithGoogle, signInWithApple } from '../services/auth';
 import { fonts } from '../constants/fonts';
 import { icons, images } from '../constants/images';
 import { AppleIcon, GoogleIcon } from '../components/SocialIcons';
@@ -83,6 +83,40 @@ export const SignupScreen: React.FC<Props> = ({ navigation }) => {
         setShowPrivacyModal(false);
         setShouldShowModalOnReturn(true);
         navigation.navigate(SCREENS.PRIVACY_POLICY);
+    };
+
+    const onGoogleSignup = async () => {
+        if (loading) return;
+        setLoading(true);
+        try {
+            await signInWithGoogle();
+            navigation.navigate(SCREENS.HOME);
+            showSuccessToast(t('auth.loginSuccess')); // Or a signup specific message if available
+        } catch (e: any) {
+            console.warn('Google Signup failed', e);
+            showErrorToast(t('auth.signupFailed'), e.message || t('auth.unknownError'));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const onAppleSignup = async () => {
+        if (loading) return;
+        setLoading(true);
+        try {
+            await signInWithApple();
+            navigation.navigate(SCREENS.HOME);
+            showSuccessToast(t('auth.loginSuccess'));
+        } catch (e: any) {
+            console.warn('Apple Signup failed', e);
+            if (e.code === '1001') {
+                // User cancelled
+            } else {
+                showErrorToast(t('auth.signupFailed'), e.message || t('auth.unknownError'));
+            }
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -180,16 +214,19 @@ export const SignupScreen: React.FC<Props> = ({ navigation }) => {
                         </View>
 
                         <View style={styles.socialButtonsRow}>
-                            <TouchableOpacity style={styles.socialButton}>
+                            <TouchableOpacity style={styles.socialButton} onPress={onGoogleSignup} disabled={loading}>
                                 <GoogleIcon width={wp(5)} height={wp(5)} />
                                 <Text style={styles.socialButtonLabel}>{t('auth.google')}</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={() => setShowPrivacyModal(true)}
-                                style={styles.socialButton}>
-                                <AppleIcon width={wp(5)} height={wp(5)} />
-                                <Text style={styles.socialButtonLabel}>{t('auth.apple')}</Text>
-                            </TouchableOpacity>
+                            {Platform.OS === 'ios' && (
+                                <TouchableOpacity
+                                    onPress={onAppleSignup}
+                                    style={styles.socialButton}
+                                    disabled={loading}>
+                                    <AppleIcon width={wp(5)} height={wp(5)} />
+                                    <Text style={styles.socialButtonLabel}>{t('auth.apple')}</Text>
+                                </TouchableOpacity>
+                            )}
                         </View>
                     </View>
 

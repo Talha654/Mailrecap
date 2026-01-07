@@ -70,8 +70,14 @@
     "support": "Soporte",
     "email": "Correo Electrónico",
     "footerCompliance": "Cumple con GDPR y CCPA • Versión 1.3 (Ene 2024)",
+    "mailSummaries": "Resúmenes de Mailrecap",
+    "nextSteps": "Próximos Pasos",
+    "noSuggestions": "No hay pasos siguientes disponibles",
     "downloadDataTitle": "Descargar Mis Datos",
-    "downloadDataMessage": "Tu solicitud de descarga de datos ha sido enviada. Recibirás un correo con tus datos en 30 días.",
+    "downloadDataMessage": "¿Está seguro de que desea descargar todos sus resúmenes de correo como archivos PDF?",
+    "noDataToDownload": "No se encontraron resúmenes de correo para descargar.",
+    "downloadSuccess": "Se descargaron exitosamente {{count}} archivos en {{path}}",
+    "downloadError": "Error al descargar los datos. Intente nuevamente o contacte soporte.",
     "deleteAccountTitle": "Eliminar Cuenta",
     "deleteAccountMessage": "¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.",
     "requestDeletion": "Solicitar Eliminación",
@@ -88,7 +94,9 @@
     "ok": "OK",
     "error": "Error",
     "success": "Éxito",
-    "continue": "Continuar"
+    "continue": "Continuar",
+    "yes": "Sí",
+    "info": "Información"
   },
   "privacyTerms": {
     "title": "Privacidad y Términos",

@@ -136,7 +136,7 @@ export const SubscriptionPlanScreen: React.FC = () => {
             setIsPurchasing(true);
 
             // Show confirmation with platform-specific payment method
-            const platform = Platform.OS === 'ios' ? 'Apple Pay' : 'Google Pay';
+            const platform = Platform.OS === 'ios' ? 'App Store' : 'Google Play';
 
             Alert.alert(
                 t('subscriptionPlan.confirmPurchase'),

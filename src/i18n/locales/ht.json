@@ -70,8 +70,14 @@
     "support": "Sipò",
     "email": "Imèl",
     "footerCompliance": "Konfòme ak GDPR ak CCPA • Vèsyon 1.3 (Jan 2024)",
+    "mailSummaries": "Rezime Mailrecap",
+    "nextSteps": "Pwochen Etap yo",
+    "noSuggestions": "Pa gen pwochen etap ki disponib",
     "downloadDataTitle": "Telechaje Done Mwen",
-    "downloadDataMessage": "Demann telechajman done ou a te soumèt. Ou pral resevwa yon imèl ak done ou nan 30 jou.",
+    "downloadDataMessage": "Èske ou sèten ou vle telechaje tout rezime lapòs ou yo kòm fichye PDF?",
+    "noDataToDownload": "Pa jwenn okenn rezime lapòs pou telechaje.",
+    "downloadSuccess": "Siksè telechaje {{count}} fichye nan {{path}}",
+    "downloadError": "Echèk telechaje done. Tanpri eseye ankò oswa kontakte sipò.",
     "deleteAccountTitle": "Efase Kont",
     "deleteAccountMessage": "Èske ou sèten ou vle efase kont ou a? Aksyon sa a pa ka defèt.",
     "requestDeletion": "Mande Efase",
@@ -88,7 +94,9 @@
     "ok": "OK",
     "error": "Erè",
     "success": "Siksè",
-    "continue": "Kontinye"
+    "continue": "Kontinye",
+    "yes": "Wi",
+    "info": "Enfòmasyon"
   },
   "privacyTerms": {
     "title": "Konfidansyalite ak Kondisyon",
