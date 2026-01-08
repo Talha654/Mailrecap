@@ -144,7 +144,7 @@ export const MailSummaryScreen: React.FC = () => {
                 showsVerticalScrollIndicator={false}
             >
                 {/* Free Scan Banner */}
-                {/* <View style={styles.freeScanBanner}>
+                <View style={styles.freeScanBanner}>
                     <View style={styles.checkIconContainer}>
                         <View style={styles.checkIcon}>
                             <Text style={styles.checkIconText}>✓</Text>
@@ -160,7 +160,7 @@ export const MailSummaryScreen: React.FC = () => {
                         <Text style={styles.unlockButtonIcon}>✨</Text>
                         <Text style={styles.unlockButtonText}>{t('mailSummary.unlockUnlimited')}</Text>
                     </TouchableOpacity>
-                </View> */}
+                </View>
 
                 {/* Main Content Card */}
                 <View style={styles.mainCard}>
@@ -265,7 +265,7 @@ export const MailSummaryScreen: React.FC = () => {
             </ScrollView>
 
             {/*Free Trial Bottom Section */}
-            {/* {(!subscriptionPlan || subscriptionPlan === 'free_trial') && (
+            {(!subscriptionPlan || subscriptionPlan === 'free_trial') && (
                 <View style={styles.bottomSectionContainer}>
                     <Image
                         source={images.bottom_img}
@@ -284,7 +284,7 @@ export const MailSummaryScreen: React.FC = () => {
                         <Text style={styles.newUpgradeButtonText}>{t('mailSummary.upgradeNow')}</Text>
                     </TouchableOpacity>
                 </View>
-            )} */}
+            )}
 
         </SafeAreaView>
     );

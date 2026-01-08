@@ -3,13 +3,6 @@ import { Platform } from 'react-native';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
 
-// const LOCAL_IP = '192.168.100.5';
-
-// const DEV_API_URL = Platform.select({
-//     ios: `http://${LOCAL_IP}:5001`,
-//     android: `http://${LOCAL_IP}:5001`,
-// });
-
 const API_URL = 'https://backend-beta-three-41.vercel.app';
 // const API_URL = 'http://192.168.100.131:5001';
 

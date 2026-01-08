@@ -253,7 +253,7 @@ For example...`;
                     </View>
 
                     {/* Privacy Policy */}
-                    <TouchableOpacity
+                    {/* <TouchableOpacity
                         style={styles.menuItem}
                         onPress={() => navigation.navigate(SCREENS.PRIVACY_POLICY)}
                         activeOpacity={0.7}
@@ -268,13 +268,14 @@ For example...`;
                             </View>
                         </View>
                         <Text style={styles.chevron}>›</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
 
                     {/* Terms of Service */}
-                    <TouchableOpacity
+                    {/* <TouchableOpacity
                         style={styles.menuItem}
                         onPress={() => navigation.navigate(SCREENS.TERMS_OF_SERVICE)}
                         activeOpacity={0.7}
+                        disabled={true}
                     >
                         <View style={styles.menuItemLeft}>
                             <View style={[styles.iconContainer, { backgroundColor: '#D6212F' }]}>
@@ -286,7 +287,7 @@ For example...`;
                             </View>
                         </View>
                         <Text style={styles.chevron}>›</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
 
                     {/* Data Rights Section */}
                     <Text style={styles.sectionTitle}>{t('settings.dataRightsTitle')}</Text>

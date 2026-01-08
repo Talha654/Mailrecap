@@ -84,7 +84,7 @@ export const HomeScreen: React.FC = () => {
                     {/* Dark Blue Area */}
                     <View style={styles.darkBlueArea}>
                         {/* Subscribe Button (Hidden for Unlimited?) - Image shows it for Free Trial and Essentials */}
-                        {/* {subscriptionPlan !== 'plus_monthly' && subscriptionPlan !== 'plus_yearly' && (
+                        {subscriptionPlan !== 'plus_monthly' && subscriptionPlan !== 'plus_yearly' && (
                             <TouchableOpacity
                                 onPress={handleSubscribe}
                                 activeOpacity={0.8}
@@ -92,7 +92,7 @@ export const HomeScreen: React.FC = () => {
                             >
                                 <Text style={styles.subscribeButtonText}>{t('mailSummary.subscribe')}</Text>
                             </TouchableOpacity>
-                        )} */}
+                        )}
                         {/* Spacer if no subscribe button to keep nav at bottom? No, flex space-between in darkBlueArea */}
 
                         {/* Navigation Row */}

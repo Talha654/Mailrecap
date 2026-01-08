@@ -43,6 +43,21 @@ export const useSubscription = (): SubscriptionState => {
                         // For essentials, we might track usage. For now, let's try to get a field or default.
                         setScansLeft(data?.scansRemaining ?? 10); // Default 10 for essentials if not tracked yet
 
+                        // Check for paid plan expiration
+                        if (plan !== 'no_plan' && plan !== 'free_trial') {
+                            const subscriptionEndDateTimestamp = data?.subscriptionEndDate;
+                            if (subscriptionEndDateTimestamp) {
+                                const subscriptionEndDate = subscriptionEndDateTimestamp.toDate();
+                                if (new Date() > subscriptionEndDate) {
+                                    console.log('[useSubscription] Subscription expired. Updating status...');
+                                    firestore().collection('users').doc(user.uid).update({
+                                        subscriptionPlan: 'no_plan',
+                                        subscriptionStatus: 'expired'
+                                    }).catch(err => console.error('Error updating expired subscription:', err));
+                                }
+                            }
+                        }
+
                         // Calculate days left for trial
                         if (plan === 'free_trial') {
                             const trialStart = data?.createdAt?.toDate() || new Date(); // Fallback to now if missing
@@ -59,6 +74,11 @@ export const useSubscription = (): SubscriptionState => {
                             if (now > trialEnd) {
                                 setDaysLeft(0);
                                 setSubscriptionPlan('no_plan');
+                                // Also update firestore to persist 'no_plan' status for trial expiration
+                                firestore().collection('users').doc(user.uid).update({
+                                    subscriptionPlan: 'no_plan',
+                                    subscriptionStatus: 'expired'
+                                }).catch(err => console.error('Error updating expired trial:', err));
                             } else {
                                 setDaysLeft(diffDays);
                             }

@@ -268,6 +268,16 @@ class RevenueCatService {
                 ? activeEntitlements[activeEntitlementKey].latestPurchaseDate
                 : `rc_${Date.now()}`;
 
+            const expirationDate = activeEntitlementKey
+                ? activeEntitlements[activeEntitlementKey].expirationDate
+                : null;
+
+            const expirationDateObj = expirationDate ? new Date(expirationDate) : null;
+            const isExpired = expirationDateObj && new Date() > expirationDateObj;
+
+            const finalStatus = isExpired ? 'expired' : 'active';
+            const finalPlanType = isExpired ? 'no_plan' : planType;
+
             const purchaseData = {
                 userId,
                 email: userEmail || 'unknown',
@@ -276,7 +286,8 @@ class RevenueCatService {
                 transactionId,
                 platform: Platform.OS,
                 purchaseDate: firestore.FieldValue.serverTimestamp(),
-                status: 'active',
+                expirationDate: expirationDate ? firestore.Timestamp.fromMillis(new Date(expirationDate).getTime()) : null,
+                status: finalStatus,
                 source: 'revenuecat',
                 verifiedAt: firestore.FieldValue.serverTimestamp(),
             };
@@ -307,46 +318,60 @@ class RevenueCatService {
 
             let scansRemaining = planType.includes('plus') ? -1 : 10;
 
-            if (isExistingTransaction) {
-                // If transaction exists, this is just a sync/restore (e.g. app restart)
-                // We MUST preserve the existing scan count from the user's profile
-                // unless it's undefined, in which case we might default (but careful not to overwrite valid 0)
-                if (userData?.scansRemaining !== undefined) {
-                    scansRemaining = userData.scansRemaining;
-                    console.log(`[RevenueCat] Existing transaction ${transactionId}. Preserving count: ${scansRemaining}`);
+            if (!isExpired) {
+                if (isExistingTransaction) {
+                    // If transaction exists, this is just a sync/restore (e.g. app restart)
+                    // We MUST preserve the existing scan count from the user's profile
+                    // unless it's undefined, in which case we might default (but careful not to overwrite valid 0)
+                    if (userData?.scansRemaining !== undefined) {
+                        scansRemaining = userData.scansRemaining;
+                        console.log(`[RevenueCat] Existing transaction ${transactionId}. Preserving count: ${scansRemaining}`);
+                    } else {
+                        // If undefined but transaction exists, it might be the "missing field" bug we just fixed.
+                        console.log(`[RevenueCat] Existing transaction but no scan count. Defaulting to: ${scansRemaining}`);
+                    }
                 } else {
-                    // If undefined but transaction exists, it might be the "missing field" bug we just fixed.
-                    // Defaulting to 10 or 9 here might be safe or risky. 
-                    // Let's stick to the plan defaults (10) if absolutely nothing is found, 
-                    // but ideally this case is rare now.
-                    console.log(`[RevenueCat] Existing transaction but no scan count. Defaulting to: ${scansRemaining}`);
+                    // New transaction (New purchase or Renewal)
+                    console.log(`[RevenueCat] New transaction ${transactionId}. Refilling scans to: ${scansRemaining}`);
                 }
             } else {
-                // New transaction (New purchase or Renewal)
-                // We enforce the refill (e.g. 10 for essentials, -1 for plus)
-                console.log(`[RevenueCat] New transaction ${transactionId}. Refilling scans to: ${scansRemaining}`);
+                console.log(`[RevenueCat] Subscription expired. Leaving scansRemaining as is or handling elsewhere.`);
+                // Ideally we shouldn't reset scans if expired, but if we switch to no_plan, scans might be irrelevant or 0.
+                // Let's keep existing if possible, or maybe set to 0? 
+                // For now, let's strictly preserve what's there if userData exists.
+                if (userData?.scansRemaining !== undefined) {
+                    scansRemaining = userData.scansRemaining;
+                } else {
+                    scansRemaining = 0; // Default for expired/no_plan
+                }
             }
+
 
             // Remove the old "preserve if plan matches" logic as it prevents legitimate renewals
             // and is superseded by the transaction ID check.
 
             // Update user's subscription status
-            await userRef.set({
-                subscriptionPlan: planType,
-                subscriptionStatus: 'active',
+            const userUpdateData: any = {
+                subscriptionPlan: finalPlanType,
+                subscriptionStatus: finalStatus,
                 lastPurchaseDate: firestore.FieldValue.serverTimestamp(),
+                subscriptionEndDate: expirationDate ? firestore.Timestamp.fromMillis(new Date(expirationDate).getTime()) : null,
                 revenueCatId: customerInfo.originalAppUserId,
-                // Store plan configuration
                 scansRemaining: scansRemaining,
-                planConfig: {
+            };
+
+            if (!isExpired) {
+                userUpdateData.planConfig = {
                     type: planType.includes('plus') ? 'plus' : 'essentials',
                     interval: planType.includes('yearly') ? 'year' : 'month',
                     limit: planType.includes('plus') ? -1 : 10,
                     features: planType.includes('plus')
                         ? ['unlimited_scans', 'tts', 'archive']
                         : ['limited_scans', 'archive']
-                }
-            }, { merge: true });
+                };
+            }
+
+            await userRef.set(userUpdateData, { merge: true });
 
             console.log('[RevenueCat] ✅ Purchase synced to database successfully');
         } catch (error: any) {
