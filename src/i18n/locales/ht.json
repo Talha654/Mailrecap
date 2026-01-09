@@ -212,10 +212,6 @@
         "content": "Sèvis la fèt pou trete imaj pou jenere rezilta, apre sa efase imaj orijinal la apre pwosesis la, tipikman imedyatman apre pwosesis e nan nenpòt ka nan 24 èdtan, jan sa dekri nan Règleman sou Konfidansyalite a."
       },
       {
-        "title": "10) Abònman, bòdwo, ak acha App Store / Play Store",
-        "content": "Si ou achte yon abònman oswa karakteristik peye:\n• abònman (si yo ofri yo) ka renouvle otomatikman sof si ou anile atravè anviwònman kont App Store/Play Store ou a;\n• chaj, renouvèlman, anilasyon, ranbousman, ak diskisyon bòdwo pou acha nan aplikasyon an jere pa Distribitè Aplikasyon an (Apple/Google) anba règleman li yo; epi\n• nou pa estoke nimewo kat peman konplè."
-      },
-      {
         "title": "11) Itilizasyon Akseptab ak Aktivite Entèdi",
         "content": "Ou dakò pa:\n• itilize Sèvis la pou aktivite ilegal oswa aksè san otorizasyon nan lapòs yon lòt moun;\n• bay manti sou otorizasyon ou pou eskane lapòs;\n• eseye kontourne karakteristik sekirite oswa sonde vilnerabilite;\n• itilize grate otomatik oswa aktivite ki chaje Sèvis la;\n• ranvèse jeni oswa eseye sòti kòd sous eksepte kote lalwa pèmèt sa;\n• telechaje malveyan oswa entèfere ak operasyon Sèvis la."
       },
@@ -456,3 +452,7 @@
     "getStartedFree": "Kòmanse Gratis"
   }
 }
+// {
+//   "title": "10) Abònman, bòdwo, ak acha App Store / Play Store",
+//   "content": "Si ou achte yon abònman oswa karakteristik peye:\n• abònman (si yo ofri yo) ka renouvle otomatikman sof si ou anile atravè anviwònman kont App Store/Play Store ou a;\n• chaj, renouvèlman, anilasyon, ranbousman, ak diskisyon bòdwo pou acha nan aplikasyon an jere pa Distribitè Aplikasyon an (Apple/Google) anba règleman li yo; epi\n• nou pa estoke nimewo kat peman konplè."
+// },

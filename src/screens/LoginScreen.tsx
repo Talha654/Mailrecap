@@ -148,8 +148,8 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
                                 {agreedToTerms && <Text style={styles.checkmark}>✓</Text>}
                             </View>
                             <Text style={styles.termsText}>
-                                {t('auth.agreeToTerms')} <Text style={styles.termsLink}>{t('auth.termsOfService')}</Text>
-                                {' '}{t('auth.and')} <Text style={styles.termsLink}>{t('auth.privacyPolicy')}</Text>
+                                {t('auth.agreeToTerms')} <Text style={styles.termsLink} onPress={() => navigation.navigate(SCREENS.TERMS_OF_SERVICE)}>{t('auth.termsOfService')}</Text>
+                                {' '}{t('auth.and')} <Text style={styles.termsLink} onPress={() => navigation.navigate(SCREENS.PRIVACY_POLICY)}>{t('auth.privacyPolicy')}</Text>
                             </Text>
                         </TouchableOpacity>
 

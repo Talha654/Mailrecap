@@ -227,10 +227,6 @@
         "content": "The Service is designed to process images to generate outputs, then delete the original image after processing, typically immediately after processing and in any event within 24 hours, as described in the Privacy Policy."
       },
       {
-        "title": "10) Subscriptions, billing, and App Store / Play Store purchases",
-        "content": "If you purchase a subscription or paid features:\n• subscriptions (if offered) may renew automatically unless canceled through your App Store/Play Store account settings;\n• charges, renewals, cancellations, refunds, and billing disputes for in-app purchases are handled by the App Distributor (Apple/Google) under its policies; and\n• we do not store full payment card numbers."
-      },
-      {
         "title": "11) Acceptable Use and Prohibited Activities",
         "content": "You agree not to:\n• use the Service for unlawful activity or unauthorized access to another person’s mail;\n• misrepresent your authorization to scan mail;\n• attempt to bypass security features or probe vulnerabilities;\n• use automated scraping or activity that burdens the Service;\n• reverse engineer or attempt to derive source code except where permitted by law;\n• upload malware or interfere with Service operation."
       },
@@ -476,3 +472,7 @@
     "requiresRecentLogin": "This action requires a recent login. Please log out and log back in, then try again."
   }
 }
+// {
+//   "title": "10) Subscriptions, billing, and App Store / Play Store purchases",
+//   "content": "If you purchase a subscription or paid features:\n• subscriptions (if offered) may renew automatically unless canceled through your App Store/Play Store account settings;\n• charges, renewals, cancellations, refunds, and billing disputes for in-app purchases are handled by the App Distributor (Apple/Google) under its policies; and\n• we do not store full payment card numbers."
+// },
