@@ -1218,6 +1218,9 @@ PODS:
   - Firebase/Firestore (12.3.0):
     - Firebase/CoreOnly
     - FirebaseFirestore (~> 12.3.0)
+  - Firebase/Messaging (12.3.0):
+    - Firebase/CoreOnly
+    - FirebaseMessaging (~> 12.3.0)
   - FirebaseAppCheckInterop (12.3.0)
   - FirebaseAuth (12.3.0):
     - FirebaseAppCheckInterop (~> 12.3.0)
@@ -1257,9 +1260,26 @@ PODS:
     - gRPC-Core (~> 1.69.0)
     - leveldb-library (~> 1.22)
     - nanopb (~> 3.30910.0)
+  - FirebaseInstallations (12.3.0):
+    - FirebaseCore (~> 12.3.0)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GoogleUtilities/UserDefaults (~> 8.1)
+    - PromisesObjC (~> 2.4)
+  - FirebaseMessaging (12.3.0):
+    - FirebaseCore (~> 12.3.0)
+    - FirebaseInstallations (~> 12.3.0)
+    - GoogleDataTransport (~> 10.1)
+    - GoogleUtilities/AppDelegateSwizzler (~> 8.1)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GoogleUtilities/Reachability (~> 8.1)
+    - GoogleUtilities/UserDefaults (~> 8.1)
+    - nanopb (~> 3.30910.0)
   - FirebaseSharedSwift (12.3.0)
   - fmt (11.0.2)
   - glog (0.3.5)
+  - GoogleDataTransport (10.1.0):
+    - nanopb (~> 3.30910.0)
+    - PromisesObjC (~> 2.4)
   - GoogleSignIn (9.0.0):
     - AppAuth (~> 2.0)
     - AppCheckCore (~> 11.0)
@@ -3829,6 +3849,11 @@ PODS:
     - Firebase/Firestore (= 12.3.0)
     - React-Core
     - RNFBApp
+  - RNFBMessaging (23.4.0):
+    - Firebase/Messaging (= 12.3.0)
+    - FirebaseCoreExtension
+    - React-Core
+    - RNFBApp
   - RNFS (2.20.0):
     - React-Core
   - RNGoogleSignin (16.0.0):
@@ -4183,6 +4208,7 @@ DEPENDENCIES:
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBAuth (from `../node_modules/@react-native-firebase/auth`)"
   - "RNFBFirestore (from `../node_modules/@react-native-firebase/firestore`)"
+  - "RNFBMessaging (from `../node_modules/@react-native-firebase/messaging`)"
   - RNFS (from `../node_modules/react-native-fs`)
   - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
   - RNImageCropPicker (from `../node_modules/react-native-image-crop-picker`)
@@ -4210,7 +4236,10 @@ SPEC REPOS:
     - FirebaseCoreInternal
     - FirebaseFirestore
     - FirebaseFirestoreInternal
+    - FirebaseInstallations
+    - FirebaseMessaging
     - FirebaseSharedSwift
+    - GoogleDataTransport
     - GoogleSignIn
     - GoogleUtilities
     - "gRPC-C++"
@@ -4386,6 +4415,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-firebase/auth"
   RNFBFirestore:
     :path: "../node_modules/@react-native-firebase/firestore"
+  RNFBMessaging:
+    :path: "../node_modules/@react-native-firebase/messaging"
   RNFS:
     :path: "../node_modules/react-native-fs"
   RNGoogleSignin:
@@ -4426,9 +4457,12 @@ SPEC CHECKSUMS:
   FirebaseCoreInternal: a9e1ff270f217489d9258563b693d11a312903bf
   FirebaseFirestore: 93138b63239303eeb035d922920f4e48216f0c2d
   FirebaseFirestoreInternal: 81150153b7b25b5eee4633cc5c7f08ab83bda966
+  FirebaseInstallations: ca48ec60ea51b66b9f214a91847ea3720cde97f5
+  FirebaseMessaging: 919ce76cb353f0c36d463f5461d8ab584e6ed765
   FirebaseSharedSwift: a08758c5e2617f3ebb47865b45ecca6f02cd35ea
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
+  GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleSignIn: c7f09cfbc85a1abf69187be091997c317cc33b77
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   "gRPC-C++": cc207623316fb041a7a3e774c252cf68a058b9e8
@@ -4513,6 +4547,7 @@ SPEC CHECKSUMS:
   RNFBApp: 8d27c7545e7e06d78974e204ff95f207a60a5cb2
   RNFBAuth: 532fc90de38b99d8bd9de4f81a8b5179cf582fd2
   RNFBFirestore: d295349d6114ca57449adc0f081c657e0ccb64f5
+  RNFBMessaging: 614675f78c9f357a1c7a3abeeda265afb6eff276
   RNFS: 89de7d7f4c0f6bafa05343c578f61118c8282ed8
   RNGoogleSignin: 85c82d6e1494bd4a039804959362e63771f7ad5a
   RNImageCropPicker: 0a63af4b79e514c1edd6c3152f19300c5ed85312
@@ -4528,4 +4563,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: a892d4af91fa49ab2fef2059992f1ef112b2c43f
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2

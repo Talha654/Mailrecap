@@ -212,6 +212,10 @@
         "content": "El Servicio está diseñado para procesar imágenes para generar resultados, luego eliminar la imagen original después del procesamiento, típicamente inmediatamente después del procesamiento y en cualquier caso dentro de las 24 horas, como se describe en la Política de Privacidad."
       },
       {
+        "title": "10) Suscripciones, facturación y compras en App Store / Play Store",
+        "content": "Si compras una suscripción o funciones pagas:\n• las suscripciones (si se ofrecen) pueden renovarse automáticamente a menos que se cancelen a través de la configuración de tu cuenta de App Store/Play Store;\n• los cargos, renovaciones, cancelaciones, reembolsos y disputas de facturación por compras en la app son manejados por el Distribuidor de la App (Apple/Google) bajo sus políticas; y\n• no almacenamos números completos de tarjetas de pago."
+      },
+      {
         "title": "11) Uso Aceptable y Actividades Prohibidas",
         "content": "Aceptas no:\n• usar el Servicio para actividad ilegal o acceso no autorizado al correo de otra persona;\n• tergiversar tu autorización para escanear correo;\n• intentar eludir funciones de seguridad o sondear vulnerabilidades;\n• usar raspado automatizado o actividad que sobrecargue el Servicio;\n• aplicar ingeniería inversa o intentar derivar el código fuente excepto donde lo permita la ley;\n• subir malware o interferir con la operación del Servicio."
       },
@@ -373,7 +377,8 @@
     "aiDisclaimer": "Generado por IA. Verifica detalles importantes.",
     "upgradeNow": "Actualizar Ahora",
     "privacy": "Privacidad",
-    "terms": "Términos"
+    "terms": "Términos",
+    "subscribe": "Suscribirse"
   },
   "archive": {
     "title": "Correo Guardado",
@@ -452,7 +457,3 @@
     "getStartedFree": "Comenzar Gratis"
   }
 }
-//       {
-//   "title": "10) Suscripciones, facturación y compras en App Store / Play Store",
-//   "content": "Si compras una suscripción o funciones pagas:\n• las suscripciones (si se ofrecen) pueden renovarse automáticamente a menos que se cancelen a través de la configuración de tu cuenta de App Store/Play Store;\n• los cargos, renovaciones, cancelaciones, reembolsos y disputas de facturación por compras en la app son manejados por el Distribuidor de la App (Apple/Google) bajo sus políticas; y\n• no almacenamos números completos de tarjetas de pago."
-// },

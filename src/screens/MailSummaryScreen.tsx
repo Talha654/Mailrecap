@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, Image, ActivityIndicator, Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import LinearGradient from 'react-native-linear-gradient';
@@ -7,7 +7,7 @@ import firestore from '@react-native-firebase/firestore';
 import { Volume2 } from 'lucide-react-native';
 import { CustomButton } from '../components/ui/CustomButton';
 import { wp, hp } from '../constants/StyleGuide';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SCREENS } from '../navigation';
@@ -23,7 +23,6 @@ export const MailSummaryScreen: React.FC = () => {
     const navigation: any = useNavigation();
     const route = useRoute<MailSummaryScreenRouteProp>();
     const mailItem = route.params?.mailItem || null;
-
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isFullTextExpanded, setIsFullTextExpanded] = useState(false);
@@ -40,6 +39,16 @@ export const MailSummaryScreen: React.FC = () => {
             ttsService.removeAllListeners();
         };
     }, []);
+
+    useFocusEffect(
+        useCallback(() => {
+            return () => {
+                // Stop speaking when leaving the screen
+                ttsService.stop();
+                setIsPlaying(false);
+            };
+        }, [])
+    );
 
     const canReadOutLoud = () => {
         // Only applies to free 1 week trial and Mailrecap+ plan
@@ -100,6 +109,7 @@ export const MailSummaryScreen: React.FC = () => {
     };
 
     const handleHome = () => {
+
         navigation.navigate(SCREENS.HOME);
     };
 
@@ -112,12 +122,12 @@ export const MailSummaryScreen: React.FC = () => {
     };
 
     const handlePrivacy = () => {
-        // Navigate to privacy policy or open URL
+        navigation.navigate(SCREENS.PRIVACY_POLICY);
         console.log('Privacy policy');
     };
 
     const handleTerms = () => {
-        // Navigate to terms or open URL
+        navigation.navigate(SCREENS.TERMS_OF_SERVICE);
         console.log('Terms and conditions');
     };
 
@@ -242,8 +252,6 @@ export const MailSummaryScreen: React.FC = () => {
                 >
                     <Text style={styles.upgradeButtonText}>{t('mailSummary.upgradeNow')}</Text>
                 </TouchableOpacity> */}
-
-
                 {/* Home Button */}
                 <TouchableOpacity
                     style={styles.homeButton}
@@ -265,7 +273,7 @@ export const MailSummaryScreen: React.FC = () => {
             </ScrollView>
 
             {/*Free Trial Bottom Section */}
-            {/* {(!subscriptionPlan || subscriptionPlan === 'free_trial') && (
+            {(!subscriptionPlan || subscriptionPlan === 'free_trial') && (
                 <View style={styles.bottomSectionContainer}>
                     <Image
                         source={images.bottom_img}
@@ -284,7 +292,7 @@ export const MailSummaryScreen: React.FC = () => {
                         <Text style={styles.newUpgradeButtonText}>{t('mailSummary.upgradeNow')}</Text>
                     </TouchableOpacity>
                 </View>
-            )} */}
+            )}
 
         </SafeAreaView>
     );

@@ -2,6 +2,17 @@ import firestore from '@react-native-firebase/firestore';
 import { getFirestore, getAuth } from './firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+/**
+ * Actionable date extracted from mail by AI
+ * Used for due date reminder notifications
+ */
+export interface ActionableDate {
+    date: string;  // YYYY-MM-DD format
+    type: 'payment' | 'deadline' | 'appointment' | 'expiry' | 'other';
+    confidence: 'HIGH' | 'MEDIUM' | 'LOW';
+    description: string;
+}
+
 export interface MailSummary {
     id: string;
     userId: string;
@@ -12,6 +23,7 @@ export interface MailSummary {
     photoUrl?: string;
     createdAt: Date;
     updatedAt: Date;
+    actionableDate?: ActionableDate;
 }
 
 export interface MailSummaryInput {
@@ -20,6 +32,7 @@ export interface MailSummaryInput {
     fullText: string;
     suggestions: string[];
     photoUrl?: string;
+    actionableDate?: ActionableDate;
 }
 
 /**
@@ -41,7 +54,19 @@ export async function saveMailSummary(data: MailSummaryInput): Promise<MailSumma
         }
 
         const now = new Date();
-        const mailSummaryData = {
+
+        // Prepare actionable date for Firestore if present
+        let actionableDateForStorage = undefined;
+        if (data.actionableDate && data.actionableDate.confidence) {
+            actionableDateForStorage = {
+                date: new Date(data.actionableDate.date),  // Convert YYYY-MM-DD string to Date
+                type: data.actionableDate.type,
+                confidence: data.actionableDate.confidence,
+                description: data.actionableDate.description,
+            };
+        }
+
+        const mailSummaryData: any = {
             userId,
             title: data.title,
             summary: data.summary,
@@ -52,6 +77,11 @@ export async function saveMailSummary(data: MailSummaryInput): Promise<MailSumma
             updatedAt: now,
         };
 
+        // Only add actionableDate if it exists
+        if (actionableDateForStorage) {
+            mailSummaryData.actionableDate = actionableDateForStorage;
+        }
+
         // Add document to Firestore
         const docRef = await db
             .collection('mailSummaries')
@@ -59,7 +89,7 @@ export async function saveMailSummary(data: MailSummaryInput): Promise<MailSumma
 
         // Check and update scan limits
         const userRef = db.collection('users').doc(userId);
-        const userDoc = await userRef.get();
+        const userDoc: any = await userRef.get();
 
         if (userDoc.exists) {
             const userData = userDoc.data();
@@ -87,6 +117,22 @@ export async function saveMailSummary(data: MailSummaryInput): Promise<MailSumma
                     scansRemaining: 9
                 });
             }
+        }
+
+        // Log scan time for habit-based notification analysis
+        try {
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            await db.collection('userScanHistory').doc(userId).collection('scans').add({
+                scannedAt: now,
+                localTimeHour: now.getHours(),
+                localTimeMinute: now.getMinutes(),
+                dayOfWeek: now.getDay(),
+                timezone: timezone,
+            });
+            console.log('[MailSummary] Scan history logged for habit analysis');
+        } catch (scanHistoryError) {
+            // Non-blocking - don't fail the save if scan history logging fails
+            console.warn('[MailSummary] Failed to log scan history:', scanHistoryError);
         }
 
         console.log('[MailSummary] Saved to Firestore with ID:', docRef.id);

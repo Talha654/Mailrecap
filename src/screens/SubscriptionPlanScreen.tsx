@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { hp, wp } from '../constants/StyleGuide';
 import { revenueCatService } from '../services/revenueCat.service';
+import { PRODUCT_IDS } from '../config/revenueCat.config';
 import { PurchasesPackage } from 'react-native-purchases';
 import { PurchaseError } from '../types/subscription';
 import { useNavigation } from '@react-navigation/native';
@@ -131,6 +132,42 @@ export const SubscriptionPlanScreen: React.FC = () => {
         }
     };
 
+    /**
+     * Find the RevenueCat package that matches the internal Plan ID
+     */
+    const findPackageForPlan = (planId: PlanId): PurchasesPackage | undefined => {
+        if (!availablePackages || availablePackages.length === 0) return undefined;
+
+        // Get the specific product ID for the current platform
+        // We cast to any to avoid strict type checking issues with platform specific keys if they differ slightly
+        const platformIds: any = Platform.OS === 'ios' ? PRODUCT_IDS.ios : PRODUCT_IDS.android;
+        const targetProductId = platformIds[planId];
+
+        return availablePackages.find(pkg => {
+            const currentProductId = pkg.product.identifier;
+
+            // 1. Exact match with config ID
+            if (targetProductId && currentProductId === targetProductId) return true;
+
+            // 2. Exact match with plan ID (legacy)
+            if (currentProductId === planId) return true;
+
+            // 3. Handle Android V2 format (product_id:base_plan_id)
+            if (currentProductId.includes(':')) {
+                const baseId = currentProductId.split(':')[0];
+                if (targetProductId && baseId === targetProductId) return true;
+                if (baseId === planId) return true;
+            }
+
+            // 4. Fallback loose matching (avoid if possible, but kept for safety)
+            // Be careful not to match 'plus' with 'essentials_plus' if that existed, 
+            // but here our names are distinct enough.
+            if (targetProductId && currentProductId.includes(targetProductId)) return true;
+
+            return false;
+        });
+    };
+
     const handleSubscribe = async () => {
         try {
             setIsPurchasing(true);
@@ -171,34 +208,14 @@ export const SubscriptionPlanScreen: React.FC = () => {
             }
 
             // Find the package that matches our selectedPlan
-            // RevenueCat product IDs may be in format: "essentials_monthly:essentials-monthly"
-            // We need to match against the part before the colon
-            let packageToPurchase: PurchasesPackage | undefined;
-
-            packageToPurchase = availablePackages.find(pkg => {
-                const productId = pkg.product.identifier;
-                const packageId = pkg.identifier;
-
-                // Extract the base product ID (part before colon if it exists)
-                const baseProductId = productId.includes(':')
-                    ? productId.split(':')[0]
-                    : productId;
-
-                return (
-                    packageId === selectedPlan ||           // Direct package match
-                    productId === selectedPlan ||           // Full product ID match
-                    baseProductId === selectedPlan ||       // Base product ID match (before colon)
-                    productId.includes(selectedPlan) ||     // Product ID contains match
-                    baseProductId.includes(selectedPlan)    // Base product ID contains match
-                );
-            });
+            const packageToPurchase = findPackageForPlan(selectedPlan);
 
             if (!packageToPurchase) {
                 console.error('[SubscriptionPlan] ❌ No matching package found!');
                 console.error('[SubscriptionPlan] Looking for:', selectedPlan);
                 console.error('[SubscriptionPlan] Available products:');
                 availablePackages.forEach((p, idx) => {
-                    console.error(`  ${idx + 1}. Package ID: "${p.identifier}" | Product ID: "${p.product.identifier}"`);
+                    console.error(`  ${idx + 1}. Identifier: "${p.identifier}" | Product ID: "${p.product.identifier}"`);
                 });
 
                 // Show user-friendly error with available options
@@ -352,25 +369,17 @@ export const SubscriptionPlanScreen: React.FC = () => {
                         // Find dynamic price from RevenueCat packages
                         let dynamicPrice = option.price;
                         if (availablePackages.length > 0) {
-                            const pkg = availablePackages.find(p => {
-                                const productId = p.product.identifier;
-                                const baseProductId = productId.includes(':')
-                                    ? productId.split(':')[0]
-                                    : productId;
-
-                                return (
-                                    p.identifier === option.id ||
-                                    productId === option.id ||
-                                    baseProductId === option.id ||
-                                    productId.includes(option.id) ||
-                                    baseProductId.includes(option.id)
-                                );
-                            });
+                            const pkg = findPackageForPlan(option.id);
                             if (pkg) {
                                 dynamicPrice = pkg.product.priceString;
-                                // If it's a monthly or yearly, we can append the period
-                                if (option.id.includes('monthly')) dynamicPrice += ' / month';
-                                else if (option.id.includes('yearly')) dynamicPrice += ' / year';
+                                // If it's a monthly or yearly, we can append the period 
+                                // (StoreKit usually provides formatted price, sometimes without period)
+                                // Only append if the price string doesn't already contain it to be safe
+                                const priceLower = dynamicPrice.toLowerCase();
+                                if (!priceLower.includes('month') && !priceLower.includes('year') && !priceLower.includes('mo') && !priceLower.includes('yr')) {
+                                    if (option.id.includes('monthly')) dynamicPrice += ' / month';
+                                    else if (option.id.includes('yearly')) dynamicPrice += ' / year';
+                                }
                             }
                         }
 

@@ -228,7 +228,7 @@ For example...`;
                         activeOpacity={0.7}
                     >
                         <View style={styles.backButtonContainer}>
-                            <ArrowLeft />
+                            <ArrowLeft color={"#000"} />
                             <Text style={styles.backButtonText}> {t('archive.back')}</Text>
                         </View>
                     </TouchableOpacity>

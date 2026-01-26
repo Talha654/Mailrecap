@@ -5,7 +5,7 @@ import Purchases, {
     LOG_LEVEL,
 } from 'react-native-purchases';
 import { Platform, Alert } from 'react-native';
-import { getRevenueCatApiKey, REVENUECAT_CONFIG } from '../config/revenueCat.config';
+import { getRevenueCatApiKey, REVENUECAT_CONFIG, PRODUCT_IDS } from '../config/revenueCat.config';
 import { PlanType } from '../types/subscription';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -28,7 +28,7 @@ class RevenueCatService {
             const apiKey = getRevenueCatApiKey();
             console.log('[RevenueCat] Initializing with API key...');
 
-            Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+            Purchases.setLogLevel(LOG_LEVEL.ERROR);
             Purchases.configure({
                 apiKey,
                 appUserID: appUserId || undefined,
@@ -117,14 +117,21 @@ class RevenueCatService {
             const { customerInfo } = await Purchases.purchasePackage(rcPackage);
 
             // Determine which entitlement to check based on plan type
-            let entitlementId: string;
-            if (planType.includes('essentials')) {
+            // Map known product IDs to entitlement
+            let entitlementId = REVENUECAT_CONFIG.entitlements.premium; // default
+
+            if (planType.includes('essentials') ||
+                rcPackage.product.identifier === PRODUCT_IDS.ios.essentials_monthly ||
+                rcPackage.product.identifier === PRODUCT_IDS.ios.essentials_yearly ||
+                rcPackage.product.identifier === PRODUCT_IDS.android.essentials_monthly ||
+                rcPackage.product.identifier === PRODUCT_IDS.android.essentials_yearly) {
                 entitlementId = REVENUECAT_CONFIG.entitlements.premium;
-            } else if (planType.includes('plus')) {
+            } else if (planType.includes('plus') ||
+                rcPackage.product.identifier === PRODUCT_IDS.ios.plus_monthly ||
+                rcPackage.product.identifier === PRODUCT_IDS.ios.plus_yearly ||
+                rcPackage.product.identifier === PRODUCT_IDS.android.plus_monthly ||
+                rcPackage.product.identifier === PRODUCT_IDS.android.plus_yearly) {
                 entitlementId = REVENUECAT_CONFIG.entitlements.plus;
-            } else {
-                // Fallback to premium
-                entitlementId = REVENUECAT_CONFIG.entitlements.premium;
             }
 
             console.log(`[RevenueCat] Checking for entitlement: ${entitlementId}`);
@@ -191,14 +198,7 @@ class RevenueCatService {
 
                 if (entitlementObj) {
                     matchedProductIdentifier = entitlementObj.productIdentifier;
-                    // Try to guess plan type from product ID
-                    let derivedPlanType: PlanType = hasPlus ? 'plus_yearly' : 'essentials_yearly';
-                    if (matchedProductIdentifier.includes('monthly')) {
-                        derivedPlanType = hasPlus ? 'plus_monthly' : 'essentials_monthly';
-                    } else if (matchedProductIdentifier.includes('yearly')) {
-                        derivedPlanType = hasPlus ? 'plus_yearly' : 'essentials_yearly';
-                    }
-
+                    const derivedPlanType = this.getPlanTypeFromProductId(matchedProductIdentifier);
                     await this.savePurchaseToDatabase(customerInfo, derivedPlanType, matchedProductIdentifier);
                 }
             }
@@ -397,14 +397,7 @@ class RevenueCatService {
 
                 if (entitlementObj) {
                     const matchedProductIdentifier = entitlementObj.productIdentifier;
-                    let derivedPlanType: PlanType = hasPlus ? 'plus_yearly' : 'essentials_yearly';
-
-                    if (matchedProductIdentifier.includes('monthly')) {
-                        derivedPlanType = hasPlus ? 'plus_monthly' : 'essentials_monthly';
-                    } else if (matchedProductIdentifier.includes('yearly')) {
-                        derivedPlanType = hasPlus ? 'plus_yearly' : 'essentials_yearly';
-                    }
-
+                    const derivedPlanType = this.getPlanTypeFromProductId(matchedProductIdentifier);
                     await this.savePurchaseToDatabase(customerInfo, derivedPlanType, matchedProductIdentifier);
                 }
             }
@@ -439,6 +432,40 @@ class RevenueCatService {
         } catch (error) {
             console.error('[RevenueCat] Logout error:', error);
         }
+    }
+
+    /**
+     * Helper to map product ID to PlanType
+     */
+    private getPlanTypeFromProductId(productId: string): PlanType {
+        const pid = productId; // simplified
+        if (pid === PRODUCT_IDS.ios.essentials_monthly) return 'essentials_monthly';
+        if (pid === PRODUCT_IDS.ios.essentials_yearly) return 'essentials_yearly';
+        if (pid === PRODUCT_IDS.ios.plus_monthly) return 'plus_monthly';
+        if (pid === PRODUCT_IDS.ios.plus_yearly) return 'plus_yearly';
+
+        if (pid === PRODUCT_IDS.android.essentials_monthly) return 'essentials_monthly';
+        if (pid === PRODUCT_IDS.android.essentials_yearly) return 'essentials_yearly';
+        if (pid === PRODUCT_IDS.android.plus_monthly) return 'plus_monthly';
+        if (pid === PRODUCT_IDS.android.plus_yearly) return 'plus_yearly';
+
+        // Additional android check if the product ID comes in different format (sometimes RC strips the base plan part?)
+        // The console shows "essentials_monthly:essentials-monthly".
+        // Use loose matching as backup for these complex IDs if exact match fails
+        if (pid.includes('essentials_monthly')) return 'essentials_monthly';
+        if (pid.includes('essentials_yearly')) return 'essentials_yearly';
+        if (pid.includes('plus_monthly')) return 'plus_monthly';
+        if (pid.includes('plus_yearly')) return 'plus_yearly';
+
+        // Fallback for legacy IDs
+        if (pid.includes('essential')) {
+            return pid.includes('month') ? 'essentials_monthly' : 'essentials_yearly';
+        }
+        if (pid.includes('plus') || pid.includes('pluss')) {
+            return pid.includes('month') ? 'plus_monthly' : 'plus_yearly';
+        }
+
+        return 'essentials_yearly'; // Default fallback
     }
 }
 

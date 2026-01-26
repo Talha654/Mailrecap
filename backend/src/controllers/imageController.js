@@ -20,7 +20,12 @@ const analyzeImage = async (req, res) => {
 
     } catch (error) {
         console.error('Error in image controller:', error);
-        res.status(500).json({ error: 'Failed to process image' });
+
+        // Propagate status code if available (e.g. from OpenAI 403, 429 etc)
+        const statusCode = error.status || error.statusCode || 500;
+        const errorMessage = error.message || 'Failed to process image';
+
+        res.status(statusCode).json({ error: errorMessage });
     } finally {
         // Clean up uploaded file
         deleteFile(filePath);

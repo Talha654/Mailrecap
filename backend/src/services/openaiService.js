@@ -116,6 +116,24 @@ Smart Bullets:
 3.<20–30 words: smart questions to ask a licensed professional or the sender + a brief “general information, not advice” note if relevant, IN ${target_language}>
 
 *ALL Smart Bullets MUST BE IN ${target_language}*
+
+========================
+ACTIONABLE DATE EXTRACTION (English only, for system processing)
+========================
+If the document contains any date that requires action (payment due, deadline, appointment, expiry), extract it:
+
+Actionable Date: <YYYY-MM-DD or NONE if no actionable date found>
+Date Type: <payment|deadline|appointment|expiry|other or NONE>
+Date Confidence: <HIGH|MEDIUM|LOW or NONE>
+Date Description: <Brief English description of what the date represents, or NONE>
+
+Confidence definitions:
+- HIGH = explicit date clearly stated with context (e.g., "Due: January 15, 2026", "Payment deadline: Feb 1st")
+- MEDIUM = date mentioned but context is somewhat unclear
+- LOW = date inferred, partially visible, or ambiguous
+
+If multiple actionable dates exist, extract only the MOST URGENT one.
+If no actionable date found, use NONE for all fields.
         `;
 
         // -----------------------
@@ -161,6 +179,12 @@ const parseResponse = (content) => {
     let summary = '';
     let steps = [];
 
+    // Actionable date fields for notifications
+    let actionableDate = null;
+    let dateType = null;
+    let dateConfidence = null;
+    let dateDescription = null;
+
     const lines = content.split('\n');
     let section = '';
 
@@ -186,6 +210,36 @@ const parseResponse = (content) => {
             continue;
         }
 
+        // Actionable Date Extraction
+        if (line.startsWith('Actionable Date:')) {
+            const value = line.replace('Actionable Date:', '').trim();
+            if (value && value !== 'NONE') {
+                actionableDate = value;
+            }
+            continue;
+        }
+        if (line.startsWith('Date Type:')) {
+            const value = line.replace('Date Type:', '').trim();
+            if (value && value !== 'NONE') {
+                dateType = value.toLowerCase();
+            }
+            continue;
+        }
+        if (line.startsWith('Date Confidence:')) {
+            const value = line.replace('Date Confidence:', '').trim();
+            if (value && value !== 'NONE') {
+                dateConfidence = value.toUpperCase();
+            }
+            continue;
+        }
+        if (line.startsWith('Date Description:')) {
+            const value = line.replace('Date Description:', '').trim();
+            if (value && value !== 'NONE') {
+                dateDescription = value;
+            }
+            continue;
+        }
+
         // Section Parsing
         if (section === 'summary' && line) {
             summary += line + ' ';
@@ -200,13 +254,26 @@ const parseResponse = (content) => {
         }
     }
 
-    return {
+    // Build result object
+    const result = {
         title: title || 'Mail Summary',
         date: date || 'Today',
         summary: summary.trim(),
         suggestions: steps,
         fullText: content,
     };
+
+    // Add actionable date if extracted with valid confidence
+    if (actionableDate && dateConfidence && ['HIGH', 'MEDIUM', 'LOW'].includes(dateConfidence)) {
+        result.actionableDate = {
+            date: actionableDate,
+            type: dateType || 'other',
+            confidence: dateConfidence,
+            description: dateDescription || '',
+        };
+    }
+
+    return result;
 };
 
 module.exports = {
