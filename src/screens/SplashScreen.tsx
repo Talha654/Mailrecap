@@ -17,7 +17,7 @@ type Props = {
 };
 
 export const SplashScreen: React.FC<Props> = () => {
-    const navigation = useNavigation<NavigationProp<any>>();
+    const navigation = useNavigation<any>();
     const { t, i18n } = useTranslation();
 
     const handleLanguageChange = (lang: string) => {
@@ -88,7 +88,7 @@ export const SplashScreen: React.FC<Props> = () => {
                 </TouchableOpacity> */}
                 <CustomButton
                     title="Get Started Free"
-                    onPress={() => navigation.navigate(SCREENS.LOGIN)}
+                    onPress={() => navigation.replace(SCREENS.LOGIN)}
                     // loading={loading}
                     style={styles.button}
                     textStyle={styles.buttonText}

@@ -36,7 +36,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
         try {
             await signInWithEmailPassword(email, password);
             // navigation.replace(SCREENS.HOME);
-            navigation.navigate(SCREENS.HOME);
+            navigation.replace(SCREENS.HOME);
             showSuccessToast(t('auth.loginSuccess'));
         } catch (e: any) {
             console.warn('Login failed', e);
@@ -55,7 +55,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
         setLoading(true);
         try {
             await signInWithGoogle();
-            navigation.navigate(SCREENS.HOME);
+            navigation.replace(SCREENS.HOME);
             showSuccessToast(t('auth.loginSuccess'));
         } catch (e: any) {
             console.warn('Google Login failed', e);
@@ -70,7 +70,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
         setLoading(true);
         try {
             await signInWithApple();
-            navigation.navigate(SCREENS.HOME);
+            navigation.replace(SCREENS.HOME);
             showSuccessToast(t('auth.loginSuccess'));
         } catch (e: any) {
             console.warn('Apple Login failed', e);

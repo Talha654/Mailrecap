@@ -1,0 +1,47 @@
+{
+    "indexes": [
+        {
+            "collectionGroup": "mailSummaries",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "actionableDate.confidence",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "actionableDate.date",
+                    "order": "ASCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "notificationSentLog",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "mailSummaryId",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "type",
+                    "order": "ASCENDING"
+                },
+                {
+                    "fieldPath": "sentAt",
+                    "order": "ASCENDING"
+                }
+            ]
+        },
+        {
+            "collectionGroup": "scans",
+            "queryScope": "COLLECTION",
+            "fields": [
+                {
+                    "fieldPath": "scannedAt",
+                    "order": "ASCENDING"
+                }
+            ]
+        }
+    ],
+    "fieldOverrides": []
+}

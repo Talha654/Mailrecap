@@ -90,7 +90,7 @@ export const SignupScreen: React.FC<Props> = ({ navigation }) => {
         setLoading(true);
         try {
             await signInWithGoogle();
-            navigation.navigate(SCREENS.HOME);
+            navigation.replace(SCREENS.HOME);
             showSuccessToast(t('auth.loginSuccess')); // Or a signup specific message if available
         } catch (e: any) {
             console.warn('Google Signup failed', e);
@@ -105,7 +105,7 @@ export const SignupScreen: React.FC<Props> = ({ navigation }) => {
         setLoading(true);
         try {
             await signInWithApple();
-            navigation.navigate(SCREENS.HOME);
+            navigation.replace(SCREENS.HOME);
             showSuccessToast(t('auth.loginSuccess'));
         } catch (e: any) {
             console.warn('Apple Signup failed', e);
@@ -192,8 +192,8 @@ export const SignupScreen: React.FC<Props> = ({ navigation }) => {
                                 {agreedToTerms && <Text style={styles.checkmark}>✓</Text>}
                             </View>
                             <Text style={styles.termsText}>
-                                {t('auth.agreeToTerms')} <Text style={styles.termsLink}>{t('auth.termsOfService')}</Text>
-                                {' '}{t('auth.and')} <Text style={styles.termsLink}>{t('auth.privacyPolicy')}</Text>
+                                {t('auth.agreeToTerms')} <Text style={styles.termsLink} onPress={() => navigation.navigate(SCREENS.TERMS_OF_SERVICE)}>{t('auth.termsOfService')}</Text>
+                                {' '}{t('auth.and')} <Text style={styles.termsLink} onPress={() => navigation.navigate(SCREENS.PRIVACY_POLICY)}>{t('auth.privacyPolicy')}</Text>
                             </Text>
                         </TouchableOpacity>
                         {/* signup button */}
