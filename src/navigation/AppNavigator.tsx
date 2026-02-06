@@ -101,7 +101,7 @@ export const AppNavigator: React.FC = () => {
                     component={MailSummaryScreen}
                 />
                 <Stack.Screen
-                    name={SCREENS.ARCHIVE}
+                    name={SCREENS.INBOX}
                     component={ArchiveScreen}
                 />
             </Stack.Navigator>

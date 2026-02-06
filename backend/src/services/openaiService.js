@@ -34,113 +34,179 @@ const analyzeImage = async (filePath, originalName, mimeType, extractedData) => 
         // -----------------------
         const prompt = `
 You are the MailRecap Expert Mail Analyzer.
-This is a personal document (utility bill, letter, or form) provided by the user for their own record-keeping and data extraction.
-Your task is to extract the visible text and summarize it for the user.
+
+This is a personal document (utility bill, letter, notice, form, or mailed offer) provided by the user for their own record-keeping and information extraction.
+
+Your task is to:
+1) Extract the visible text
+2) Summarize it clearly
+3) Categorize it using Smart Inbox rules
+4) Critically assess credibility and potential risk patterns ONLY when warranted
+5) Extract links and a due date (if present) safely
 
 Do NOT refuse to process this document unless it contains content you are not allowed to handle under policy (e.g., explicit instructions for wrongdoing). Otherwise, proceed.
 
 ========================
 CRITICAL LANGUAGE REQUIREMENT
-========================
-*YOU MUST GENERATE ALL OUTPUT IN ${target_language}.*
-This includes the Title, Summary, and Smart Bullets.
+YOU MUST GENERATE ALL OUTPUT IN ${target_language}.
+This includes the Title, Category, Summary, Smart Bullets, Links, and Due Date.
 Do NOT use English unless ${target_language} is English.
 Every single word in your response must be in ${target_language}.
+========================
 
-========================
 INPUT VARIABLES
-========================
-Letter Text: {letter_text}
-Mail Category: ${mail_category}
+Letter Text: ${letter_text}
+Mail Category Hint (may be ignored or overridden): ${mail_category}
 Domain Expert Role: ${domain_expert_role}
 Extracted Date: ${extracted_date}
 Extracted Title: ${extracted_title}
 Output Language: ${target_language}
 
 ========================
-FULL INSTRUCTIONS
+SMART INBOX CATEGORY RULES (STRICT)
+
+You MUST assign exactly ONE category from the list below.
+Every document MUST fit into one of these categories.
+
+Marketing
+Offers
+Subscriptions
+Bills
+Banking
+Insurance
+Utilities
+Government
+Medical
+Housing
+Legal
+Business
+Receipts
+Warranty
+Personal
+Packages
+Notices
+Urgent
+Archive
+Charity
+Education
+ID
+Suspicious
+
+DO NOT invent categories.
+DO NOT use placeholders such as "general" or "review".
+
 ========================
-Analyze the letter like a specialized ${domain_expert_role}, BUT you must follow these safety rules:
+SUSPICIOUS OVERRIDE RULE
 
-1) NO PROFESSIONAL ADVICE
-- Provide clear summarization and general information only.
-- Do NOT provide legal advice, financial advice, medical advice, or other professional advice.
-- Do NOT interpret or assert the user’s legal rights, legal protections, legal claims, or legal outcomes.
-- Do NOT tell the user what they “should” do in a way that substitutes for a licensed professional.
+Assign the category "Suspicious" if:
+- There is ONE strong risk signal (e.g., misleading authority cues, unusual payment method, suspicious domain or link), OR
+- There are TWO OR MORE moderate risk signals (e.g., urgency + vague sender, generic “final notice” language + payment pressure).
 
-2) SAFE ACTIONABILITY (ALLOWED)
-You MAY provide:
-- dates to verify, amounts, sender purpose, and key factual details
-- common follow-ups phrased generally (e.g., “Consider contacting the sender to confirm…”)
-- smart questions the user can ask the sender or a licensed professional
-- one high-value insight that is practical and non-obvious (e.g., what to verify, what to gather, what to watch for)
+Common patterns include (but are not limited to):
+- Vague or unverifiable sender identity
+- Fear-based or deadline-driven urgency that seems manipulative
+- Generic notices without a clear user relationship
+- Payment pressure or unusual payment paths
+- Unclear or uncommon links or QR codes
+- Common solicitation patterns such as vehicle warranty mail
 
-3) NO LEGAL DOCUMENT DRAFTING
-- Do NOT draft motions, demand letters, legal filings, or formal legal correspondence.
+If "Suspicious" is assigned, it OVERRIDES all other categories.
 
-4) PRIVACY / PII MINIMIZATION
-- Do NOT output sensitive identifiers in full.
-- Mask or omit: full account numbers, SSN, barcodes, full addresses, full card/bank numbers, passwords.
-- If needed, show only last 2–4 digits (e.g., “****1234”) or use “[REDACTED]”.
+If NOT Suspicious, classify by the primary subject and intent using the category list.
 
-5) TONE / CERTAINTY
-- Avoid absolute statements. Use “may,” “might,” “appears,” and “to verify” where appropriate.
-- If the document appears time-sensitive or serious (legal/medical/financial), include a short “consider a licensed professional” note inside Smart Bullets (in ${target_language}).
+IMPORTANT:
+Only include “credibility / risk / verification hygiene” language in the Summary or Smart Bullets if the category is Suspicious
+OR if there are clear risk signals. Do NOT imply fraud or wrongdoing for normal official mail.
 
-*REMEMBER: Write everything in ${target_language}.*
+========================
+SAFE ANALYSIS RULES
+NO PROFESSIONAL ADVICE
+
+Provide clear summarization and general information only.
+
+Do NOT provide legal, financial, or medical advice.
+Do NOT interpret or assert the user’s rights, protections, claims, or outcomes.
+Do NOT tell the user what they “should” do in a way that substitutes for a licensed professional.
+
+ALLOWED:
+- Key facts (dates, amounts, sender purpose)
+- Neutral follow-ups (only when relevant, especially for Suspicious)
+- Smart questions the user could ask the sender or a licensed professional (only when relevant)
+- ONE high-value, practical insight focused on verification, organization, or risk awareness (only when relevant)
+
+NO LEGAL OR FORMAL DOCUMENT DRAFTING
+
+========================
+SMART LINK EXTRACTION
+
+If the document contains URLs, QR codes, or payment portals:
+- Identify them
+- Describe their general purpose (payment, account access, information)
+- Do NOT encourage clicking
+- Do NOT imply fraud for official-looking mail
+
+If the category is Suspicious, you MAY include a brief neutral caution about links using probabilistic language.
+
+========================
+PRIVACY / PII MINIMIZATION
+
+Do NOT output sensitive identifiers in full.
+Mask or omit:
+- Full account numbers
+- SSNs
+- Barcodes
+- Full addresses
+- Full card or bank numbers
+- Passwords
+
+Use “[REDACTED]” where appropriate.
+
+========================
+DUE DATE EXTRACTION (USER-FACING)
+
+Extract a single due date (or respond-by date) if the document provides one.
+- If the document says “Due upon receipt”, set Due Date to: UPON RECEIPT
+- If multiple due dates exist, choose the most urgent one
+- If no due date exists, set Due Date to: NONE
 
 ========================
 OUTPUT TEMPLATE (STRICT)
-========================
 
-Title: <Generate a short, descriptive title (3-5 words) based on the letter content - MUST BE IN ${target_language}>
-
+Title: <3–5 word descriptive title>
 Date: ${extracted_date}
+Category: <ONE category from the allowed list>
 
 Summary:
 Write 60–70 words in ${target_language}.
-Paraphrase the letter (do NOT copy text).
+Paraphrase the document (do NOT copy).
 Include:
-- type of mail
-- sender's purpose
-- key amounts/dates to verify (do not present as legal conclusions)
-- what the user needs to know at a glance
-- one deep, practical insight (verification or organization tip), NOT professional advice
-- avoid exposing PII (mask/redact)
+- Type of mail
+- Sender’s apparent purpose
+- Key dates or amounts to note (neutral; no conclusions)
+- One practical usage or record-keeping insight (e.g., what information to retain, what details to compare later)
+DO NOT mention how or where the mail should be filed.
+DO NOT explain or restate the assigned category in narrative form.
 
-*ALL SUMMARY TEXT MUST BE IN ${target_language}*
+Avoid exposing PII.
+Do NOT include fraud/verification warnings unless category is Suspicious or clear risk signals exist.
 
 Smart Bullets:
-1.<20–30 words: the single most urgent thing to verify or check (deadline/date/contact), IN ${target_language}>
-2.<20–30 words: a common follow-up phrased generally (e.g., contact sender, gather documents), IN ${target_language}>
-3.<20–30 words: smart questions to ask a licensed professional or the sender + a brief “general information, not advice” note if relevant, IN ${target_language}>
+1. <20–30 words: the most important thing to note or verify (amount, due date, service period, sender, reference number)>
+2. <20–30 words: a neutral next step for record-keeping (e.g., save, match to insurance/EOB, keep receipt, note balance)>
+3. <20–30 words: if Suspicious, include a cautious verification-oriented question; otherwise, include a neutral clarifying question to ask the sender if needed>
 
-*ALL Smart Bullets MUST BE IN ${target_language}*
+Links:
+- <List any URLs or portals referenced (describe purpose). If none, write NONE.>
 
-========================
-ACTIONABLE DATE EXTRACTION (English only, for system processing)
-========================
-If the document contains any date that requires action (payment due, deadline, appointment, expiry), extract it:
-
-Actionable Date: <YYYY-MM-DD or NONE if no actionable date found>
-Date Type: <payment|deadline|appointment|expiry|other or NONE>
-Date Confidence: <HIGH|MEDIUM|LOW or NONE>
-Date Description: <Brief English description of what the date represents, or NONE>
-
-Confidence definitions:
-- HIGH = explicit date clearly stated with context (e.g., "Due: January 15, 2026", "Payment deadline: Feb 1st")
-- MEDIUM = date mentioned but context is somewhat unclear
-- LOW = date inferred, partially visible, or ambiguous
-
-If multiple actionable dates exist, extract only the MOST URGENT one.
-If no actionable date found, use NONE for all fields.
-        `;
+Due Date:
+<YYYY-MM-DD | UPON RECEIPT | NONE>
+`;
 
         // -----------------------
         // 4. OpenAI Call
         // -----------------------
         const response = await openai.chat.completions.create({
-            model: 'gpt-4o',
+            model: 'gpt-4o-mini',
             messages: [
                 {
                     role: 'user',
@@ -175,15 +241,12 @@ If no actionable date found, use NONE for all fields.
 
 const parseResponse = (content) => {
     let title = '';
+    let category = '';
     let date = '';
     let summary = '';
+    let links = [];
     let steps = [];
-
-    // Actionable date fields for notifications
-    let actionableDate = null;
-    let dateType = null;
-    let dateConfidence = null;
-    let dateDescription = null;
+    let dueDate = null;
 
     const lines = content.split('\n');
     let section = '';
@@ -196,6 +259,11 @@ const parseResponse = (content) => {
             title = line.replace('Title:', '').trim();
             continue;
         }
+        if (line.startsWith('Category:')) {
+            section = 'category';
+            category = line.replace('Category:', '').trim();
+            continue;
+        }
         if (line.startsWith('Date:')) {
             section = 'date';
             date = line.replace('Date:', '').trim();
@@ -205,37 +273,18 @@ const parseResponse = (content) => {
             section = 'summary';
             continue;
         }
-        if (line.startsWith('Smart Bullets:') || line.startsWith('Next Steps:')) {
+        if (line.startsWith('Smart Bullets:')) {
             section = 'steps';
             continue;
         }
-
-        // Actionable Date Extraction
-        if (line.startsWith('Actionable Date:')) {
-            const value = line.replace('Actionable Date:', '').trim();
-            if (value && value !== 'NONE') {
-                actionableDate = value;
-            }
+        if (line.startsWith('Links:')) {
+            section = 'links';
             continue;
         }
-        if (line.startsWith('Date Type:')) {
-            const value = line.replace('Date Type:', '').trim();
-            if (value && value !== 'NONE') {
-                dateType = value.toLowerCase();
-            }
-            continue;
-        }
-        if (line.startsWith('Date Confidence:')) {
-            const value = line.replace('Date Confidence:', '').trim();
-            if (value && value !== 'NONE') {
-                dateConfidence = value.toUpperCase();
-            }
-            continue;
-        }
-        if (line.startsWith('Date Description:')) {
-            const value = line.replace('Date Description:', '').trim();
-            if (value && value !== 'NONE') {
-                dateDescription = value;
+        if (line.startsWith('Due Date:')) {
+            const val = line.replace('Due Date:', '').trim();
+            if (val && val !== 'NONE') {
+                dueDate = val;
             }
             continue;
         }
@@ -246,10 +295,17 @@ const parseResponse = (content) => {
         }
 
         if (section === 'steps') {
-            // Remove numbering like "1.", "2." and keep the text
             const cleanedLine = line.replace(/^\d+[\.)]\s*/, '').trim();
             if (cleanedLine) {
                 steps.push(cleanedLine);
+            }
+        }
+
+        if (section === 'links') {
+            // Remove bullet points if present
+            const cleanedLink = line.replace(/^-\s*/, '').trim();
+            if (cleanedLink && cleanedLink !== 'NONE') {
+                links.push(cleanedLink);
             }
         }
     }
@@ -257,19 +313,21 @@ const parseResponse = (content) => {
     // Build result object
     const result = {
         title: title || 'Mail Summary',
+        category: category || 'General',
         date: date || 'Today',
         summary: summary.trim(),
         suggestions: steps,
+        links: links,
         fullText: content,
     };
 
-    // Add actionable date if extracted with valid confidence
-    if (actionableDate && dateConfidence && ['HIGH', 'MEDIUM', 'LOW'].includes(dateConfidence)) {
+    // Map Due Date to actionableDate structure for compatibility
+    if (dueDate) {
         result.actionableDate = {
-            date: actionableDate,
-            type: dateType || 'other',
-            confidence: dateConfidence,
-            description: dateDescription || '',
+            date: dueDate,
+            type: 'deadline', // Defaulting to deadline as it's a due date
+            confidence: 'HIGH', // Assuming high confidence since it's explicitly extracted
+            description: 'Due Date extracted from document'
         };
     }
 

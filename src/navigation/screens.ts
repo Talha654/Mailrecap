@@ -15,7 +15,7 @@ export const SCREENS = {
     CAMERA_PERMISSION: 'CameraPermission',
     CAMERA_SCREEN: 'CameraScreen',
     MAIL_SUMMARY: 'MailSummary',
-    ARCHIVE: 'Archive',
+    INBOX: 'Inbox',
 } as const;
 
 // Screen names as type for better type safety

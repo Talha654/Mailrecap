@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import LinearGradient from 'react-native-linear-gradient';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import { Volume2 } from 'lucide-react-native';
+import { Volume2, ExternalLink } from 'lucide-react-native';
 import { CustomButton } from '../components/ui/CustomButton';
 import { wp, hp } from '../constants/StyleGuide';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
@@ -28,6 +28,10 @@ export const MailSummaryScreen: React.FC = () => {
     const [isFullTextExpanded, setIsFullTextExpanded] = useState(false);
     const { subscriptionPlan, loading: loadingSubscription } = useSubscription();
     const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
+    const [audioPath, setAudioPath] = useState<string | null>(null);
+    const [isFetchingAudio, setIsFetchingAudio] = useState(true); // Start as true to block UI
+
+    // console.log('mailItem =>>>>>>>>>>>>', mailItem);
 
     useEffect(() => {
         // Initialize TTS service when component mounts
@@ -40,14 +44,50 @@ export const MailSummaryScreen: React.FC = () => {
         };
     }, []);
 
+    const getSummaryText = useCallback(() => {
+        if (!mailItem?.summary) return '';
+        let textToSpeak = mailItem.summary;
+        if (mailItem.suggestions && mailItem.suggestions.length > 0) {
+            textToSpeak += '. ' + t('mailSummary.nextSteps') + '. ';
+            mailItem.suggestions.forEach((suggestion) => {
+                textToSpeak += `${suggestion}. `;
+            });
+        }
+        return textToSpeak;
+    }, [mailItem, t]);
+
     useFocusEffect(
         useCallback(() => {
+            let isActive = true;
+
+            const fetchAudio = async () => {
+                if (!mailItem) return;
+
+                try {
+                    if (isActive) setIsFetchingAudio(true);
+                    const text = getSummaryText();
+                    if (text) {
+                        const path = await ttsService.prepareAudio(text);
+                        if (isActive) setAudioPath(path);
+                    }
+                } catch (error) {
+                    console.error('Error pre-fetching audio:', error);
+                } finally {
+                    if (isActive) setIsFetchingAudio(false);
+                }
+            };
+
+            fetchAudio();
+
             return () => {
-                // Stop speaking when leaving the screen
+                isActive = false;
+                // Stop speaking and reset state when leaving the screen
                 ttsService.stop();
                 setIsPlaying(false);
+                setAudioPath(null); // Reset audio state
+                setIsFetchingAudio(true); // Reset to true so next visit shows loader
             };
-        }, [])
+        }, [mailItem, getSummaryText])
     );
 
     const canReadOutLoud = () => {
@@ -60,47 +100,37 @@ export const MailSummaryScreen: React.FC = () => {
         if (!mailItem?.summary) return;
 
         if (isPlaying) {
-            // Stop speaking
             await ttsService.stop();
             setIsPlaying(false);
         } else {
             setIsGeneratingAudio(true);
 
-            // Construct text to speak
-            let textToSpeak = mailItem.summary;
+            try {
+                // Use pre-fetched path if available, otherwise fetch
+                const textToSpeak = getSummaryText();
 
-            // Add next steps if available
-            if (mailItem.suggestions && mailItem.suggestions.length > 0) {
-                // Add a pause before next steps
-                textToSpeak += '. ' + t('mailSummary.nextSteps') + '. ';
-
-                // Add each suggestion
-                mailItem.suggestions.forEach((suggestion, index) => {
-                    textToSpeak += `${suggestion}. `;
-                });
+                await ttsService.speak(
+                    textToSpeak,
+                    () => {
+                        setIsGeneratingAudio(false);
+                        setIsPlaying(true);
+                    },
+                    () => {
+                        setIsPlaying(false);
+                        ttsService.setIsSpeaking(false);
+                    },
+                    (error) => {
+                        setIsGeneratingAudio(false);
+                        console.error('TTS Error:', error);
+                        setIsPlaying(false);
+                        ttsService.setIsSpeaking(false);
+                    },
+                    audioPath || undefined // Pass the pre-fetched path!
+                );
+            } catch (error) {
+                setIsGeneratingAudio(false);
+                console.error('TTS execution error', error);
             }
-
-            // Start speaking
-            await ttsService.speak(
-                textToSpeak,
-                // onStart callback
-                () => {
-                    setIsGeneratingAudio(false);
-                    setIsPlaying(true);
-                },
-                // onFinish callback
-                () => {
-                    setIsPlaying(false);
-                    ttsService.setIsSpeaking(false);
-                },
-                // onError callback
-                (error) => {
-                    setIsGeneratingAudio(false);
-                    console.error('TTS Error:', error);
-                    setIsPlaying(false);
-                    ttsService.setIsSpeaking(false);
-                }
-            );
         }
     };
 
@@ -140,6 +170,64 @@ export const MailSummaryScreen: React.FC = () => {
             </SafeAreaView>
         );
     }
+
+    if (isFetchingAudio) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <View style={styles.emptyContainer}>
+                    <ActivityIndicator size="large" color="#000F54" />
+                    {/* <Text style={[styles.emptyText, { marginTop: wp(4) }]}>Preparing Audio Summary...</Text> */}
+                </View>
+            </SafeAreaView>
+        );
+    }
+
+    const parseLink = (linkItem: string) => {
+        const match = linkItem.match(/^(.*?) \((.*)\)$/);
+        if (match) {
+            const part1 = match[1];
+            const part2 = match[2];
+
+            // Check if second part looks like a URL (common format: Text (URL))
+            if (part2.startsWith('http') || part2.startsWith('www')) {
+                return { url: part2, text: part1 };
+            }
+            // Check if first part looks like a URL (format: URL (Text))
+            if (part1.startsWith('http') || part1.startsWith('www')) {
+                return { url: part1, text: part2 };
+            }
+
+            // Default fallback if detection fails (assume URL (Text) to match original behavior, or Text (URL)?)
+            // Given the original code was url: match[1], let's stick to that unless it looks like a URL is in the second part
+            return { url: part1, text: part2 };
+        }
+        return { url: linkItem, text: linkItem };
+    };
+
+    const handleLinkPress = async (url: string) => {
+        try {
+            // Ensure protocol is present and remove whitespace
+            let urlToOpen = url.trim();
+            if (!urlToOpen.startsWith('http')) {
+                urlToOpen = `https://${urlToOpen}`;
+            }
+
+            const canOpen = await Linking.canOpenURL(urlToOpen);
+            if (canOpen) {
+                await Linking.openURL(urlToOpen);
+            } else {
+                console.log('Cannot open URL:', urlToOpen);
+                // Try opening anyway as canOpenURL can be flaky on Android
+                try {
+                    await Linking.openURL(urlToOpen);
+                } catch (e) {
+                    console.error('Force open failed:', e);
+                }
+            }
+        } catch (error) {
+            console.error('Error handling link press:', error);
+        }
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -185,13 +273,38 @@ export const MailSummaryScreen: React.FC = () => {
                         </View>
                         <Text style={styles.summaryText}>{mailItem.summary}</Text>
 
+                        {/* Links Section */}
+                        {mailItem.links && mailItem.links.length > 0 && (
+                            <View style={styles.linksContainer}>
+                                <Text style={styles.sectionTitle}>{t('mailSummary.links', { defaultValue: 'Links' })}</Text>
+                                <View style={styles.linksList}>
+                                    {mailItem.links.map((link, index) => {
+                                        const { url, text } = parseLink(link);
+                                        return (
+                                            <TouchableOpacity
+                                                key={index}
+                                                style={styles.linkButton}
+                                                onPress={() => handleLinkPress(url)}
+                                                activeOpacity={0.7}
+                                            >
+                                                <Text style={styles.linkText} numberOfLines={1}>{text.charAt(0).toUpperCase() + text.slice(1)}</Text>
+                                                <ExternalLink size={wp(4)} color="#000F54" />
+                                            </TouchableOpacity>
+                                        );
+                                    })}
+                                </View>
+                            </View>
+                        )}
+
+
                         {canReadOutLoud() && (
                             <TouchableOpacity
-                                style={styles.readOutLoudButton}
+                                style={[styles.readOutLoudButton, isFetchingAudio && { opacity: 0.7 }]}
                                 onPress={handleListen}
                                 activeOpacity={0.7}
+                                disabled={isFetchingAudio}
                             >
-                                {isGeneratingAudio ? (
+                                {isGeneratingAudio || isFetchingAudio ? (
                                     <ActivityIndicator size="small" color="#FFFFFF" style={styles.readOutLoudIcon} />
                                 ) : (
                                     <Volume2 size={wp(5)} color="#FFFFFF" style={styles.readOutLoudIcon} />
@@ -199,7 +312,9 @@ export const MailSummaryScreen: React.FC = () => {
                                 <Text style={styles.readOutLoudText}>
                                     {isGeneratingAudio
                                         ? 'Generating...'
-                                        : (isPlaying ? t('mailSummary.stopReading') : t('mailSummary.readOutLoud'))
+                                        : isFetchingAudio
+                                            ? 'Preparing Audio...'
+                                            : (isPlaying ? t('mailSummary.stopReading') : t('mailSummary.readOutLoud'))
                                     }
                                 </Text>
                             </TouchableOpacity>
@@ -608,5 +723,28 @@ const styles = StyleSheet.create({
         fontSize: wp(6),
         fontFamily: Platform.OS === 'ios' ? fonts.sourceSerif.semiBold : fonts.sourceSerif.semiBoldItalic,
         fontStyle: Platform.OS === 'ios' ? 'italic' : 'normal',
+    },
+    linksContainer: {
+        marginTop: hp(2),
+    },
+    linksList: {
+        gap: hp(1),
+    },
+    linkButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        backgroundColor: '#F3F4F6',
+        padding: wp(3),
+        borderRadius: wp(2),
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+    },
+    linkText: {
+        fontSize: wp(3.5),
+        color: '#000F54',
+        fontFamily: fonts.inter.medium,
+        flex: 1,
+        marginRight: wp(2),
     },
 });

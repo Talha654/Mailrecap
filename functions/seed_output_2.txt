@@ -1,0 +1,18 @@
+Starting seed process...
+Error seeding data: Error: Could not load the default credentials. Browse to https://cloud.google.com/docs/authentication/getting-started for more information.
+    at GoogleAuth.getApplicationDefaultAsync (/Users/talhasiddiqui/Documents/mailrecap/functions/node_modules/google-auth-library/build/src/auth/googleauth.js:207:19)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async GoogleAuth.getClient (/Users/talhasiddiqui/Documents/mailrecap/functions/node_modules/google-auth-library/build/src/auth/googleauth.js:624:17)
+    at async GrpcClient._getCredentials (/Users/talhasiddiqui/Documents/mailrecap/functions/node_modules/google-gax/src/grpc.ts:207:20)
+    at async GrpcClient.createStub (/Users/talhasiddiqui/Documents/mailrecap/functions/node_modules/google-gax/src/grpc.ts:409:19)
+Caused by: Error
+    at Query._get (/Users/talhasiddiqui/Documents/mailrecap/functions/node_modules/@google-cloud/firestore/build/src/reference.js:1738:23)
+    at Query.get (/Users/talhasiddiqui/Documents/mailrecap/functions/node_modules/@google-cloud/firestore/build/src/reference.js:1726:21)
+    at seedTestMail (/Users/talhasiddiqui/Documents/mailrecap/functions/src/scripts/seedDueDateTest.ts:22:14)
+    at Object.<anonymous> (/Users/talhasiddiqui/Documents/mailrecap/functions/src/scripts/seedDueDateTest.ts:91:1)
+    at Module._compile (node:internal/modules/cjs/loader:1529:14)
+    at Module.m._compile (/Users/talhasiddiqui/Documents/mailrecap/functions/node_modules/ts-node/src/index.ts:1618:23)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1613:10)
+    at Object.require.extensions.<computed> [as .ts] (/Users/talhasiddiqui/Documents/mailrecap/functions/node_modules/ts-node/src/index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1275:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:1096:12)

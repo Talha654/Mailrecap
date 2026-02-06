@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkHabitReminders = void 0;
 const functions = require("firebase-functions/v1");
 const admin = require("firebase-admin");
+const firestore_1 = require("firebase-admin/firestore");
 const fcm_1 = require("./utils/fcm");
 const confidence_1 = require("./utils/confidence");
 /**
@@ -10,7 +11,7 @@ const confidence_1 = require("./utils/confidence");
  */
 exports.checkHabitReminders = functions.pubsub.schedule('every 30 minutes').onRun(async (_context) => {
     const db = admin.firestore();
-    const now = admin.firestore.Timestamp.now();
+    const now = firestore_1.Timestamp.now();
     const todayStr = new Date().toISOString().split('T')[0];
     console.log('[HabitReminder] Starting check...');
     try {

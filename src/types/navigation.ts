@@ -18,7 +18,7 @@ export type RootStackParamList = {
     [SCREENS.CAMERA_PERMISSION]: undefined;
     [SCREENS.CAMERA_SCREEN]: undefined;
     [SCREENS.MAIL_SUMMARY]: { mailItem: MailItem };
-    [SCREENS.ARCHIVE]: undefined;
+    [SCREENS.INBOX]: undefined;
 };
 
 // Screen names as constants for type safety

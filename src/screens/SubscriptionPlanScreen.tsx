@@ -11,7 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { SCREENS } from '../navigation';
 import { fonts } from '../constants/fonts';
 import { Shield, Sparkles } from 'lucide-react-native';
-import { icons } from '../constants/images';
+import { icons, images } from '../constants/images';
 
 type PlanId = 'essentials_monthly' | 'essentials_yearly' | 'plus_monthly' | 'plus_yearly';
 
@@ -58,10 +58,10 @@ export const SubscriptionPlanScreen: React.FC = () => {
                 }
             ],
             features: [
-                'Up to 10 letters per month',
-                'Mail summaries shown in large, easy-to-read text',
-                'Suggestions for next steps (pay, call, save, calendar, etc.)',
-                'Archive of all scanned mail so you can find things later'
+                'Up to 10 mail summaries per month.',
+                'Smart bullets that suggest the best way to move forward with your mail.',
+                'Automatic inbox organization that prioritizes mail by due date and urgency.',
+                'Timely push notifications so important mail is never missed.'
             ]
         },
         {
@@ -81,10 +81,12 @@ export const SubscriptionPlanScreen: React.FC = () => {
                 }
             ],
             features: [
-                'Unlimited letters per month',
-                'Mail summaries in large text + spoken read-out',
-                'Suggestions for next steps on every letter',
-                'Archive of all scanned mail with full history'
+                'Unlimited mail scans and summaries each month.',
+                'Read-aloud summaries for hands-free listening.',
+                'Clear action guidance on every letter to help you move forward.',
+                'Automatic inbox organization that categorizes your mail.',
+                'Priority sorting based on due dates and urgency.',
+                'Timely push notifications so important mail is never missed.'
             ]
         }
     ];
@@ -458,14 +460,11 @@ export const SubscriptionPlanScreen: React.FC = () => {
                 <View style={styles.container}>
                     {/* Icon */}
                     <View style={styles.iconContainer}>
-                        <View style={styles.iconCircle}>
-                            <Image source={icons.mail} style={styles.icon} resizeMode="contain" />
-                        </View>
+                        <Image source={icons.mailIcon_withBackground} style={styles.icon} resizeMode="contain" />
                     </View>
 
-                    {/* Title */}
-                    <Text style={styles.title}>{t('home.title')}</Text>
-                    <Text style={styles.subtitle}>{t('subscriptionPlan.mailMadeSimple')}</Text>
+                    {/* Logo */}
+                    <Image source={images.welcome_logo} style={styles.logo} resizeMode="contain" />
                     {/* Tiers */}
                     <View style={styles.tiersContainer}>
                         {tiers.map(renderTier)}
@@ -555,18 +554,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: hp(2),
     },
-    iconCircle: {
+    icon: {
         width: wp(18),
         height: wp(18),
-        borderRadius: wp(9),
-        backgroundColor: '#D6212F',
-        alignItems: 'center',
-        justifyContent: 'center',
     },
-    icon: {
-        width: wp(9),
-        height: wp(9),
-        tintColor: '#fff',
+    logo: {
+        width: wp(60),
+        height: hp(10),
+        alignSelf: 'center',
+        marginBottom: hp(2),
     },
     title: {
         fontSize: wp(6.5),

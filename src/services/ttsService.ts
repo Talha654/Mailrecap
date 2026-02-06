@@ -32,14 +32,15 @@ class TTSService {
         text: string,
         onStart?: () => void,
         onFinish?: () => void,
-        onError?: (error: any) => void
+        onError?: (error: any) => void,
+        audioPath?: string // New optional parameter
     ): Promise<void> {
         try {
             await this.stop();
             this.shouldStop = false;
             this.onFinishCallback = onFinish;
 
-            const filePath = await this.downloadAudio(text);
+            const filePath = audioPath || await this.prepareAudio(text);
 
             if (this.shouldStop) return;
 
@@ -51,7 +52,7 @@ class TTSService {
         }
     }
 
-    private async downloadAudio(text: string): Promise<string> {
+    async prepareAudio(text: string): Promise<string> {
         // Create a unique filename based on text length and some content hash (simplified)
         // ideally use a proper hash but for now simplify
         const safeText = text.slice(0, 20).replace(/[^a-z0-9]/gi, '_');

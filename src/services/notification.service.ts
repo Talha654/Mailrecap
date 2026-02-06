@@ -5,8 +5,9 @@
  * This service operates automatically with no manual user controls.
  */
 
-import { Platform } from 'react-native';
+import { Platform, PermissionsAndroid } from 'react-native';
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
+import notifee, { AndroidImportance } from '@notifee/react-native';
 import { getFirestore, getAuth } from './firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -18,7 +19,10 @@ const NOTIFICATION_PERMISSION_KEY = 'fcm_permission_requested';
  */
 export async function initializeNotifications(): Promise<void> {
     try {
-        console.log('[FCM] Initializing notifications...');
+        // Create notification channel for Android
+        if (Platform.OS === 'android') {
+            await createNotificationChannel();
+        }
 
         // Request permission (iOS primarily)
         const permissionGranted = await requestNotificationPermission();
@@ -33,15 +37,31 @@ export async function initializeNotifications(): Promise<void> {
             // Set up foreground notification handler
             setupForegroundHandler();
 
-            // Set up background notification handler
-            setupBackgroundHandler();
-
-            console.log('[FCM] Notifications initialized successfully');
-        } else {
-            console.log('[FCM] Notification permission not granted');
+            // NOTE: Background handler is registered in index.js
+            // We don't register it here to avoid duplicate registrations
         }
     } catch (error) {
         console.error('[FCM] Error initializing notifications:', error);
+    }
+}
+
+/**
+ * Create Android notification channel
+ * Required for Android 8.0+ to display notifications
+ */
+async function createNotificationChannel(): Promise<void> {
+    try {
+        const channelId = 'mailrecap_reminders';
+        await notifee.createChannel({
+            id: channelId,
+            name: 'Mail Reminders',
+            description: 'Notifications for mail summaries and reminders',
+            importance: AndroidImportance.HIGH,
+            sound: 'default',
+            vibration: true,
+        });
+    } catch (error) {
+        console.error('[FCM] Error creating notification channel:', error);
     }
 }
 
@@ -52,6 +72,23 @@ export async function initializeNotifications(): Promise<void> {
  */
 async function requestNotificationPermission(): Promise<boolean> {
     try {
+        // For Android 13+, we need to explicitly request POST_NOTIFICATIONS permission
+        if (Platform.OS === 'android' && Platform.Version >= 33) {
+            const granted = await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+                {
+                    title: 'Notification Permission',
+                    message: 'This app needs notification permission to send you important mail reminders.',
+                    buttonPositive: 'Allow',
+                    buttonNegative: 'Deny',
+                }
+            );
+
+            if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+                return false;
+            }
+        }
+
         // Check if we've already requested permission
         const alreadyRequested = await AsyncStorage.getItem(NOTIFICATION_PERMISSION_KEY);
 
@@ -60,13 +97,7 @@ async function requestNotificationPermission(): Promise<boolean> {
 
         if (authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
             authStatus === messaging.AuthorizationStatus.PROVISIONAL) {
-            console.log('[FCM] Permission already granted');
             return true;
-        }
-
-        if (authStatus === messaging.AuthorizationStatus.DENIED) {
-            console.log('[FCM] Permission previously denied');
-            return false;
         }
 
         // Request permission
@@ -77,7 +108,6 @@ async function requestNotificationPermission(): Promise<boolean> {
             newAuthStatus === messaging.AuthorizationStatus.AUTHORIZED ||
             newAuthStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
-        console.log('[FCM] Permission request result:', enabled ? 'granted' : 'denied');
         return enabled;
     } catch (error) {
         console.error('[FCM] Error requesting permission:', error);
@@ -103,8 +133,6 @@ async function registerFCMToken(retryCount = 0): Promise<void> {
             console.warn('[FCM] No token received');
             return;
         }
-
-        console.log('[FCM] Token received:', token.substring(0, 20) + '...');
 
         // Store token in Firestore for the current user
         await storeFCMToken(token);
@@ -149,8 +177,6 @@ async function storeFCMToken(token: string): Promise<void> {
             fcmTokenUpdatedAt: new Date(),
             notificationsEnabled: true,
         }, { merge: true });
-
-        console.log('[FCM] Token stored in Firestore for user:', userId);
     } catch (error) {
         console.error('[FCM] Error storing token:', error);
     }
@@ -172,11 +198,38 @@ function setupTokenRefreshListener(): void {
  */
 function setupForegroundHandler(): void {
     messaging().onMessage(async (remoteMessage) => {
-        console.log('[FCM] Foreground notification received:', remoteMessage);
-
         // The notification is automatically displayed by the system
         // We can add custom handling here if needed (e.g., in-app toast)
     });
+}
+
+/**
+ * Handle background notification message
+ * Must be exported for usage in index.js
+ */
+export async function handleBackgroundMessage(remoteMessage: FirebaseMessagingTypes.RemoteMessage): Promise<void> {
+    // Firebase automatically displays notifications that include the `notification` field
+    // We only need to manually display if it's a data-only message (no notification field)
+    // This prevents duplicate notifications
+
+    if (!remoteMessage.notification && remoteMessage.data && Platform.OS === 'android') {
+        // For data-only messages on Android, manually display using Notifee
+        try {
+            await notifee.displayNotification({
+                title: remoteMessage.data.title as string || 'New Notification',
+                body: remoteMessage.data.body as string || '',
+                android: {
+                    channelId: 'mailrecap_reminders',
+                    importance: AndroidImportance.HIGH,
+                    pressAction: {
+                        id: 'default',
+                    },
+                },
+            });
+        } catch (error) {
+            console.error('[FCM] Error displaying notification:', error);
+        }
+    }
 }
 
 /**
@@ -185,11 +238,7 @@ function setupForegroundHandler(): void {
  */
 function setupBackgroundHandler(): void {
     // This handler is called when the app is in background or quit
-    messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-        console.log('[FCM] Background notification received:', remoteMessage);
-        // Handle the notification silently
-        // The system will show the notification automatically
-    });
+    messaging().setBackgroundMessageHandler(handleBackgroundMessage);
 }
 
 /**

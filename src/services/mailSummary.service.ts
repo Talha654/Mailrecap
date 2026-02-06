@@ -24,6 +24,9 @@ export interface MailSummary {
     createdAt: Date;
     updatedAt: Date;
     actionableDate?: ActionableDate;
+    isCompleted?: boolean;
+    links?: string[];
+    category?: string;
 }
 
 export interface MailSummaryInput {
@@ -33,6 +36,9 @@ export interface MailSummaryInput {
     suggestions: string[];
     photoUrl?: string;
     actionableDate?: ActionableDate;
+    isCompleted?: boolean;
+    links?: string[];
+    category?: string;
 }
 
 /**
@@ -75,6 +81,9 @@ export async function saveMailSummary(data: MailSummaryInput): Promise<MailSumma
             photoUrl: data.photoUrl || undefined,
             createdAt: now,
             updatedAt: now,
+            isCompleted: data.isCompleted || false,
+            links: data.links || [],
+            category: data.category || 'General',
         };
 
         // Only add actionableDate if it exists
@@ -184,6 +193,15 @@ export async function getUserMailSummaries(): Promise<MailSummary[]> {
                 photoUrl: data.photoUrl || undefined,
                 createdAt: data.createdAt?.toDate() || new Date(),
                 updatedAt: data.updatedAt?.toDate() || new Date(),
+                isCompleted: data.isCompleted || false,
+                links: data.links || [],
+                category: data.category || 'General',
+                actionableDate: data.actionableDate ? {
+                    date: data.actionableDate.date.toDate().toISOString().split('T')[0], // Convert Timestamp back to YYYY-MM-DD
+                    type: data.actionableDate.type,
+                    confidence: data.actionableDate.confidence,
+                    description: data.actionableDate.description,
+                } : undefined
             });
         });
 
@@ -241,6 +259,15 @@ export async function getMailSummaryById(summaryId: string): Promise<MailSummary
             photoUrl: data.photoUrl,
             createdAt: data.createdAt?.toDate() || new Date(),
             updatedAt: data.updatedAt?.toDate() || new Date(),
+            isCompleted: data.isCompleted || false,
+            links: data.links || [],
+            category: data.category || 'General',
+            actionableDate: data.actionableDate ? {
+                date: data.actionableDate.date.toDate().toISOString().split('T')[0],
+                type: data.actionableDate.type,
+                confidence: data.actionableDate.confidence,
+                description: data.actionableDate.description,
+            } : undefined
         };
     } catch (error) {
         console.error('[MailSummary] Error fetching summary by ID:', error);

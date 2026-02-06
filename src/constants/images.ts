@@ -10,4 +10,5 @@ export const icons = {
     camera: require('../assets/icons/camera-icon.png'),
     file: require('../assets/icons/file-icon.png'),
     home: require('../assets/icons/home.png'),
+    mailIcon_withBackground: require('../assets/icons/mailIcon_withBackground.png'),
 }

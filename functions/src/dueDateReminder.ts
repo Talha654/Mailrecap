@@ -1,5 +1,6 @@
 import * as functions from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
+import { Timestamp } from 'firebase-admin/firestore';
 import { sendDueDateNotification } from './utils/fcm';
 import { isExactlyDaysAway } from './utils/confidence';
 
@@ -8,7 +9,15 @@ import { isExactlyDaysAway } from './utils/confidence';
  */
 export const checkDueDateReminders = functions.pubsub.schedule('0 8 * * *').onRun(async (_context: functions.EventContext) => {
     const db = admin.firestore();
-    const now = admin.firestore.Timestamp.now();
+    await executeDueDateCheck(db);
+});
+
+/**
+ * Execute the logic for checking due date reminders.
+ * Extracted for manual testing purposes.
+ */
+export async function executeDueDateCheck(db: admin.firestore.Firestore) {
+    const now = Timestamp.now();
 
     console.log('[DueDateReminder] Starting daily check...');
 
@@ -75,4 +84,4 @@ export const checkDueDateReminders = functions.pubsub.schedule('0 8 * * *').onRu
     } catch (error) {
         console.error('[DueDateReminder] Error:', error);
     }
-});
+}

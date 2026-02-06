@@ -18,18 +18,8 @@ import { analyzeImage } from '../services/openai.service';
 import Toast from 'react-native-toast-message';
 import { useSubscription } from '../hooks/useSubscription';
 
-export interface MailItem {
-    id: string;
-    userId?: string;
-    title: string;
-    summary: string;
-    fullText: string;
-    suggestions: string[];
-    date: string;
-    photoUrl?: string;
-    createdAt?: Date;
-    updatedAt?: Date;
-}
+import { MailItem } from '../types/mail';
+
 
 export const CameraScreen: React.FC = () => {
     const { t, i18n } = useTranslation();
@@ -184,6 +174,8 @@ export const CameraScreen: React.FC = () => {
             // Call OpenAI Backend with the user's selected language
             const analysisResult = await analyzeImage(photoPath, targetLanguage);
 
+            console.log('analysisResult=>>>>>>>>>>', analysisResult);
+
             // Complete the progress bar
             if (progressInterval.current) clearInterval(progressInterval.current);
             setProgress(100);
@@ -197,6 +189,9 @@ export const CameraScreen: React.FC = () => {
                         suggestions: analysisResult.suggestions,
                         photoUrl: photoPath,
                         date: analysisResult.date || new Date().toISOString().split('T')[0],
+                        links: analysisResult.links,
+                        category: analysisResult.category,
+                        actionableDate: analysisResult.actionableDate,
                     };
 
                     // Save to Firestore
@@ -215,6 +210,9 @@ export const CameraScreen: React.FC = () => {
                         date: savedSummary.createdAt.toISOString().split('T')[0],
                         createdAt: savedSummary.createdAt,
                         updatedAt: savedSummary.updatedAt,
+                        links: savedSummary.links,
+                        category: savedSummary.category,
+                        actionableDate: savedSummary.actionableDate,
                     };
 
                     setMailItems(prev => [newMailItem, ...prev]);
@@ -349,7 +347,7 @@ export const CameraScreen: React.FC = () => {
                     <View style={styles.privacyCardContainer}>
                         <View style={styles.privacyCard}>
                             <View style={styles.privacyIconContainer}>
-                                <Shield color="#FFFFFF" size={28} strokeWidth={2.5} />
+                                <Shield color="#FFFFFF" size={wp(10)} strokeWidth={2.5} />
                             </View>
                             <Text style={styles.privacyTitle}>{t('camera.privacyNoticeTitle')}</Text>
                             <Text style={styles.privacyText}>
@@ -546,11 +544,12 @@ const styles = StyleSheet.create({
     },
     cameraPreviewBox: {
         width: '100%',
-        height: hp(55),
+        flex: 1, // Fill available vertical space
+        // height: hp(55), // Removed fixed height
         backgroundColor: '#F1F5F9',
         borderWidth: 1,
         borderColor: '#D8DCDF',
-        borderRadius: 24,
+        borderRadius: 14,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -649,11 +648,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: hp(3),
+        alignSelf: 'center', // Ensure container is centered in card
     },
     processingIcon: {
         width: wp(10),
         height: wp(10),
-        tintColor: '#fff'
+        marginRight: wp(2),
+        tintColor: '#fff',
+        alignSelf: 'center', // Ensure icon is centered in gradient
     },
     processingTitle: {
         color: '#1f2937',
@@ -699,19 +701,21 @@ const styles = StyleSheet.create({
     },
     privacyCardContainer: {
         flex: 1,
-        justifyContent: 'center',
         paddingHorizontal: wp(6),
     },
     privacyCard: {
         backgroundColor: '#F8FAFC',
+        marginTop: hp(4),
         borderRadius: 20,
         padding: wp(6),
+        height: hp(40),
         borderWidth: 1,
         borderColor: '#E2E8F0',
+        justifyContent: "space-around"
     },
     privacyIconContainer: {
-        width: 48,
-        height: 48,
+        width: wp(20),
+        height: wp(20),
         borderRadius: 12,
         backgroundColor: '#D6212F',
         justifyContent: 'center',
@@ -720,15 +724,16 @@ const styles = StyleSheet.create({
         alignSelf: 'center'
     },
     privacyTitle: {
-        fontSize: 18,
+        fontSize: wp(7),
         fontWeight: '700',
         color: '#000',
         marginBottom: hp(1.5),
+        alignSelf: 'center'
     },
     privacyText: {
-        fontSize: 15,
-        color: '#64748B',
+        fontSize: wp(4.5),
+        color: '#13181fff',
         lineHeight: 22,
-        fontWeight: '400',
+        fontFamily: fonts.inter.regular
     },
 });

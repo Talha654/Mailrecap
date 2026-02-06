@@ -1,0 +1,18 @@
+Starting seed process...
+Error seeding data: Error: Unable to detect a Project Id in the current environment. 
+To learn more about authentication and Google APIs, visit: 
+https://cloud.google.com/docs/authentication/getting-started
+    at GoogleAuth.findAndCacheProjectId (/Users/talhasiddiqui/Documents/mailrecap/functions/node_modules/google-auth-library/build/src/auth/googleauth.js:124:19)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Firestore.initializeIfNeeded (/Users/talhasiddiqui/Documents/mailrecap/functions/node_modules/@google-cloud/firestore/build/src/index.js:1185:35)
+Caused by: Error
+    at Query._get (/Users/talhasiddiqui/Documents/mailrecap/functions/node_modules/@google-cloud/firestore/build/src/reference.js:1738:23)
+    at Query.get (/Users/talhasiddiqui/Documents/mailrecap/functions/node_modules/@google-cloud/firestore/build/src/reference.js:1726:21)
+    at seedTestMail (/Users/talhasiddiqui/Documents/mailrecap/functions/src/scripts/seedDueDateTest.ts:20:14)
+    at Object.<anonymous> (/Users/talhasiddiqui/Documents/mailrecap/functions/src/scripts/seedDueDateTest.ts:89:1)
+    at Module._compile (node:internal/modules/cjs/loader:1529:14)
+    at Module.m._compile (/Users/talhasiddiqui/Documents/mailrecap/functions/node_modules/ts-node/src/index.ts:1618:23)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1613:10)
+    at Object.require.extensions.<computed> [as .ts] (/Users/talhasiddiqui/Documents/mailrecap/functions/node_modules/ts-node/src/index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1275:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:1096:12)

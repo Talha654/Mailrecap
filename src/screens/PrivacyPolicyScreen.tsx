@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     },
     backButtonText: {
         fontSize: wp(4),
-        fontWeight: '600',
+        fontFamily: fonts.inter.bold,
         color: '#000F54',
     },
     titleContainer: {

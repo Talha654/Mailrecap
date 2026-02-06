@@ -1,5 +1,6 @@
 import * as functions from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
+import { Timestamp } from 'firebase-admin/firestore';
 import { sendHabitNotification } from './utils/fcm';
 import { calculateUsualScanTime, isThirtyMinutesBefore } from './utils/confidence';
 
@@ -8,7 +9,7 @@ import { calculateUsualScanTime, isThirtyMinutesBefore } from './utils/confidenc
  */
 export const checkHabitReminders = functions.pubsub.schedule('every 30 minutes').onRun(async (_context: functions.EventContext) => {
     const db = admin.firestore();
-    const now = admin.firestore.Timestamp.now();
+    const now = Timestamp.now();
     const todayStr = new Date().toISOString().split('T')[0];
 
     console.log('[HabitReminder] Starting check...');

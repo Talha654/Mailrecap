@@ -100,11 +100,11 @@ export const HomeScreen: React.FC = () => {
                         <View style={styles.navigationRow}>
                             <TouchableOpacity
                                 style={[styles.navButton, { borderRightWidth: 2 }]}
-                                onPress={() => navigation.navigate(SCREENS.ARCHIVE)}
+                                onPress={() => navigation.navigate(SCREENS.INBOX)}
                                 activeOpacity={0.7}
                             >
-                                <Icon name="folder" size={wp(8)} color="#FFFFFF" />
-                                <Text style={styles.navButtonText}>{t('home.navArchive')}</Text>
+                                <Image source={icons.mail} resizeMode='contain' style={styles.navButtonIcon} />
+                                <Text style={styles.navButtonText}>{t('home.navInbox')}</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
@@ -208,14 +208,19 @@ const styles = StyleSheet.create({
     },
     subscribeButtonText: {
         color: '#FFFFFF',
-        fontSize: wp(5),
-        fontFamily: fonts.sourceSerif.bold,
-        fontStyle: 'italic',
+        fontSize: wp(7),
+        fontFamily: Platform.OS === 'ios' ? fonts.sourceSerif.semiBold : fonts.sourceSerif.semiBoldItalic,
+        fontStyle: Platform.OS === 'ios' ? 'italic' : 'normal',
     },
     navigationRow: {
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center',
+    },
+    navButtonIcon: {
+        width: wp(9),
+        height: wp(9),
+
     },
     navButton: {
         alignItems: 'center',
@@ -225,7 +230,7 @@ const styles = StyleSheet.create({
     },
     navButtonText: {
         fontSize: wp(3),
-        fontWeight: '600',
+        fontFamily: fonts.inter.semiBold,
         color: '#FFFFFF',
         marginTop: hp(0.5),
         letterSpacing: 0.5,

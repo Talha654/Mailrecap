@@ -80,3 +80,7 @@ backend/.env
 # Large build artifacts
 *.apk
 *.aab
+
+# Google Service Accounts
+service-account.json
+*-firebase-adminsdk-*.json

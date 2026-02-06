@@ -5,3 +5,4 @@ export type { PlanType } from './PlanCard';
 export { PrivacyModal } from './PrivacyModal';
 export { ToastComponent, showSuccessToast, showErrorToast, showInfoToast } from './Toast';
 export * from './ui';
+export { MailCard } from './MailCard';

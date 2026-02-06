@@ -4,7 +4,7 @@ import axios from 'axios';
 import Toast from 'react-native-toast-message';
 
 const API_URL = 'https://backend-beta-three-41.vercel.app';
-// const API_URL = 'http://192.168.100.182:5001';
+// const API_URL = 'http://192.168.100.197:5001';
 
 export interface OpenAIResponse {
     title: string;
@@ -12,6 +12,14 @@ export interface OpenAIResponse {
     summary: string;
     suggestions: string[];
     fullText: string;
+    links?: string[];
+    category?: string;
+    actionableDate?: {
+        date: string;
+        type: 'payment' | 'deadline' | 'appointment' | 'expiry' | 'other';
+        confidence: 'HIGH' | 'MEDIUM' | 'LOW';
+        description: string;
+    };
 }
 
 export const analyzeImage = async (imagePath: string, targetLanguage: string = 'English'): Promise<OpenAIResponse> => {

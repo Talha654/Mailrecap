@@ -1,17 +1,25 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkDueDateReminders = void 0;
+exports.executeDueDateCheck = exports.checkDueDateReminders = void 0;
 const functions = require("firebase-functions/v1");
 const admin = require("firebase-admin");
+const firestore_1 = require("firebase-admin/firestore");
 const fcm_1 = require("./utils/fcm");
 const confidence_1 = require("./utils/confidence");
 /**
  * Scheduled Function: Check for due date reminders daily at 8:00 AM
  */
 exports.checkDueDateReminders = functions.pubsub.schedule('0 8 * * *').onRun(async (_context) => {
-    var _a;
     const db = admin.firestore();
-    const now = admin.firestore.Timestamp.now();
+    await executeDueDateCheck(db);
+});
+/**
+ * Execute the logic for checking due date reminders.
+ * Extracted for manual testing purposes.
+ */
+async function executeDueDateCheck(db) {
+    var _a;
+    const now = firestore_1.Timestamp.now();
     console.log('[DueDateReminder] Starting daily check...');
     try {
         // Query mail summaries with HIGH confidence actionable dates
@@ -67,5 +75,6 @@ exports.checkDueDateReminders = functions.pubsub.schedule('0 8 * * *').onRun(asy
     catch (error) {
         console.error('[DueDateReminder] Error:', error);
     }
-});
+}
+exports.executeDueDateCheck = executeDueDateCheck;
 //# sourceMappingURL=dueDateReminder.js.map
