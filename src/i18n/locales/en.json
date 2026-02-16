@@ -367,7 +367,10 @@
     "confirm": "Confirm",
     "positionMail": "Position Your Mail",
     "ensureVisible": "Ensure all text is visible",
-    "cameraView": "Camera view"
+    "cameraView": "Camera view",
+    "scanFailedTitle": "Scan Unclear",
+    "scanFailedMsg": "We couldn't read the text clearly. Please ensure good lighting and try scanning again.",
+    "scanAgain": "Scan Again"
   },
   "mailSummary": {
     "title": "Mail Summary",

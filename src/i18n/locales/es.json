@@ -352,7 +352,10 @@
     "confirm": "Confirmar",
     "positionMail": "Posiciona Tu Correo",
     "ensureVisible": "Asegura que todo el texto sea visible",
-    "cameraView": "Vista de cámara"
+    "cameraView": "Vista de cámara",
+    "scanFailedTitle": "Escaneo Poco Claro",
+    "scanFailedMsg": "No pudimos leer el texto claramente. Por favor asegura buena iluminación e intenta escanear de nuevo.",
+    "scanAgain": "Escanear de Nuevo"
   },
   "mailSummary": {
     "title": "Resumen del Correo",

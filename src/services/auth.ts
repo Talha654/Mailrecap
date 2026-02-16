@@ -1,5 +1,5 @@
 import { getAuth } from './firebase';
-import { createUserDocument } from './user';
+import { createUserDocument, findOrphanedUserByEmail } from './user';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import appleAuth from '@invertase/react-native-apple-authentication';
@@ -50,8 +50,21 @@ export async function signUpWithEmailPassword(email: string, password: string, d
     await AsyncStorage.setItem('userEmail', cred.user.email || '');
     console.log('[Auth] User ID saved to AsyncStorage:', cred.user.uid);
 
+    // Check for orphaned account to restore subscription
+    let revenueCatUserId = cred.user.uid;
+    try {
+        // Pass cred.user.uid to exclude the currently created document
+        const orphanedId = await findOrphanedUserByEmail(trimmedEmail, cred.user.uid);
+        if (orphanedId) {
+            console.log(`[Auth] Linked new account ${cred.user.uid} to orphaned ID ${orphanedId}`);
+            revenueCatUserId = orphanedId;
+        }
+    } catch (e) {
+        console.warn('[Auth] Failed to check for orphans:', e);
+    }
+
     // Identify user in RevenueCat
-    await revenueCatService.login(cred.user.uid);
+    await revenueCatService.login(revenueCatUserId);
 
     return cred.user;
 }
@@ -90,8 +103,25 @@ export async function signInWithGoogle() {
         await AsyncStorage.setItem('userId', userCredential.user.uid);
         await AsyncStorage.setItem('userEmail', userCredential.user.email || '');
 
+        // Check for orphaned account if this is a new user (or just always check to be safe)
+        let revenueCatUserId = userCredential.user.uid;
+        if (userCredential.additionalUserInfo?.isNewUser || true) { // Always check to catch re-installs/re-logins
+            try {
+                const userEmail = userCredential.user.email || '';
+                if (userEmail) {
+                    const orphanedId = await findOrphanedUserByEmail(userEmail, userCredential.user.uid);
+                    if (orphanedId) {
+                        console.log(`[Auth] Linked Google account ${userCredential.user.uid} to orphaned ID ${orphanedId}`);
+                        revenueCatUserId = orphanedId;
+                    }
+                }
+            } catch (e) {
+                console.warn('[Auth] Failed to check for orphans (Google):', e);
+            }
+        }
+
         // Identify user in RevenueCat
-        await revenueCatService.login(userCredential.user.uid);
+        await revenueCatService.login(revenueCatUserId);
 
         return userCredential.user;
     } catch (error) {
@@ -141,8 +171,23 @@ export async function signInWithApple() {
         await AsyncStorage.setItem('userId', userCredential.user.uid);
         await AsyncStorage.setItem('userEmail', userCredential.user.email || '');
 
+        // Check for orphaned account
+        let revenueCatUserId = userCredential.user.uid;
+        try {
+            const userEmail = userCredential.user.email || '';
+            if (userEmail) {
+                const orphanedId = await findOrphanedUserByEmail(userEmail);
+                if (orphanedId) {
+                    console.log(`[Auth] Linked Apple account ${userCredential.user.uid} to orphaned ID ${orphanedId}`);
+                    revenueCatUserId = orphanedId;
+                }
+            }
+        } catch (e) {
+            console.warn('[Auth] Failed to check for orphans (Apple):', e);
+        }
+
         // Identify user in RevenueCat
-        await revenueCatService.login(userCredential.user.uid);
+        await revenueCatService.login(revenueCatUserId);
 
         return userCredential.user;
     } catch (error) {

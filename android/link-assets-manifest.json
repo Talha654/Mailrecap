@@ -68,6 +68,10 @@
     {
       "path": "src/assets/fonts/SourceSerif4-SemiboldItalic.ttf",
       "sha1": "1e4793bef9d829aa5ecd13f7abac8afc9eb40e79"
+    },
+    {
+      "path": "src/assets/sounds/paper_swish.mp3",
+      "sha1": "8e535016d8b9f29e0d32b0b687fc046759a510fe"
     }
   ]
 }

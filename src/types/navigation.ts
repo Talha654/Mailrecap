@@ -17,7 +17,10 @@ export type RootStackParamList = {
     [SCREENS.SUBSCRIPTION_PLAN]: undefined;
     [SCREENS.CAMERA_PERMISSION]: undefined;
     [SCREENS.CAMERA_SCREEN]: undefined;
-    [SCREENS.MAIL_SUMMARY]: { mailItem: MailItem };
+    [SCREENS.MAIL_SUMMARY]: {
+        mailItem: MailItem;
+        localAudioPath?: string;
+    };
     [SCREENS.INBOX]: undefined;
 };
 

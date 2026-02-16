@@ -21,6 +21,7 @@ export interface MailSummary {
     fullText: string;
     suggestions: string[];
     photoUrl?: string;
+    audioUrl?: string;
     createdAt: Date;
     updatedAt: Date;
     actionableDate?: ActionableDate;
@@ -35,6 +36,7 @@ export interface MailSummaryInput {
     fullText: string;
     suggestions: string[];
     photoUrl?: string;
+    audioUrl?: string;
     actionableDate?: ActionableDate;
     isCompleted?: boolean;
     links?: string[];
@@ -79,6 +81,7 @@ export async function saveMailSummary(data: MailSummaryInput): Promise<MailSumma
             fullText: data.fullText,
             suggestions: data.suggestions,
             photoUrl: data.photoUrl || undefined,
+            audioUrl: data.audioUrl || undefined,
             createdAt: now,
             updatedAt: now,
             isCompleted: data.isCompleted || false,
@@ -191,6 +194,7 @@ export async function getUserMailSummaries(): Promise<MailSummary[]> {
                 fullText: data.fullText,
                 suggestions: data.suggestions || [],
                 photoUrl: data.photoUrl || undefined,
+                audioUrl: data.audioUrl || undefined,
                 createdAt: data.createdAt?.toDate() || new Date(),
                 updatedAt: data.updatedAt?.toDate() || new Date(),
                 isCompleted: data.isCompleted || false,
@@ -257,6 +261,7 @@ export async function getMailSummaryById(summaryId: string): Promise<MailSummary
             fullText: data.fullText,
             suggestions: data.suggestions || [],
             photoUrl: data.photoUrl,
+            audioUrl: data.audioUrl,
             createdAt: data.createdAt?.toDate() || new Date(),
             updatedAt: data.updatedAt?.toDate() || new Date(),
             isCompleted: data.isCompleted || false,

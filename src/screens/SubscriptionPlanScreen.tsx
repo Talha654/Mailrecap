@@ -230,17 +230,17 @@ export const SubscriptionPlanScreen: React.FC = () => {
                 return;
             }
 
-            console.log('[SubscriptionPlan] ✅ Found matching package!');
-            console.log('[SubscriptionPlan] ========================================');
-            console.log('[SubscriptionPlan] PURCHASE DETAILS:');
-            console.log('[SubscriptionPlan] Selected Plan ID:', selectedPlan);
-            console.log('[SubscriptionPlan] Package Identifier:', packageToPurchase.identifier);
-            console.log('[SubscriptionPlan] Product ID:', packageToPurchase.product.identifier);
-            console.log('[SubscriptionPlan] Product Title:', packageToPurchase.product.title);
-            console.log('[SubscriptionPlan] Price:', packageToPurchase.product.priceString);
-            console.log('[SubscriptionPlan] Product Type:', packageToPurchase.product.productType);
-            console.log('[SubscriptionPlan] ========================================');
-            console.log('[SubscriptionPlan] Attempting purchase...');
+            // console.log('[SubscriptionPlan] ✅ Found matching package!');
+            // console.log('[SubscriptionPlan] ========================================');
+            // console.log('[SubscriptionPlan] PURCHASE DETAILS:');
+            // console.log('[SubscriptionPlan] Selected Plan ID:', selectedPlan);
+            // console.log('[SubscriptionPlan] Package Identifier:', packageToPurchase.identifier);
+            // console.log('[SubscriptionPlan] Product ID:', packageToPurchase.product.identifier);
+            // console.log('[SubscriptionPlan] Product Title:', packageToPurchase.product.title);
+            // console.log('[SubscriptionPlan] Price:', packageToPurchase.product.priceString);
+            // console.log('[SubscriptionPlan] Product Type:', packageToPurchase.product.productType);
+            // console.log('[SubscriptionPlan] ========================================');
+            // console.log('[SubscriptionPlan] Attempting purchase...');
 
             const result = await revenueCatService.purchasePlan(packageToPurchase, selectedPlan);
 
@@ -562,7 +562,8 @@ const styles = StyleSheet.create({
         width: wp(60),
         height: hp(10),
         alignSelf: 'center',
-        marginBottom: hp(2),
+        marginTop: hp(1),
+        marginBottom: hp(4),
     },
     title: {
         fontSize: wp(6.5),

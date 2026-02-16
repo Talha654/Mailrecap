@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import Animated, { SharedTransition, withSpring } from 'react-native-reanimated';
 import { MailItem } from '../types/mail';
 import { wp, hp } from '../constants/StyleGuide';
 import { Check } from 'lucide-react-native';
@@ -8,8 +9,11 @@ import { getCategoryIcon } from '../constants/CategoryIcons';
 interface MailCardProps {
     item: MailItem;
     onPress: (item: MailItem) => void;
-    onToggleComplete: (id: string) => void;
+    onToggleComplete: (id: string, success?: boolean) => void;
 }
+
+// Custom transition removed due to runtime error with v4
+// const customTransition = SharedTransition.custom(...)
 
 export const MailCard: React.FC<MailCardProps> = ({ item, onPress, onToggleComplete }) => {
     const isPriority = item.actionableDate?.confidence === 'HIGH';
@@ -36,81 +40,86 @@ export const MailCard: React.FC<MailCardProps> = ({ item, onPress, onToggleCompl
     };
 
     return (
-        <TouchableOpacity
+        <Animated.View
             style={styles.cardContainer}
-            onPress={() => onPress(item)}
-            activeOpacity={0.9}
+            sharedTransitionTag={`mailCard-${item.id}`}
         >
-            <View style={styles.cardHeaderRow}>
-                <View style={styles.leftColumn}>
-                    <View style={[
-                        styles.iconWrapper,
-                        item.category === 'Suspicious' && styles.iconWrapperSuspicious
-                    ]}>
-                        {/* Dynamic icon based on category */}
-                        <Icon
-                            color={item.category === 'Suspicious' ? '#DC2626' : "#1F2937"}
-                            size={wp(6)}
-                        />
+            <TouchableOpacity
+                style={styles.innerContainer}
+                onPress={() => onPress(item)}
+                activeOpacity={0.9}
+            >
+                <View style={styles.cardHeaderRow}>
+                    <View style={styles.leftColumn}>
+                        <View style={[
+                            styles.iconWrapper,
+                            item.category === 'Suspicious' && styles.iconWrapperSuspicious
+                        ]}>
+                            {/* Dynamic icon based on category */}
+                            <Icon
+                                color={item.category === 'Suspicious' ? '#DC2626' : "#1F2937"}
+                                size={wp(6)}
+                            />
+                        </View>
                     </View>
-                </View>
 
-                <View style={styles.cardHeaderContent}>
-                    <Text style={styles.dateText}>{formatDate(item.date)}</Text>
-                    <View style={styles.badgesContainer}>
-                        {isPriority && (
-                            <View style={[styles.badge, styles.priorityBadge]}>
-                                <Text style={styles.priorityBadgeText}>PRIORITY</Text>
+                    <View style={styles.cardHeaderContent}>
+                        <Text style={styles.dateText}>{formatDate(item.date)}</Text>
+                        <View style={styles.badgesContainer}>
+                            {isPriority && (
+                                <View style={[styles.badge, styles.priorityBadge]}>
+                                    <Text style={styles.priorityBadgeText}>PRIORITY</Text>
+                                </View>
+                            )}
+                            <View style={[styles.badge, styles.packBadge]}>
+                                <Text style={styles.packBadgeText}>PACK</Text>
                             </View>
-                        )}
-                        <View style={[styles.badge, styles.packBadge]}>
-                            <Text style={styles.packBadgeText}>PACK</Text>
                         </View>
                     </View>
                 </View>
-            </View>
-            <View style={styles.checkContainer}>
-                <TouchableOpacity
-                    style={[
-                        styles.checkButton,
-                        item.isCompleted && styles.checkButtonCompleted
-                    ]}
-                    onPress={() => onToggleComplete(item.id)}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                    <Check color={item.isCompleted ? '#FFFFFF' : "#1F2937"} size={wp(4)} />
-                </TouchableOpacity>
+                <View style={styles.checkContainer}>
+                    <TouchableOpacity
+                        style={[
+                            styles.checkButton,
+                            item.isCompleted && styles.checkButtonCompleted
+                        ]}
+                        onPress={() => onToggleComplete(item.id, !item.isCompleted)}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                        <Check color={item.isCompleted ? '#FFFFFF' : "#1F2937"} size={wp(4)} />
+                    </TouchableOpacity>
 
-                <View style={styles.textContainer}>
-                    <Text style={styles.itemTitle} numberOfLines={1}>
-                        {item.title}
-                    </Text>
-                    <Text style={styles.itemSummary} numberOfLines={2}>
-                        {item.summary}
-                    </Text>
-                </View>
-            </View>
-            {(hasAction || dueDate) && (
-                <View style={styles.actionFooter}>
-                    <View style={styles.actionRow}>
-                        {hasAction && (
-                            <View style={styles.actionLeft}>
-                                <Text style={styles.actionLabel}>ACTION:</Text>
-                                <Text style={styles.actionValue} numberOfLines={1}>
-                                    Take action
-                                </Text>
-                            </View>
-                        )}
-                        {dueDate && (
-                            <View style={styles.actionRight}>
-                                <Text style={styles.dueLabel}>DUE:</Text>
-                                <Text style={styles.dueValue}>{formatDueDate(dueDate)}</Text>
-                            </View>
-                        )}
+                    <View style={styles.textContainer}>
+                        <Text style={styles.itemTitle} numberOfLines={1}>
+                            {item.title}
+                        </Text>
+                        <Text style={styles.itemSummary} numberOfLines={2}>
+                            {item.summary}
+                        </Text>
                     </View>
                 </View>
-            )}
-        </TouchableOpacity>
+                {(hasAction || dueDate) && (
+                    <View style={styles.actionFooter}>
+                        <View style={styles.actionRow}>
+                            {hasAction && (
+                                <View style={styles.actionLeft}>
+                                    <Text style={styles.actionLabel}>ACTION:</Text>
+                                    <Text style={styles.actionValue} numberOfLines={1}>
+                                        Take action
+                                    </Text>
+                                </View>
+                            )}
+                            {dueDate && (
+                                <View style={styles.actionRight}>
+                                    <Text style={styles.dueLabel}>DUE:</Text>
+                                    <Text style={styles.dueValue}>{formatDueDate(dueDate)}</Text>
+                                </View>
+                            )}
+                        </View>
+                    </View>
+                )}
+            </TouchableOpacity>
+        </Animated.View>
     );
 };
 
@@ -118,14 +127,15 @@ const styles = StyleSheet.create({
     cardContainer: {
         backgroundColor: '#FFFFFF',
         borderRadius: wp(5),
-        padding: wp(5),
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.05,
         shadowRadius: 8,
-        elevation: 3,
-        position: 'relative',
+        // elevation: 3, // Removed validation shadow on Android
         marginBottom: hp(2), // Add margin bottom for list spacing
+    },
+    innerContainer: {
+        padding: wp(5),
     },
     cardHeaderRow: {
         flexDirection: 'row',

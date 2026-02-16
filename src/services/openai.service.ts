@@ -4,7 +4,7 @@ import axios from 'axios';
 import Toast from 'react-native-toast-message';
 
 const API_URL = 'https://backend-beta-three-41.vercel.app';
-// const API_URL = 'http://192.168.100.197:5001';
+// const API_URL = 'http://192.168.100.214:5001';
 
 export interface OpenAIResponse {
     title: string;
