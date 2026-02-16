@@ -10,3 +10,9 @@
 # Add any project specific keep options here:
 -dontwarn com.gemalto.jp2.**
 -keep class com.tom_roush.pdfbox.** { *; }
+
+# Google Play Services
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.android.gms.**
+-keep class com.google.firebase.** { *; }
+

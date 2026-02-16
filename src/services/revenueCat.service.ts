@@ -320,29 +320,34 @@ class RevenueCatService {
 
             if (!isExpired) {
                 if (isExistingTransaction) {
-                    // If transaction exists, this is just a sync/restore (e.g. app restart)
-                    // We MUST preserve the existing scan count from the user's profile
-                    // unless it's undefined, in which case we might default (but careful not to overwrite valid 0)
-                    if (userData?.scansRemaining !== undefined) {
-                        scansRemaining = userData.scansRemaining;
-                        console.log(`[RevenueCat] Existing transaction ${transactionId}. Preserving count: ${scansRemaining}`);
+                    // If transaction exists, this is just a sync/restore (e.g. app restart or re-login with old ID)
+
+                    // CRITICAL FIX: Ensure Plus users get unlimited scans even if restoring
+                    if (planType.includes('plus')) {
+                        scansRemaining = -1;
+                        console.log(`[RevenueCat] Restoring 'Plus' plan. Enforcing unlimited scans: ${scansRemaining}`);
                     } else {
-                        // If undefined but transaction exists, it might be the "missing field" bug we just fixed.
-                        console.log(`[RevenueCat] Existing transaction but no scan count. Defaulting to: ${scansRemaining}`);
+                        // For non-unlimited plans, we try to preserve existing count if valid
+                        if (userData?.scansRemaining !== undefined) {
+                            scansRemaining = userData.scansRemaining;
+                            console.log(`[RevenueCat] Existing transaction ${transactionId}. Preserving count: ${scansRemaining}`);
+                        } else {
+                            // Recovery for undefined count
+                            scansRemaining = 10;
+                            console.log(`[RevenueCat] Existing transaction but no scan count. Defaulting to: ${scansRemaining}`);
+                        }
                     }
                 } else {
-                    // New transaction (New purchase or Renewal)
+                    // New transaction (New purchase or Renewal) - defaults already set correctly above (-1 or 10)
                     console.log(`[RevenueCat] New transaction ${transactionId}. Refilling scans to: ${scansRemaining}`);
                 }
             } else {
                 console.log(`[RevenueCat] Subscription expired. Leaving scansRemaining as is or handling elsewhere.`);
-                // Ideally we shouldn't reset scans if expired, but if we switch to no_plan, scans might be irrelevant or 0.
-                // Let's keep existing if possible, or maybe set to 0? 
-                // For now, let's strictly preserve what's there if userData exists.
+                // If expired, we DO NOT restore subscription features.
                 if (userData?.scansRemaining !== undefined) {
                     scansRemaining = userData.scansRemaining;
                 } else {
-                    scansRemaining = 0; // Default for expired/no_plan
+                    scansRemaining = 0;
                 }
             }
 
@@ -414,6 +419,11 @@ class RevenueCatService {
             console.log(`[RevenueCat] Logging in as ${appUserId}...`);
             const { customerInfo } = await Purchases.logIn(appUserId);
             console.log('[RevenueCat] Login successful');
+
+            // Automatically sync subscription status to DB after login
+            // This handles the "Account Restore" case where we logged in with an old ID
+            await this.syncSubscriptionStatus();
+
             return customerInfo;
         } catch (error) {
             console.error('[RevenueCat] Login error:', error);

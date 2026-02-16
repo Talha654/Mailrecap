@@ -1,6 +1,7 @@
 const OpenAI = require('openai');
 const fs = require('fs');
 const config = require('../config/env');
+const { parseResponse } = require('../utils/responseParser');
 
 const openai = new OpenAI({
     apiKey: config.openaiApiKey,
@@ -145,6 +146,11 @@ If the document contains URLs, QR codes, or payment portals:
 - Do NOT encourage clicking
 - Do NOT imply fraud for official-looking mail
 
+IMPORTANT:
+- Only extract valid full URLs starting with http:// or https://.
+- Do NOT include plain text descriptions as links.
+- If a link is just text like "Visit our website" without a URL, IGNORE it.
+
 If the category is Suspicious, you MAY include a brief neutral caution about links using probabilistic language.
 
 ========================
@@ -235,104 +241,6 @@ Due Date:
     }
 };
 
-// ========================
-// PARSER UPDATED FOR v3
-// ========================
-
-const parseResponse = (content) => {
-    let title = '';
-    let category = '';
-    let date = '';
-    let summary = '';
-    let links = [];
-    let steps = [];
-    let dueDate = null;
-
-    const lines = content.split('\n');
-    let section = '';
-
-    for (let line of lines) {
-        line = line.trim();
-
-        if (line.startsWith('Title:')) {
-            section = 'title';
-            title = line.replace('Title:', '').trim();
-            continue;
-        }
-        if (line.startsWith('Category:')) {
-            section = 'category';
-            category = line.replace('Category:', '').trim();
-            continue;
-        }
-        if (line.startsWith('Date:')) {
-            section = 'date';
-            date = line.replace('Date:', '').trim();
-            continue;
-        }
-        if (line.startsWith('Summary:')) {
-            section = 'summary';
-            continue;
-        }
-        if (line.startsWith('Smart Bullets:')) {
-            section = 'steps';
-            continue;
-        }
-        if (line.startsWith('Links:')) {
-            section = 'links';
-            continue;
-        }
-        if (line.startsWith('Due Date:')) {
-            const val = line.replace('Due Date:', '').trim();
-            if (val && val !== 'NONE') {
-                dueDate = val;
-            }
-            continue;
-        }
-
-        // Section Parsing
-        if (section === 'summary' && line) {
-            summary += line + ' ';
-        }
-
-        if (section === 'steps') {
-            const cleanedLine = line.replace(/^\d+[\.)]\s*/, '').trim();
-            if (cleanedLine) {
-                steps.push(cleanedLine);
-            }
-        }
-
-        if (section === 'links') {
-            // Remove bullet points if present
-            const cleanedLink = line.replace(/^-\s*/, '').trim();
-            if (cleanedLink && cleanedLink !== 'NONE') {
-                links.push(cleanedLink);
-            }
-        }
-    }
-
-    // Build result object
-    const result = {
-        title: title || 'Mail Summary',
-        category: category || 'General',
-        date: date || 'Today',
-        summary: summary.trim(),
-        suggestions: steps,
-        links: links,
-        fullText: content,
-    };
-
-    // Map Due Date to actionableDate structure for compatibility
-    if (dueDate) {
-        result.actionableDate = {
-            date: dueDate,
-            type: 'deadline', // Defaulting to deadline as it's a due date
-            confidence: 'HIGH', // Assuming high confidence since it's explicitly extracted
-            description: 'Due Date extracted from document'
-        };
-    }
-
-    return result;
-};
 
 module.exports = {
     analyzeImage,

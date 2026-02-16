@@ -1221,6 +1221,9 @@ PODS:
   - Firebase/Messaging (12.3.0):
     - Firebase/CoreOnly
     - FirebaseMessaging (~> 12.3.0)
+  - Firebase/Storage (12.3.0):
+    - Firebase/CoreOnly
+    - FirebaseStorage (~> 12.3.0)
   - FirebaseAppCheckInterop (12.3.0)
   - FirebaseAuth (12.3.0):
     - FirebaseAppCheckInterop (~> 12.3.0)
@@ -1275,6 +1278,13 @@ PODS:
     - GoogleUtilities/UserDefaults (~> 8.1)
     - nanopb (~> 3.30910.0)
   - FirebaseSharedSwift (12.3.0)
+  - FirebaseStorage (12.3.0):
+    - FirebaseAppCheckInterop (~> 12.3.0)
+    - FirebaseAuthInterop (~> 12.3.0)
+    - FirebaseCore (~> 12.3.0)
+    - FirebaseCoreExtension (~> 12.3.0)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GTMSessionFetcher/Core (< 6.0, >= 3.4)
   - fmt (11.0.2)
   - glog (0.3.5)
   - GoogleDataTransport (10.1.0):
@@ -3301,6 +3311,36 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
+  - react-native-skia (2.4.19):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React
+    - React-callinvoker
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
   - React-NativeModulesApple (0.81.4):
     - boost
     - DoubleConversion
@@ -3854,6 +3894,10 @@ PODS:
     - FirebaseCoreExtension
     - React-Core
     - RNFBApp
+  - RNFBStorage (23.4.0):
+    - Firebase/Storage (= 12.3.0)
+    - React-Core
+    - RNFBApp
   - RNFS (2.20.0):
     - React-Core
   - RNGoogleSignin (16.0.0):
@@ -4359,6 +4403,7 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
+  - "react-native-skia (from `../node_modules/@shopify/react-native-skia`)"
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-oscompat (from `../node_modules/react-native/ReactCommon/oscompat`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -4395,6 +4440,7 @@ DEPENDENCIES:
   - "RNFBAuth (from `../node_modules/@react-native-firebase/auth`)"
   - "RNFBFirestore (from `../node_modules/@react-native-firebase/firestore`)"
   - "RNFBMessaging (from `../node_modules/@react-native-firebase/messaging`)"
+  - "RNFBStorage (from `../node_modules/@react-native-firebase/storage`)"
   - RNFS (from `../node_modules/react-native-fs`)
   - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
   - RNImageCropPicker (from `../node_modules/react-native-image-crop-picker`)
@@ -4428,6 +4474,7 @@ SPEC REPOS:
     - FirebaseInstallations
     - FirebaseMessaging
     - FirebaseSharedSwift
+    - FirebaseStorage
     - GoogleDataTransport
     - GoogleSignIn
     - GoogleUtilities
@@ -4534,6 +4581,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
+  react-native-skia:
+    :path: "../node_modules/@shopify/react-native-skia"
   React-NativeModulesApple:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios"
   React-oscompat:
@@ -4606,6 +4655,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-firebase/firestore"
   RNFBMessaging:
     :path: "../node_modules/@react-native-firebase/messaging"
+  RNFBStorage:
+    :path: "../node_modules/@react-native-firebase/storage"
   RNFS:
     :path: "../node_modules/react-native-fs"
   RNGoogleSignin:
@@ -4655,6 +4706,7 @@ SPEC CHECKSUMS:
   FirebaseInstallations: ca48ec60ea51b66b9f214a91847ea3720cde97f5
   FirebaseMessaging: 919ce76cb353f0c36d463f5461d8ab584e6ed765
   FirebaseSharedSwift: a08758c5e2617f3ebb47865b45ecca6f02cd35ea
+  FirebaseStorage: 23c8869d6e9d93f159766c4f81f6ead6410aff4f
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
@@ -4705,6 +4757,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: e4a65db5f4df53369f39558c0cf2f480f6d3d6c7
   React-microtasksnativemodule: 86334c5c06315e0bccb7b6e6f2c905e92f98b615
   react-native-safe-area-context: ee1e8e2a7abf737a8d4d9d1a5686a7f2e7466236
+  react-native-skia: ae52108a7267f3a1e6ad60ba1578d7f14944a51f
   React-NativeModulesApple: 8c7eb6057b00c191a11ad5ced41826ec5a0e4d78
   React-oscompat: 93b5535ea7f7dff46aaee4f78309a70979bdde9d
   React-perflogger: 5536d2df3d18fe0920263466f7b46a56351c0510
@@ -4743,6 +4796,7 @@ SPEC CHECKSUMS:
   RNFBAuth: 532fc90de38b99d8bd9de4f81a8b5179cf582fd2
   RNFBFirestore: d295349d6114ca57449adc0f081c657e0ccb64f5
   RNFBMessaging: 614675f78c9f357a1c7a3abeeda265afb6eff276
+  RNFBStorage: d234a0037fb5580d2578b59798ff49910651f1fc
   RNFS: 89de7d7f4c0f6bafa05343c578f61118c8282ed8
   RNGoogleSignin: 85c82d6e1494bd4a039804959362e63771f7ad5a
   RNImageCropPicker: 0a63af4b79e514c1edd6c3152f19300c5ed85312

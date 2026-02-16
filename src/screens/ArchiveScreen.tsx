@@ -49,9 +49,35 @@ import {
     Mail,
     Check,
 } from 'lucide-react-native';
+import { Confetti } from '../components/Confetti';
+import Sound from 'react-native-sound';
 
-const CATEGORIES = [
-    { id: 'All', label: 'All', icon: undefined },
+const exitingAnimation = (values: any) => {
+    'worklet';
+    const animations = {
+        opacity: withTiming(0, { duration: 300 }),
+        transform: [{ scale: withTiming(0.95, { duration: 300 }) }],
+        height: withTiming(0, { duration: 300 }),
+        marginBottom: withTiming(0, { duration: 300 }),
+    };
+    const initialValues = {
+        opacity: 1,
+        transform: [{ scale: 1 }],
+        height: values.currentHeight,
+        marginBottom: 10,
+        originX: 0,
+        originY: 0,
+        width: values.currentWidth,
+        globalOriginX: values.currentGlobalOriginX,
+        globalOriginY: values.currentGlobalOriginY,
+    };
+    return {
+        animations,
+        initialValues,
+    };
+};
+
+const CATEGORIES: { id: string; label: string; icon?: any }[] = [
     { id: 'Completed', label: 'Completed', icon: Check },
 ];
 
@@ -105,10 +131,49 @@ export const ArchiveScreen: React.FC = () => {
 
     const [categories, setCategories] = useState(CATEGORIES);
     const [mailItems, setMailItems] = useState<MailItem[]>([]);
-    const [selectedCategory, setSelectedCategory] = useState('All');
+    const [selectedCategory, setSelectedCategory] = useState('General');
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [confettiTrigger, setConfettiTrigger] = useState(0);
+
+    const completionSound = React.useRef<Sound | null>(null);
+
+    useEffect(() => {
+        Sound.setCategory('Playback');
+
+        // Pre-load the sound
+        completionSound.current = new Sound('paper_swish.mp3', Sound.MAIN_BUNDLE, (error) => {
+            if (error) {
+                console.log('[ArchiveScreen] Failed to load the completion sound (paper_swish.mp3). Please ensure it exists in android/app/src/main/res/raw or the iOS bundle.', error);
+            } else {
+                console.log('[ArchiveScreen] Completion sound loaded successfully.');
+            }
+        });
+
+        return () => {
+            if (completionSound.current) {
+                completionSound.current.release();
+            }
+        };
+    }, []);
+
+    const playSound = () => {
+        if (completionSound.current) {
+            completionSound.current.play((success) => {
+                if (!success) {
+                    console.log('[ArchiveScreen] Call to play sound failed');
+                }
+            });
+        } else {
+            // Fallback if not loaded yet
+            const sound = new Sound('paper_swish.mp3', Sound.MAIN_BUNDLE, (error) => {
+                if (!error) {
+                    sound.play(() => sound.release());
+                }
+            });
+        }
+    };
 
     // Animation for the mail count
     const scale = useSharedValue(1);
@@ -144,6 +209,7 @@ export const ArchiveScreen: React.FC = () => {
                 fullText: summary.fullText,
                 suggestions: summary.suggestions,
                 photoUrl: summary.photoUrl,
+                audioUrl: summary.audioUrl,
                 date: summary.createdAt.toISOString().split('T')[0],
                 createdAt: summary.createdAt,
                 updatedAt: summary.updatedAt,
@@ -190,48 +256,85 @@ export const ArchiveScreen: React.FC = () => {
         fetchMailSummaries();
     }, []);
 
-    // Dynamically update categories based on mailItems
+    // Dynamically update categories based on mailItems status
     useEffect(() => {
-        if (mailItems.length === 0) return;
-
-        const newCategories = [...CATEGORIES];
-
+        // 1. Find active (uncompleted) categories
+        const activeCategories = new Set<string>();
         mailItems.forEach(item => {
-            if (item.category) {
-                // Check if category is already present (exact match or substring match)
-                // e.g. If "Utilities" comes in, and we have "Bills & Utilities", don't add it.
-                const exists = newCategories.some(cat =>
-                    item.category && (
-                        cat.id === item.category ||
-                        cat.id.includes(item.category) ||
-                        item.category.includes(cat.id)
-                    )
-                );
-
-                if (!exists && item.category) {
-                    console.log('Adding new category:', item.category);
-                    newCategories.push({
-                        id: item.category,
-                        label: item.category.charAt(0).toUpperCase() + item.category.slice(1),
-                        icon: undefined // No icon for dynamic categories for now
-                    });
-                }
+            if (!item.isCompleted && item.category) {
+                activeCategories.add(item.category);
             }
         });
 
-        // Only update if we actually added something to avoid infinite loops if we were careless
-        // (though simple length check is efficient enough here)
-        if (newCategories.length > categories.length) {
-            setCategories(newCategories);
-        }
-    }, [mailItems]);
+        // 2. Construct the list
+        // Priority: 'General' -> Other Active (sorted) -> 'Completed'
+        const nextCategories: { id: string; label: string; icon?: any }[] = [];
 
-    const handleToggleComplete = async (id: string) => {
+        // 2a. Add 'General' if it exists in active categories
+        if (activeCategories.has('General')) {
+            nextCategories.push({
+                id: 'General',
+                label: 'General',
+                icon: undefined
+            });
+            activeCategories.delete('General'); // Remove so it's not added again
+        }
+
+        // 2b. Add remaining active categories (sorted alphabetically for consistency)
+        const sortedOthers = Array.from(activeCategories).sort();
+        sortedOthers.forEach(cat => {
+            nextCategories.push({
+                id: cat,
+                label: cat.charAt(0).toUpperCase() + cat.slice(1),
+                icon: undefined
+            });
+        });
+
+        // 2c. Always add 'Completed' at the end
+        nextCategories.push({ id: 'Completed', label: 'Completed', icon: Check });
+
+        // 4. Update state if categories changed
+        setCategories(prev => {
+            const isSame = prev.length === nextCategories.length &&
+                prev.every((val, index) => val.id === nextCategories[index].id);
+            if (isSame) return prev;
+            return nextCategories;
+        });
+
+        // 5. Handle selection validity
+        // If the currently selected category is no longer valid (hidden), switch to 'General'
+        // If 'General' is not in the list, just pick the first available one (that is not completed, ideally)
+        const isSelectedValid = nextCategories.some(c => c.id === selectedCategory);
+
+        if (!isSelectedValid) {
+            const generalExists = nextCategories.some(c => c.id === 'General');
+            if (generalExists) {
+                setSelectedCategory('General');
+            } else if (nextCategories.length > 0) {
+                // Fallback to the first non-completed category if possible
+                const firstNonCompleted = nextCategories.find(c => c.id !== 'Completed');
+                if (firstNonCompleted) {
+                    setSelectedCategory(firstNonCompleted.id);
+                } else {
+                    setSelectedCategory(nextCategories[0].id);
+                }
+            }
+        }
+
+    }, [mailItems, selectedCategory]);
+
+    const handleToggleComplete = async (id: string, newCompletedState?: boolean) => {
         // Optimistic update
         const itemToUpdate = mailItems.find(item => item.id === id);
         if (!itemToUpdate) return;
 
-        const newIsCompleted = !itemToUpdate.isCompleted;
+        // If explicitly passed, use it, otherwise toggle
+        const newIsCompleted = newCompletedState !== undefined ? newCompletedState : !itemToUpdate.isCompleted;
+
+        if (newIsCompleted) {
+            playSound();
+            setConfettiTrigger(prev => prev + 1);
+        }
 
         setMailItems(prevItems => prevItems.map(item => {
             if (item.id === id) {
@@ -265,12 +368,10 @@ export const ArchiveScreen: React.FC = () => {
             // For other categories, show ONLY active (uncompleted) items
             filtered = mailItems.filter(item => !item.isCompleted);
 
-            if (selectedCategory !== 'All') {
-                filtered = filtered.filter(item => {
-                    // Strictly match category
-                    return item.category === selectedCategory;
-                });
-            }
+            // Filter by specific category
+            filtered = filtered.filter(item => {
+                return item.category === selectedCategory;
+            });
         }
         return filtered;
     }, [selectedCategory, mailItems]);
@@ -317,17 +418,23 @@ export const ArchiveScreen: React.FC = () => {
         </View>
     );
 
+    const handleMailPress = (item: MailItem) => {
+        navigation.navigate(SCREENS.MAIL_SUMMARY, {
+            mailItem: item,
+        });
+    };
+
     const renderMailItem = ({ item, index }: { item: MailItem, index: number }) => {
         return (
             <Animated.View
                 layout={Layout.duration(300)}
                 entering={FadeInLeft.delay(index * 200).duration(300)}
-                exiting={FadeOut.duration(200)}
+                exiting={exitingAnimation}
             >
                 <MailCard
                     key={item.id}
                     item={item}
-                    onPress={(mailItem) => navigation.navigate(SCREENS.MAIL_SUMMARY, { mailItem })}
+                    onPress={handleMailPress}
                     onToggleComplete={handleToggleComplete}
                 />
             </Animated.View>
@@ -340,9 +447,7 @@ export const ArchiveScreen: React.FC = () => {
             <View style={styles.header}>
                 <View style={styles.headerTop}>
                     <Animated.Text style={[styles.headerCount, animatedCountStyle]}>
-                        {selectedCategory === 'All'
-                            ? mailItems.filter(item => !item.isCompleted).length // Total active count for All
-                            : filteredItems.length}
+                        {filteredItems.length}
                     </Animated.Text>
                     <Text style={styles.headerLabel}>TOTAL INBOX</Text>
                 </View>
@@ -391,6 +496,9 @@ export const ArchiveScreen: React.FC = () => {
                 />
             )}
 
+
+
+            <Confetti trigger={confettiTrigger} />
         </SafeAreaView>
     );
 };

@@ -352,7 +352,10 @@
     "confirm": "Konfime",
     "positionMail": "Pozisyon Lapòs Ou",
     "ensureVisible": "Asire tout tèks vizib",
-    "cameraView": "Wè kamera"
+    "cameraView": "Wè kamera",
+    "scanFailedTitle": "Eskanè pa Klè",
+    "scanFailedMsg": "Nou pa t 'kapab li tèks la klè. Tanpri asire bon ekleraj epi eseye eskane ankò.",
+    "scanAgain": "Eskane Ankò"
   },
   "mailSummary": {
     "title": "Rezime Lapòs",

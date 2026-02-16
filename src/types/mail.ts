@@ -18,6 +18,7 @@ export interface MailItem {
     };
     links?: string[];
     photoUrl?: string;
+    audioUrl?: string;
     createdAt?: Date;
     updatedAt?: Date;
 }

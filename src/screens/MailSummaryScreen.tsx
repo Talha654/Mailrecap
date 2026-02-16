@@ -1,35 +1,40 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, Image, ActivityIndicator, Platform } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
-import LinearGradient from 'react-native-linear-gradient';
-import auth from '@react-native-firebase/auth';
-import firestore from '@react-native-firebase/firestore';
+
+
 import { Volume2, ExternalLink } from 'lucide-react-native';
-import { CustomButton } from '../components/ui/CustomButton';
+
 import { wp, hp } from '../constants/StyleGuide';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../types/navigation';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SCREENS } from '../navigation';
 import { fonts } from '../constants/fonts';
-import { icons, images } from '../constants/images';
+import { images } from '../constants/images';
 import { ttsService } from '../services/ttsService';
 import { useSubscription } from '../hooks/useSubscription';
 
 type MailSummaryScreenRouteProp = RouteProp<RootStackParamList, 'MailSummary'>;
+
+// Custom transition removed due to runtime error
+// const customTransition = SharedTransition.custom(...)
 
 export const MailSummaryScreen: React.FC = () => {
     const { t } = useTranslation();
     const navigation: any = useNavigation();
     const route = useRoute<MailSummaryScreenRouteProp>();
     const mailItem = route.params?.mailItem || null;
-    const [showSuggestions, setShowSuggestions] = useState(false);
+    const localAudioPath = route.params?.localAudioPath; // Get local path from params
+
+
     const [isPlaying, setIsPlaying] = useState(false);
-    const [isFullTextExpanded, setIsFullTextExpanded] = useState(false);
-    const { subscriptionPlan, loading: loadingSubscription } = useSubscription();
+
+    const { subscriptionPlan } = useSubscription();
     const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
     const [audioPath, setAudioPath] = useState<string | null>(null);
-    const [isFetchingAudio, setIsFetchingAudio] = useState(true); // Start as true to block UI
+    const [isFetchingAudio, setIsFetchingAudio] = useState(false); // Changed to false to avoid blocking loader
 
     // console.log('mailItem =>>>>>>>>>>>>', mailItem);
 
@@ -65,8 +70,39 @@ export const MailSummaryScreen: React.FC = () => {
 
                 try {
                     if (isActive) setIsFetchingAudio(true);
+
+                    // 1. Check if we have a passed-in local path (from CameraScreen)
+                    if (localAudioPath) {
+                        console.log('[MailSummaryScreen] Using passed localAudioPath:', localAudioPath);
+                        setAudioPath(localAudioPath);
+                        setIsFetchingAudio(false);
+                        return;
+                    }
+
+                    // 2. Check if we already have a valid audio file from DB (Remote URL)
+                    if (mailItem.audioUrl) {
+                        console.log('[MailSummaryScreen] Found audioUrl, downloading/caching:', mailItem.audioUrl);
+                        try {
+                            const localPath = await ttsService.downloadAudio(mailItem.audioUrl);
+                            console.log('[MailSummaryScreen] Audio ready at:', localPath);
+                            if (isActive) {
+                                setAudioPath(localPath);
+                                setIsFetchingAudio(false);
+                                return;
+                            }
+                        } catch (err) {
+                            console.warn('[MailSummaryScreen] Failed to download audio:', err);
+                            // Fallback to streaming remote URL if download fails
+                            if (isActive) setAudioPath(mailItem.audioUrl);
+                        }
+                    } else {
+                        console.log('[MailSummaryScreen] No audioUrl in mailItem');
+                    }
+
+                    // 3. Fallback to generating if no valid stored audio
                     const text = getSummaryText();
                     if (text) {
+                        console.log('[MailSummaryScreen] Generating new audio (fallback)...');
                         const path = await ttsService.prepareAudio(text);
                         if (isActive) setAudioPath(path);
                     }
@@ -85,9 +121,9 @@ export const MailSummaryScreen: React.FC = () => {
                 ttsService.stop();
                 setIsPlaying(false);
                 setAudioPath(null); // Reset audio state
-                setIsFetchingAudio(true); // Reset to true so next visit shows loader
+                setIsFetchingAudio(false); // Reset to false
             };
-        }, [mailItem, getSummaryText])
+        }, [mailItem, getSummaryText, localAudioPath])
     );
 
     const canReadOutLoud = () => {
@@ -134,18 +170,18 @@ export const MailSummaryScreen: React.FC = () => {
         }
     };
 
-    const handleBack = () => {
-        navigation.goBack();
-    };
+    // const handleBack = () => {
+    //     navigation.goBack();
+    // };
 
     const handleHome = () => {
 
         navigation.navigate(SCREENS.HOME);
     };
 
-    const handleUnlockUnlimited = () => {
-        navigation.navigate(SCREENS.SUBSCRIPTION_PLAN);
-    };
+    // const handleUnlockUnlimited = () => {
+    //     navigation.navigate(SCREENS.SUBSCRIPTION_PLAN);
+    // };
 
     const handleUpgradeNow = () => {
         navigation.navigate(SCREENS.SUBSCRIPTION_PLAN);
@@ -171,16 +207,7 @@ export const MailSummaryScreen: React.FC = () => {
         );
     }
 
-    if (isFetchingAudio) {
-        return (
-            <SafeAreaView style={styles.container}>
-                <View style={styles.emptyContainer}>
-                    <ActivityIndicator size="large" color="#000F54" />
-                    {/* <Text style={[styles.emptyText, { marginTop: wp(4) }]}>Preparing Audio Summary...</Text> */}
-                </View>
-            </SafeAreaView>
-        );
-    }
+
 
     const parseLink = (linkItem: string) => {
         const match = linkItem.match(/^(.*?) \((.*)\)$/);
@@ -188,17 +215,26 @@ export const MailSummaryScreen: React.FC = () => {
             const part1 = match[1];
             const part2 = match[2];
 
+            // Helper to check if string looks like a URL
+            const isUrl = (str: string) => {
+                return /^(https?:\/\/|www\.|[a-zA-Z0-9-]+\.[a-zA-Z]{2,})/.test(str);
+            };
+
             // Check if second part looks like a URL (common format: Text (URL))
-            if (part2.startsWith('http') || part2.startsWith('www')) {
+            if (isUrl(part2)) {
                 return { url: part2, text: part1 };
             }
             // Check if first part looks like a URL (format: URL (Text))
-            if (part1.startsWith('http') || part1.startsWith('www')) {
+            if (isUrl(part1)) {
                 return { url: part1, text: part2 };
             }
 
-            // Default fallback if detection fails (assume URL (Text) to match original behavior, or Text (URL)?)
-            // Given the original code was url: match[1], let's stick to that unless it looks like a URL is in the second part
+            // Default fallback: if part2 has no spaces and part1 does, assume part2 is the URL
+            if (!part2.includes(' ') && part1.includes(' ')) {
+                return { url: part2, text: part1 };
+            }
+
+            // Otherwise stick to original assumption or just return as is
             return { url: part1, text: part2 };
         }
         return { url: linkItem, text: linkItem };
@@ -208,8 +244,17 @@ export const MailSummaryScreen: React.FC = () => {
         try {
             // Ensure protocol is present and remove whitespace
             let urlToOpen = url.trim();
-            if (!urlToOpen.startsWith('http')) {
-                urlToOpen = `https://${urlToOpen}`;
+
+            // basic check if it already has a scheme
+            const hasScheme = /^[a-zA-Z]+:\/\//.test(urlToOpen);
+
+            if (!hasScheme) {
+                // Determine if it's likely an email or just a web link
+                if (urlToOpen.includes('@') && !urlToOpen.includes('/')) {
+                    urlToOpen = `mailto:${urlToOpen}`;
+                } else {
+                    urlToOpen = `https://${urlToOpen}`;
+                }
             }
 
             const canOpen = await Linking.canOpenURL(urlToOpen);
@@ -261,7 +306,10 @@ export const MailSummaryScreen: React.FC = () => {
                 </View> */}
 
                 {/* Main Content Card */}
-                <View style={styles.mainCard}>
+                <Animated.View
+                    style={styles.mainCard}
+                    sharedTransitionTag={`mailCard-${mailItem.id}`}
+                >
                     {/* Mail Title */}
                     <Text style={styles.mailTitle}>{mailItem.title}</Text>
                     <Text style={styles.mailDate}>{mailItem.date}</Text>
@@ -299,7 +347,7 @@ export const MailSummaryScreen: React.FC = () => {
 
                         {canReadOutLoud() && (
                             <TouchableOpacity
-                                style={[styles.readOutLoudButton, isFetchingAudio && { opacity: 0.7 }]}
+                                style={[styles.readOutLoudButton, isFetchingAudio && styles.readOutLoudButtonDisabled]}
                                 onPress={handleListen}
                                 activeOpacity={0.7}
                                 disabled={isFetchingAudio}
@@ -350,7 +398,7 @@ export const MailSummaryScreen: React.FC = () => {
                             <Text style={styles.fullText}>{mailItem.fullText}</Text>
                         )}
                     </View> */}
-                </View>
+                </Animated.View>
 
                 {/* AI Disclaimer */}
                 <View style={styles.aiDisclaimer}>
@@ -388,28 +436,30 @@ export const MailSummaryScreen: React.FC = () => {
             </ScrollView>
 
             {/*Free Trial Bottom Section */}
-            {(!subscriptionPlan || subscriptionPlan === 'free_trial') && (
-                <View style={styles.bottomSectionContainer}>
-                    <Image
-                        source={images.bottom_img}
-                        style={styles.bottomStripImage}
-                        resizeMode="contain"
-                    />
-                    <View style={styles.trialInfoContainer}>
-                        <Text style={styles.trialText}>Free Trial</Text>
-                        <Text style={styles.daysLeftText}>7 days left</Text>
+            {
+                (!subscriptionPlan || subscriptionPlan === 'free_trial') && (
+                    <View style={styles.bottomSectionContainer}>
+                        <Image
+                            source={images.bottom_img}
+                            style={styles.bottomStripImage}
+                            resizeMode="contain"
+                        />
+                        <View style={styles.trialInfoContainer}>
+                            <Text style={styles.trialText}>Free Trial</Text>
+                            <Text style={styles.daysLeftText}>7 days left</Text>
+                        </View>
+                        <TouchableOpacity
+                            style={styles.newUpgradeButton}
+                            onPress={handleUpgradeNow}
+                            activeOpacity={0.8}
+                        >
+                            <Text style={styles.newUpgradeButtonText}>{t('mailSummary.upgradeNow')}</Text>
+                        </TouchableOpacity>
                     </View>
-                    <TouchableOpacity
-                        style={styles.newUpgradeButton}
-                        onPress={handleUpgradeNow}
-                        activeOpacity={0.8}
-                    >
-                        <Text style={styles.newUpgradeButtonText}>{t('mailSummary.upgradeNow')}</Text>
-                    </TouchableOpacity>
-                </View>
-            )}
+                )
+            }
 
-        </SafeAreaView>
+        </SafeAreaView >
     );
 };
 
@@ -747,4 +797,7 @@ const styles = StyleSheet.create({
         flex: 1,
         marginRight: wp(2),
     },
+    readOutLoudButtonDisabled: {
+        opacity: 0.7,
+    }
 });

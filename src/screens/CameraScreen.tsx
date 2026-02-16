@@ -19,6 +19,8 @@ import Toast from 'react-native-toast-message';
 import { useSubscription } from '../hooks/useSubscription';
 
 import { MailItem } from '../types/mail';
+import { ttsService } from '../services/ttsService';
+import { CustomModal } from '../components/ui/CustomModal';
 
 
 export const CameraScreen: React.FC = () => {
@@ -30,6 +32,7 @@ export const CameraScreen: React.FC = () => {
     const [showCamera, setShowCamera] = useState(true);
     const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
     const [currentStep, setCurrentStep] = useState(1);
+    const [showErrorModal, setShowErrorModal] = useState(false);
     const progressInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
     // Reset screen to step 1 when user navigates back
@@ -147,6 +150,8 @@ export const CameraScreen: React.FC = () => {
     //     }
     // };
 
+    // ... existing imports
+
     const processPhoto = async (photoPath: string) => {
         setIsProcessing(true);
         setShowCamera(false);
@@ -176,6 +181,53 @@ export const CameraScreen: React.FC = () => {
 
             console.log('analysisResult=>>>>>>>>>>', analysisResult);
 
+            // Check if analysis is empty or invalid
+            if (!analysisResult || !analysisResult.summary || !analysisResult.title ||
+                (analysisResult.summary === 'Summary not available' && analysisResult.title === 'No Title Found')) {
+
+                if (progressInterval.current) clearInterval(progressInterval.current);
+                setIsProcessing(false);
+                setProgress(0);
+
+                // Clear photo and reset step so modal shows over camera view
+                setCapturedPhoto(null);
+                setCurrentStep(1);
+                setShowCamera(true);
+
+                setShowErrorModal(true);
+                return;
+            }
+
+            // Pre-fetch audio
+            let localAudioPath: string | undefined;
+            let remoteAudioUrl: string | undefined;
+
+            try {
+                if (analysisResult.summary) {
+                    let textToSpeak = analysisResult.summary;
+                    if (analysisResult.suggestions && analysisResult.suggestions.length > 0) {
+                        textToSpeak += '. ' + t('mailSummary.nextSteps') + '. ';
+                        analysisResult.suggestions.forEach((suggestion: string) => {
+                            textToSpeak += `${suggestion}. `;
+                        });
+                    }
+                    // 1. Generate local audio
+                    localAudioPath = await ttsService.prepareAudio(textToSpeak);
+                    console.log('[CameraScreen] Audio pre-fetched at:', localAudioPath);
+
+                    // 2. Upload to Firebase Storage
+                    try {
+                        remoteAudioUrl = await ttsService.uploadAudio(localAudioPath);
+                        console.log('[CameraScreen] Audio uploaded to:', remoteAudioUrl);
+                    } catch (uploadError) {
+                        console.warn('[CameraScreen] Failed to upload audio:', uploadError);
+                        // If upload fails, we still have localAudioPath, but we won't have a remote URL for DB persistence
+                    }
+                }
+            } catch (ttsError) {
+                console.warn('[CameraScreen] Failed to pre-fetch audio:', ttsError);
+            }
+
             // Complete the progress bar
             if (progressInterval.current) clearInterval(progressInterval.current);
             setProgress(100);
@@ -188,6 +240,7 @@ export const CameraScreen: React.FC = () => {
                         fullText: analysisResult.fullText,
                         suggestions: analysisResult.suggestions,
                         photoUrl: photoPath,
+                        audioUrl: remoteAudioUrl, // Save remote URL to DB
                         date: analysisResult.date || new Date().toISOString().split('T')[0],
                         links: analysisResult.links,
                         category: analysisResult.category,
@@ -207,6 +260,7 @@ export const CameraScreen: React.FC = () => {
                         fullText: savedSummary.fullText,
                         suggestions: savedSummary.suggestions,
                         photoUrl: savedSummary.photoUrl,
+                        audioUrl: savedSummary.audioUrl, // This will be the remote URL
                         date: savedSummary.createdAt.toISOString().split('T')[0],
                         createdAt: savedSummary.createdAt,
                         updatedAt: savedSummary.updatedAt,
@@ -221,8 +275,11 @@ export const CameraScreen: React.FC = () => {
                     setProgress(0);
                     setShowCamera(true);
 
-                    // Navigate to MailSummaryScreen with the new mail item
-                    navigation.navigate(SCREENS.MAIL_SUMMARY, { mailItem: newMailItem });
+                    // Navigate to MailSummaryScreen with the new mail item AND the local audio path
+                    navigation.navigate(SCREENS.MAIL_SUMMARY, {
+                        mailItem: newMailItem,
+                        localAudioPath: localAudioPath // Pass local path for immediate playback
+                    });
                     setCurrentStep(1);
                 } catch (error) {
                     console.error('[CameraScreen] Error saving summary:', error);
@@ -474,7 +531,22 @@ export const CameraScreen: React.FC = () => {
                     </TouchableOpacity>
                 </View>
             </View>
-        </SafeAreaView>
+
+            <CustomModal
+                visible={showErrorModal}
+                title={t('camera.scanFailedTitle') || "Scan Unclear"}
+                message={t('camera.scanFailedMsg') || "We couldn't read the text clearly. Please ensure good lighting and try scanning again."}
+                onConfirm={() => {
+                    setShowErrorModal(false);
+                    setCapturedPhoto(null);
+                    setCurrentStep(1);
+                    setShowCamera(true);
+                }}
+                confirmText={t('camera.scanAgain') || "Scan Again"}
+                type="warning"
+                icon={<Icon name="broken-image" size={40} color="#F59E0B" />}
+            />
+        </SafeAreaView >
     );
 };
 
