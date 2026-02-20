@@ -78,6 +78,7 @@ const exitingAnimation = (values: any) => {
 };
 
 const CATEGORIES: { id: string; label: string; icon?: any }[] = [
+    { id: 'General', label: 'General' },
     { id: 'Completed', label: 'Completed', icon: Check },
 ];
 
@@ -143,9 +144,10 @@ export const ArchiveScreen: React.FC = () => {
         Sound.setCategory('Playback');
 
         // Pre-load the sound
-        completionSound.current = new Sound('paper_swish.mp3', Sound.MAIN_BUNDLE, (error) => {
+        const soundFile = Platform.OS === 'android' ? 'mail_complete' : 'mail_complete.wav';
+        completionSound.current = new Sound(soundFile, Sound.MAIN_BUNDLE, (error) => {
             if (error) {
-                console.log('[ArchiveScreen] Failed to load the completion sound (paper_swish.mp3). Please ensure it exists in android/app/src/main/res/raw or the iOS bundle.', error);
+                console.log(`[ArchiveScreen] Failed to load the completion sound (${soundFile}). Please ensure it exists in android/app/src/main/res/raw or the iOS bundle.`, error);
             } else {
                 console.log('[ArchiveScreen] Completion sound loaded successfully.');
             }
@@ -167,7 +169,8 @@ export const ArchiveScreen: React.FC = () => {
             });
         } else {
             // Fallback if not loaded yet
-            const sound = new Sound('paper_swish.mp3', Sound.MAIN_BUNDLE, (error) => {
+            const soundFile = Platform.OS === 'android' ? 'mail_complete' : 'mail_complete.wav';
+            const sound = new Sound(soundFile, Sound.MAIN_BUNDLE, (error) => {
                 if (!error) {
                     sound.play(() => sound.release());
                 }
@@ -270,18 +273,18 @@ export const ArchiveScreen: React.FC = () => {
         // Priority: 'General' -> Other Active (sorted) -> 'Completed'
         const nextCategories: { id: string; label: string; icon?: any }[] = [];
 
-        // 2a. Add 'General' if it exists in active categories
-        if (activeCategories.has('General')) {
-            nextCategories.push({
-                id: 'General',
-                label: 'General',
-                icon: undefined
-            });
-            activeCategories.delete('General'); // Remove so it's not added again
+        // 2a. Add 'General' (predefined)
+        const generalCat = CATEGORIES.find(c => c.id === 'General');
+        if (generalCat) {
+            nextCategories.push(generalCat);
         }
 
-        // 2b. Add remaining active categories (sorted alphabetically for consistency)
-        const sortedOthers = Array.from(activeCategories).sort();
+        // 2b. Add remaining active categories (sorted alphabetically)
+        // Exclude 'General' and 'Completed' as they are predefined
+        const sortedOthers = Array.from(activeCategories)
+            .filter(cat => cat !== 'General' && cat !== 'Completed')
+            .sort();
+
         sortedOthers.forEach(cat => {
             nextCategories.push({
                 id: cat,
@@ -290,8 +293,11 @@ export const ArchiveScreen: React.FC = () => {
             });
         });
 
-        // 2c. Always add 'Completed' at the end
-        nextCategories.push({ id: 'Completed', label: 'Completed', icon: Check });
+        // 2c. Add 'Completed' (predefined)
+        const completedCat = CATEGORIES.find(c => c.id === 'Completed');
+        if (completedCat) {
+            nextCategories.push(completedCat);
+        }
 
         // 4. Update state if categories changed
         setCategories(prev => {
@@ -368,10 +374,12 @@ export const ArchiveScreen: React.FC = () => {
             // For other categories, show ONLY active (uncompleted) items
             filtered = mailItems.filter(item => !item.isCompleted);
 
-            // Filter by specific category
-            filtered = filtered.filter(item => {
-                return item.category === selectedCategory;
-            });
+            // Filter by specific category (skip if 'General' is selected)
+            if (selectedCategory !== 'General') {
+                filtered = filtered.filter(item => {
+                    return item.category === selectedCategory;
+                });
+            }
         }
         return filtered;
     }, [selectedCategory, mailItems]);

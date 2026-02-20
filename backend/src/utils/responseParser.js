@@ -17,35 +17,42 @@ const parseResponse = (content) => {
     for (let line of lines) {
         line = line.trim();
 
-        if (line.startsWith('Title:')) {
+        // Strip leading markdown asterisks (e.g. **Title:**)
+        const cleanLine = line.replace(/^\*+/, '').trim();
+
+        if (cleanLine.startsWith('Title:')) {
             section = 'title';
-            title = line.replace('Title:', '').trim();
+            title = cleanLine.replace('Title:', '').trim();
+            // Remove trailing markdown (e.g. from '**Title:**')
+            title = title.replace(/^\*+|\*+$/g, '').trim();
             continue;
         }
-        if (line.startsWith('Category:')) {
+        if (cleanLine.startsWith('Category:')) {
             section = 'category';
-            category = line.replace('Category:', '').trim();
+            category = cleanLine.replace('Category:', '').trim();
+            category = category.replace(/^\*+|\*+$/g, '').trim();
             continue;
         }
-        if (line.startsWith('Date:')) {
+        if (cleanLine.startsWith('Date:')) {
             section = 'date';
-            date = line.replace('Date:', '').trim();
+            date = cleanLine.replace('Date:', '').trim();
+            date = date.replace(/^\*+|\*+$/g, '').trim();
             continue;
         }
-        if (line.startsWith('Summary:')) {
+        if (cleanLine.startsWith('Summary:')) {
             section = 'summary';
             continue;
         }
-        if (line.startsWith('Smart Bullets:')) {
+        if (cleanLine.startsWith('Smart Bullets:')) {
             section = 'steps';
             continue;
         }
-        if (line.startsWith('Links:')) {
+        if (cleanLine.startsWith('Links:')) {
             section = 'links';
             continue;
         }
-        if (line.startsWith('Due Date:')) {
-            const val = line.replace('Due Date:', '').trim();
+        if (cleanLine.startsWith('Due Date:')) {
+            const val = cleanLine.replace('Due Date:', '').trim().replace(/^\*+|\*+$/g, '').trim();
             if (val && val !== 'NONE') {
                 dueDate = val;
             }

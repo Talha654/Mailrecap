@@ -45,6 +45,7 @@ export const analyzeImage = async (imagePath: string, targetLanguage: string = '
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
+            timeout: 60000, // 60 seconds timeout for large images and AI processing
         });
 
         return response.data;

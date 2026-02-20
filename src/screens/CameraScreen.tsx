@@ -156,14 +156,30 @@ export const CameraScreen: React.FC = () => {
         setIsProcessing(true);
         setShowCamera(false);
 
-        // Simulate processing with progress for UI feedback
-        let currentProgress = 0;
+        // Simulate continuous processing progress for better UX
+        // Progress slows down logarithmically as it gets closer to 99.9%
         progressInterval.current = setInterval(() => {
-            if (currentProgress < 90) {
-                currentProgress += 5;
-                setProgress(currentProgress);
-            }
-        }, 500);
+            setProgress((prevProgress) => {
+                if (prevProgress >= 99.9) {
+                    return 99.9; // Hold just before 100% until network request completes
+                }
+
+                const remaining = 99.9 - prevProgress;
+                let step = 1;
+
+                if (prevProgress < 40) {
+                    step = Math.random() * 3 + 2; // Fast initial progress
+                } else if (prevProgress < 70) {
+                    step = Math.random() * 2 + 1; // Medium progress
+                } else if (prevProgress < 85) {
+                    step = remaining * 0.08; // Starts slowing down organically
+                } else {
+                    step = remaining * 0.03; // Smooth logarithmic tail to prevent freezing
+                }
+
+                return Math.min(99.9, prevProgress + step);
+            });
+        }, 250);
 
         try {
             // Map i18n language codes to full language names
@@ -234,22 +250,41 @@ export const CameraScreen: React.FC = () => {
 
             setTimeout(async () => {
                 try {
+                    // Safely get the date - fallback to today if invalid
+                    let safeDate = new Date().toISOString().split('T')[0];
+                    if (analysisResult.date) {
+                        const parsedDate = new Date(analysisResult.date);
+                        if (!isNaN(parsedDate.getTime())) {
+                            safeDate = analysisResult.date;
+                        } else {
+                            console.warn('[CameraScreen] Invalid date from analysis:', analysisResult.date, '- using today');
+                        }
+                    }
+
                     const mailSummaryData = {
                         title: analysisResult.title || 'Scanned Mail',
                         summary: analysisResult.summary,
                         fullText: analysisResult.fullText,
-                        suggestions: analysisResult.suggestions,
+                        suggestions: analysisResult.suggestions || [],
                         photoUrl: photoPath,
                         audioUrl: remoteAudioUrl, // Save remote URL to DB
-                        date: analysisResult.date || new Date().toISOString().split('T')[0],
-                        links: analysisResult.links,
-                        category: analysisResult.category,
+                        date: safeDate,
+                        links: analysisResult.links || [],
+                        category: analysisResult.category || 'General',
                         actionableDate: analysisResult.actionableDate,
                     };
+
+                    console.log('[CameraScreen] Saving mail summary data:', JSON.stringify(mailSummaryData, null, 2));
 
                     // Save to Firestore
                     const savedSummary = await saveMailSummary(mailSummaryData);
                     console.log('[CameraScreen] Summary saved to Firestore:', savedSummary.id);
+
+                    // Safely get date from savedSummary
+                    let summaryDate = safeDate;
+                    if (savedSummary.createdAt instanceof Date && !isNaN(savedSummary.createdAt.getTime())) {
+                        summaryDate = savedSummary.createdAt.toISOString().split('T')[0];
+                    }
 
                     // Convert to MailItem for navigation
                     const newMailItem: MailItem = {
@@ -261,7 +296,7 @@ export const CameraScreen: React.FC = () => {
                         suggestions: savedSummary.suggestions,
                         photoUrl: savedSummary.photoUrl,
                         audioUrl: savedSummary.audioUrl, // This will be the remote URL
-                        date: savedSummary.createdAt.toISOString().split('T')[0],
+                        date: summaryDate,
                         createdAt: savedSummary.createdAt,
                         updatedAt: savedSummary.updatedAt,
                         links: savedSummary.links,
@@ -281,8 +316,9 @@ export const CameraScreen: React.FC = () => {
                         localAudioPath: localAudioPath // Pass local path for immediate playback
                     });
                     setCurrentStep(1);
-                } catch (error) {
+                } catch (error: any) {
                     console.error('[CameraScreen] Error saving summary:', error);
+                    console.error('[CameraScreen] Error details:', error?.message, error?.code);
                     setIsProcessing(false);
                     setProgress(0);
                     setShowCamera(true);
@@ -369,7 +405,7 @@ export const CameraScreen: React.FC = () => {
                         <View style={styles.progressBar}>
                             <View style={[styles.progressFill, { width: `${progress}%` }]} />
                         </View>
-                        <Text style={styles.progressText}>{progress}%</Text>
+                        <Text style={styles.progressText}>{Math.floor(progress)}%</Text>
                     </View>
                 </View>
             </SafeAreaView>

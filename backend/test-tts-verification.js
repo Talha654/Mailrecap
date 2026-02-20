@@ -10,7 +10,7 @@ const server = app.listen(0, async () => {
     try {
         const postData = JSON.stringify({
             text: 'Hello world',
-            voice: 'alloy',
+            voice: 'cedar',
             speed: 1.0
         });
 

@@ -30,8 +30,8 @@
 		CFE580C2D08347858E656ACD /* SourceSerif4-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A89BD2092E5D4121AF6E0706 /* SourceSerif4-Regular.ttf */; };
 		D359F2607BA041DD95231CA8 /* SourceSerif4-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EBF09DB5CB4445BAB682CAD0 /* SourceSerif4-Black.ttf */; };
 		D75E6983CF183308FEEABBB2 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
+		EAAA2A83F9734278BF946C7F /* mail_complete.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8C69B977AB0941E5990E2570 /* mail_complete.wav */; };
 		F192390645144EAAAFBE3CFA /* Inter-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8CEFD52983B14D52A022A23E /* Inter-Black.ttf */; };
-		EAAA2A83F9734278BF946C7F /* paper_swish.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 8C69B977AB0941E5990E2570 /* paper_swish.mp3 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -58,6 +58,7 @@
 		790467770B0045DBA6578B9C /* Inter-Thin.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Thin.ttf"; path = "../src/assets/fonts/Inter-Thin.ttf"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = mailrecap/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		862D99A476FC5DD4744333ED /* Pods_mailrecap.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_mailrecap.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8C69B977AB0941E5990E2570 /* mail_complete.wav */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = mail_complete.wav; path = ../src/assets/sounds/mail_complete.wav; sourceTree = "<group>"; };
 		8CEFD52983B14D52A022A23E /* Inter-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Black.ttf"; path = "../src/assets/fonts/Inter-Black.ttf"; sourceTree = "<group>"; };
 		940AEDC3BC70420DA282A78A /* SourceSerif4-SemiBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "SourceSerif4-SemiBoldItalic.ttf"; path = "../src/assets/fonts/SourceSerif4-SemiBoldItalic.ttf"; sourceTree = "<group>"; };
 		99F66B68FC904CBEAAF62E47 /* SourceSerif4-Semibold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "SourceSerif4-Semibold.ttf"; path = "../src/assets/fonts/SourceSerif4-Semibold.ttf"; sourceTree = "<group>"; };
@@ -66,7 +67,6 @@
 		CBAE2F30776F4343A410D421 /* Inter-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Medium.ttf"; path = "../src/assets/fonts/Inter-Medium.ttf"; sourceTree = "<group>"; };
 		EBF09DB5CB4445BAB682CAD0 /* SourceSerif4-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "SourceSerif4-Black.ttf"; path = "../src/assets/fonts/SourceSerif4-Black.ttf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		8C69B977AB0941E5990E2570 /* paper_swish.mp3 */ = {isa = PBXFileReference; name = "paper_swish.mp3"; path = "../src/assets/sounds/paper_swish.mp3"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -156,7 +156,7 @@
 				A89BD2092E5D4121AF6E0706 /* SourceSerif4-Regular.ttf */,
 				99F66B68FC904CBEAAF62E47 /* SourceSerif4-Semibold.ttf */,
 				12D57E8F1E3F4EB9A0AAF152 /* SourceSerif4-SemiboldItalic.ttf */,
-				8C69B977AB0941E5990E2570 /* paper_swish.mp3 */,
+				8C69B977AB0941E5990E2570 /* mail_complete.wav */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -258,7 +258,7 @@
 				4A01F1452EE29A720078D0CE /* GoogleService-Info.plist in Resources */,
 				A1C1B5D7D16A443EA3CC7433 /* SourceSerif4-Semibold.ttf in Resources */,
 				479F117DD7F44CB6A523708E /* SourceSerif4-SemiboldItalic.ttf in Resources */,
-				EAAA2A83F9734278BF946C7F /* paper_swish.mp3 in Resources */,
+				EAAA2A83F9734278BF946C7F /* mail_complete.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

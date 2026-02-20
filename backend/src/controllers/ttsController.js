@@ -7,7 +7,7 @@ const openai = new OpenAI({
 
 exports.generateSpeech = async (req, res) => {
     try {
-        const { text, voice = 'alloy', speed = 1.0 } = req.body;
+        const { text, voice = 'cedar', speed = 1.0 } = req.body;
 
         if (!text) {
             return res.status(400).json({ error: 'Text is required' });
@@ -18,7 +18,7 @@ exports.generateSpeech = async (req, res) => {
         }
 
         const mp3 = await openai.audio.speech.create({
-            model: "tts-1",
+            model: "gpt-4o-mini-tts",
             voice: voice,
             input: text,
             speed: speed,
@@ -35,6 +35,9 @@ exports.generateSpeech = async (req, res) => {
 
     } catch (error) {
         console.error('Error generating speech:', error);
-        res.status(500).json({ error: 'Failed to generate speech' });
+        res.status(500).json({
+            error: 'Failed to generate speech',
+            details: error.message
+        });
     }
 };

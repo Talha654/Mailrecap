@@ -16,3 +16,9 @@
 -dontwarn com.google.android.gms.**
 -keep class com.google.firebase.** { *; }
 
+
+# React Native Sound
+-keep class com.zmxv.RNSound.** { *; }
+
+# Keep R class members
+-keep class **.R$* { *; }

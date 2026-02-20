@@ -67,7 +67,7 @@ class TTSService {
         try {
             const response = await axios.post(`${BASE_URL}/api/tts`, {
                 text,
-                voice: 'alloy' // Make configurable if needed
+                voice: 'cedar' // Make configurable if needed
             }, {
                 responseType: 'arraybuffer' // Important to get raw bytes
             });

@@ -64,14 +64,20 @@ export async function saveMailSummary(data: MailSummaryInput): Promise<MailSumma
         const now = new Date();
 
         // Prepare actionable date for Firestore if present
-        let actionableDateForStorage = undefined;
+        let actionableDateForStorage = null;
         if (data.actionableDate && data.actionableDate.confidence) {
-            actionableDateForStorage = {
-                date: new Date(data.actionableDate.date),  // Convert YYYY-MM-DD string to Date
-                type: data.actionableDate.type,
-                confidence: data.actionableDate.confidence,
-                description: data.actionableDate.description,
-            };
+            // Safely parse the date - Invalid Date objects will crash Firestore
+            const parsedDate = new Date(data.actionableDate.date);
+            if (!isNaN(parsedDate.getTime())) {
+                actionableDateForStorage = {
+                    date: parsedDate,
+                    type: data.actionableDate.type,
+                    confidence: data.actionableDate.confidence,
+                    description: data.actionableDate.description,
+                };
+            } else {
+                console.warn('[MailSummary] Invalid actionableDate.date received:', data.actionableDate.date, '- skipping actionableDate');
+            }
         }
 
         const mailSummaryData: any = {
@@ -80,8 +86,8 @@ export async function saveMailSummary(data: MailSummaryInput): Promise<MailSumma
             summary: data.summary,
             fullText: data.fullText,
             suggestions: data.suggestions,
-            photoUrl: data.photoUrl || undefined,
-            audioUrl: data.audioUrl || undefined,
+            photoUrl: data.photoUrl || null,
+            audioUrl: data.audioUrl || null,
             createdAt: now,
             updatedAt: now,
             isCompleted: data.isCompleted || false,
